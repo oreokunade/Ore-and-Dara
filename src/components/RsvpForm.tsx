@@ -100,6 +100,17 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
         });
       }
       onNotify('RSVP Received', 'Thank you for responding!');
+      
+      // 4. Send email confirmation if an email was provided
+      if (email.trim()) {
+        import('../utils/email').then(({ sendRsvpConfirmationEmail }) => {
+          sendRsvpConfirmationEmail({
+            guestName: firstName.trim(),
+            guestEmail: email.trim(),
+            attendance: attendance as 'yes' | 'no'
+          }).catch(err => console.error('Failed to send RSVP email:', err));
+        });
+      }
     } catch (e) {
       console.error(e);
       onNotify('Error', 'Failed to save RSVP. Please try again.');

@@ -95,6 +95,58 @@ function getEmailWrapper(content: string): string {
   `;
 }
 
+export async function sendRsvpConfirmationEmail(params: {
+  guestName: string;
+  guestEmail: string;
+  attendance: 'yes' | 'no';
+}): Promise<{ success: boolean; error?: any }> {
+  let content = '';
+
+  if (params.attendance === 'yes') {
+    content = `
+      <h2 style="margin: 0 0 15px 0; color: #1c1917; font-family: Georgia, serif; font-size: 24px; font-weight: normal;">
+        Dearest ${params.guestName},
+      </h2>
+      <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #44403c;">
+        We are absolutely thrilled that you will be joining us to celebrate our wedding! Your RSVP has been successfully received.
+      </p>
+      
+      <!-- Wedding Details Box -->
+      <div style="background-color: #faf8f2; border: 1px solid #e7e0d3; border-radius: 16px; padding: 20px 25px; margin-bottom: 30px;">
+        <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">
+          Wedding Details
+        </p>
+        <p style="margin: 0 0 8px 0; font-size: 15px; color: #1c1917;"><strong>Date:</strong> Saturday, December 12, 2026</p>
+        <p style="margin: 0; font-size: 15px; color: #1c1917;"><strong>Location:</strong> Lagos, Nigeria</p>
+      </div>
+
+      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+        We will share more specific details regarding the venue and schedule closer to the big day. Thank you for your continued love and support!
+      </p>
+    `;
+  } else {
+    content = `
+      <h2 style="margin: 0 0 15px 0; color: #1c1917; font-family: Georgia, serif; font-size: 24px; font-weight: normal;">
+        Dearest ${params.guestName},
+      </h2>
+      <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #44403c;">
+        We have received your RSVP. While we are sad that you won't be able to join us in person, we completely understand and truly appreciate you letting us know.
+      </p>
+      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+        Thank you for all your love, prayers, and support as we embark on this new chapter together!
+      </p>
+    `;
+  }
+
+  return sendEmail({
+    to: params.guestEmail,
+    subject: params.attendance === 'yes' 
+      ? "RSVP Confirmed: We can't wait to celebrate with you! 🥂" 
+      : "RSVP Received: We will miss you! 🕊️",
+    html: getEmailWrapper(content)
+  });
+}
+
 export async function sendReservationConfirmationEmail(params: {
   guestName: string;
   guestEmail: string;
