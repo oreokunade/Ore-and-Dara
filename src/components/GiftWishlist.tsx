@@ -278,12 +278,12 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-xl border-2 border-brand-gold/30 bg-brand-espresso group relative"
+              className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-xl border-2 border-brand-gold/30 bg-brand-espresso group relative aspect-[3/4]"
             >
               <img
-                src="/assets/wishlist-couple.png"
-                alt="Our forever starts now - Oreoluwa & Oluwadara"
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                src="/assets/0V3A8999.jpg"
+                alt="Oreoluwa & Oluwadara - Our forever starts now"
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
               />
             </motion.div>
 
