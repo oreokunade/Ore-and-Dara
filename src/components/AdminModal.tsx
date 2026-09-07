@@ -279,16 +279,21 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   };
 
   const handleDeleteWishlistItem = async (id: string) => {
-    if (confirm('Are you sure you want to completely remove this item from the wishlist?')) {
-      try {
-        await deleteWishlistItem(id);
-        setWishlistItems(wishlistItems.filter(i => i.id !== id));
-        onNotify('Item Deleted', 'The wishlist item was removed.');
-      } catch (err) {
-        console.error(err);
-        alert('Failed to delete item.');
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Delete Wishlist Item',
+      message: 'Are you sure you want to completely remove this item from the wishlist?',
+      onConfirm: async () => {
+        try {
+          await deleteWishlistItem(id);
+          setWishlistItems(wishlistItems.filter(i => i.id !== id));
+          onNotify('Item Deleted', 'The wishlist item was removed.');
+        } catch (err) {
+          console.error(err);
+          onNotify('Error', 'Failed to delete item.');
+        }
       }
-    }
+    });
   };
 
   const getRelationLabel = (val?: string) => {
@@ -304,7 +309,15 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   };
 
   return (
-    <div className="min-h-screen w-full bg-brand-ivory flex flex-col font-sans">
+    <div 
+      className="fixed inset-0 z-50 min-h-screen w-full bg-brand-ivory flex flex-col font-sans overflow-auto"
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
+    >
       {/* Header */}
       <div className="bg-brand-espresso px-6 sm:px-12 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0 shadow-md z-20">
         <div>

@@ -106,7 +106,7 @@ export function clearUserActiveRsvp(): void {
 export async function exportRsvpsCsv(): Promise<void> {
   const rsvps = await getStoredRsvps();
   if (rsvps.length === 0) {
-    alert('No RSVPs recorded yet.');
+    console.warn('No RSVPs recorded yet.');
     return;
   }
 
@@ -277,7 +277,7 @@ export async function exportGiftPledgesCsv(): Promise<void> {
   // Use admin version so the export includes emails and notes (admin-only action)
   const pledges = await getStoredGiftPledgesAdmin();
   if (pledges.length === 0) {
-    alert('No item gift payments recorded yet.');
+    console.warn('No item gift payments recorded yet.');
     return;
   }
 

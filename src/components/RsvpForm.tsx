@@ -102,7 +102,7 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       onNotify('RSVP Received', 'Thank you for responding!');
     } catch (e) {
       console.error(e);
-      alert('Failed to save RSVP. Please try again.');
+      onNotify('Error', 'Failed to save RSVP. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -243,11 +243,12 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
 
               {/* 5-Digit Invite Code */}
               <div className="p-5 rounded-2xl bg-white border border-brand-gold/30 shadow-sm">
-                <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                <label htmlFor="passcode" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                   5-Digit Invite Code <span className="text-brand-goldDark">*</span>
                 </label>
                 <div className="relative">
                   <input
+                    id="passcode"
                     type="text"
                     maxLength={5}
                     required
@@ -266,10 +267,11 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
               {/* First Name & Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                  <label htmlFor="firstName" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                     First Name <span className="text-brand-goldDark">*</span>
                   </label>
                   <input
+                    id="firstName"
                     type="text"
                     required
                     placeholder="e.g. Adewale"
@@ -280,10 +282,11 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                  <label htmlFor="lastName" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                     Last Name <span className="text-brand-goldDark">*</span>
                   </label>
                   <input
+                    id="lastName"
                     type="text"
                     required
                     placeholder="e.g. Bakare"
@@ -296,10 +299,11 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
 
               {/* Email */}
               <div>
-                <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                <label htmlFor="email" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                   Email <span className="text-brand-muted font-normal lowercase">(optional)</span>
                 </label>
                 <input
+                  id="email"
                   type="email"
                   placeholder="e.g. adewale@example.com"
                   value={email}
@@ -310,10 +314,11 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
 
               {/* Who do you know? */}
               <div>
-                <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                <label htmlFor="relation" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                   Who are you celebrating with? <span className="text-brand-goldDark">*</span>
                 </label>
                 <select
+                  id="relation"
                   required
                   value={relation}
                   onChange={(e) => setRelation(e.target.value)}
@@ -365,10 +370,11 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
 
               {/* Message for the couple */}
               <div>
-                <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
+                <label htmlFor="message" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
                   Message for the couple <span className="text-brand-muted font-normal lowercase">(optional)</span>
                 </label>
                 <textarea
+                  id="message"
                   rows={3}
                   placeholder="Share a sweet note, prayers, or well wishes for Oreoluwa & Oluwadara..."
                   value={message}

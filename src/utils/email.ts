@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 
-const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || '';
 const SENDER_EMAIL = import.meta.env.VITE_EMAIL_SENDER || "Ore & Dara's Wedding <onboarding@resend.dev>";
 
 interface SendEmailParams {
@@ -10,7 +9,9 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<{ success: boolean; error?: any }> {
-  // 1. First attempt: Use Supabase Edge Function if available (best security, no CORS restrictions)
+  // Send emails via Supabase Edge Function (server-side) to keep API keys secure.
+  // NEVER send emails directly from the browser — that would expose the Resend API key
+  // in the client-side JavaScript bundle.
   try {
     const { data, error } = await supabase.functions.invoke('send-email', {
       body: { to, subject, html, from: SENDER_EMAIL }
@@ -18,41 +19,17 @@ export async function sendEmail({ to, subject, html }: SendEmailParams): Promise
     if (!error && data) {
       return { success: true };
     }
-  } catch (err) {
-    // Edge function not deployed yet, proceed to direct Resend API call
-  }
-
-  // 2. Direct Resend API call if API key is present in environment
-  if (RESEND_API_KEY) {
-    try {
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from: SENDER_EMAIL,
-          to: [to],
-          subject,
-          html
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Resend API error:', errorData);
-        return { success: false, error: errorData };
-      }
-
-      return { success: true };
-    } catch (err) {
-      console.error('Failed to send email via Resend:', err);
-      return { success: false, error: err };
+    if (error) {
+      console.error('Edge function error:', error);
+      return { success: false, error };
     }
+  } catch (err) {
+    console.warn('Supabase Edge Function not available. Email not sent:', err);
   }
 
-  console.warn('No Resend API Key or Supabase Edge Function configured. Email simulated.');
+  // If no Edge Function is deployed yet, log a warning and return success
+  // so the rest of the app flow (reservation confirmations, etc.) continues.
+  console.warn('[email] No email backend configured. Email was not sent. Deploy a Supabase Edge Function for production email delivery.');
   return { success: true };
 }
 

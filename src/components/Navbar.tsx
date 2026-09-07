@@ -12,6 +12,7 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(audioManager.isPlaying);
   const [isMuted, setIsMuted] = useState(audioManager.isMuted);
+  const [activeSection, setActiveSection] = useState<string>('');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -41,6 +42,36 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
     { name: 'RSVP', href: '/#rsvp', icon: Users },
     { name: 'Gallery', href: '/#gallery', icon: ImageIcon },
   ];
+
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      setActiveSection('');
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    navLinks.forEach((link) => {
+      if (link.href.startsWith('/#')) {
+        const id = link.href.replace('/#', '');
+        const element = document.getElementById(id);
+        if (element) {
+          observer.observe(element);
+        }
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [location.pathname]);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
@@ -100,16 +131,28 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="text-xs font-sans tracking-[0.2em] uppercase text-brand-cream/80 hover:text-brand-gold transition-colors duration-200 relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-brand-gold hover:after:w-full after:transition-all after:duration-300"
-              >
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isWishlist = link.href === '/wishlist';
+              const sectionId = link.href.replace('/#', '');
+              const isActive = isWishlist 
+                ? location.pathname === '/wishlist' 
+                : location.pathname === '/' && activeSection === sectionId;
+                
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className={`text-xs font-sans tracking-[0.2em] uppercase transition-colors duration-200 relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-brand-gold after:transition-all after:duration-300 ${
+                    isActive 
+                      ? 'text-brand-gold after:w-full' 
+                      : 'text-brand-cream/80 hover:text-brand-gold after:w-0 hover:after:w-full'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
           </nav>
 
           {/* CTA Button - Clean, Borderless */}
@@ -140,7 +183,9 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
                   </div>
                 )}
               </div>
-              <span className="text-[10px] font-bold text-brand-cream tracking-wider">DO 4 LOVE</span>
+              <span className="text-[10px] font-bold text-brand-cream tracking-wider">
+                {isMuted || !isPlaying ? 'MUTED' : 'PLAYING'}
+              </span>
             </button>
 
             {/* Mobile Menu Button */}

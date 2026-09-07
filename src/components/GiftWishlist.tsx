@@ -191,7 +191,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
       onNotify('Gift Saved With Love 💛', `We have set this aside for you! A confirmation with bank details has been sent to ${reminderEmail.trim()}.`);
     } catch (e) {
       console.error(e);
-      alert('Failed to reserve item. Please try again.');
+      onNotify('Error', 'Failed to reserve item. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -210,7 +210,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
     e.preventDefault();
     if (!activeItem) return;
     if (!giverName.trim()) {
-      alert('Please enter your name so the couple knows who to thank!');
+      onNotify('Error', 'Please enter your name so the couple knows who to thank!');
       return;
     }
 
@@ -251,7 +251,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
       onNotify('Gift Recorded!', `Thank you ${giverName.trim()} for blessing Oreoluwa & Oluwadara!`);
     } catch (e) {
       console.error(e);
-      alert('Failed to save pledge. Please try again.');
+      onNotify('Error', 'Failed to save pledge. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -471,6 +471,13 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             data-lenis-prevent
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
+            onClick={closeModal}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') closeModal();
+            }}
             className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto overscroll-contain"
           >
             <motion.div
@@ -478,6 +485,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               data-lenis-prevent
+              onClick={(e) => e.stopPropagation()}
               className="bg-brand-cream border border-brand-gold/40 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto overscroll-contain"
             >
               {/* Modal Header */}
@@ -544,7 +552,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                             <button 
                               type="button"
                               onClick={() => setPurchaseQuantity(Math.max(1, purchaseQuantity - 1))}
-                              className="w-8 h-8 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50"
+                              className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
                               disabled={purchaseQuantity <= 1}
                             >
                               -
@@ -553,7 +561,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                             <button 
                               type="button"
                               onClick={() => setPurchaseQuantity(Math.min(activeItem.quantity, purchaseQuantity + 1))}
-                              className="w-8 h-8 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50"
+                              className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
                               disabled={purchaseQuantity >= activeItem.quantity}
                             >
                               +
@@ -758,6 +766,12 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             data-lenis-prevent
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') closeReminderModal();
+            }}
             className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto overscroll-contain"
             onClick={closeReminderModal}
           >
