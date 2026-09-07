@@ -7,52 +7,52 @@ export const Gallery: FC = () => {
   const photos: GalleryPhoto[] = [
     {
       id: '1',
-      src: '/assets/0V3A8930.jpg',
-      alt: 'Oreoluwa and Oluwadara dancing along the colonnade',
-      caption: 'Every love story is beautiful, but ours is our favorite',
-      featured: true,
-    },
-    {
-      id: '2',
-      src: '/assets/0V3A8976.jpg',
-      alt: 'Close up tender moment with engagement ring',
-      caption: 'Walking into forever, hand in hand',
-      featured: false,
-    },
-    {
-      id: '3',
-      src: '/assets/0V3A8914.jpg',
-      alt: 'Romantic portrait of the couple',
-      caption: 'In your eyes, I found my home',
-      featured: false,
-    },
-    {
-      id: '4',
-      src: '/assets/0V3A8849_(2).jpg',
-      alt: 'Oreoluwa and Oluwadara embracing with flowers',
-      caption: 'Two souls, one timeless journey',
-      featured: true,
-    },
-    {
-      id: '5',
       src: '/assets/0V3A8999.jpg',
       alt: 'Couple walking under the archway',
       caption: 'Our forever starts now',
       featured: false,
     },
     {
-      id: '6',
+      id: '2',
       src: '/assets/0V3A8960 1.jpg',
       alt: 'Oreoluwa and Oluwadara smiling together',
       caption: 'Joy in every shared smile',
       featured: false,
     },
     {
-      id: '7',
+      id: '3',
       src: '/assets/0V3A8979.jpg',
       alt: 'Couple facing the historic colonial building',
-      caption: 'Laughter and light filled days',
+      caption: 'Two souls, one beautiful journey',
       featured: false,
+    },
+    {
+      id: '4',
+      src: '/assets/0V3A8930.jpg',
+      alt: 'Oreoluwa and Oluwadara dancing along the colonnade',
+      caption: 'Every love story is beautiful, but ours is our favorite',
+      featured: true,
+    },
+    {
+      id: '5',
+      src: '/assets/0V3A8976.jpg',
+      alt: 'Close up tender moment with engagement ring',
+      caption: 'Walking into forever, hand in hand',
+      featured: false,
+    },
+    {
+      id: '6',
+      src: '/assets/0V3A8914.jpg',
+      alt: 'Romantic portrait of the couple',
+      caption: 'In your eyes, I found my home',
+      featured: false,
+    },
+    {
+      id: '7',
+      src: '/assets/0V3A8849_(2).jpg',
+      alt: 'Oreoluwa and Oluwadara embracing with flowers',
+      caption: 'Laughter and light filled days',
+      featured: true,
     },
   ];
 
@@ -81,6 +81,12 @@ export const Gallery: FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeIndex, handleNext, handlePrev]);
+
+  const getSpanClass = (index: number) => {
+    if (index === 3 || index === 6) return 'sm:col-span-2 lg:col-span-2';
+    if (index === 2) return 'sm:col-span-2 lg:col-span-1';
+    return 'col-span-1';
+  };
 
   return (
     <section id="gallery" className="py-24 sm:py-32 px-4 sm:px-6 bg-brand-ivory relative">
@@ -112,7 +118,7 @@ export const Gallery: FC = () => {
         {/* Desktop Masonry / Bento Style Photo Grid */}
         <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((photo, index) => {
-            const isSpan = index === 0 || index === 3;
+            const spanClass = getSpanClass(index);
             return (
               <motion.div
                 key={photo.id}
@@ -121,9 +127,7 @@ export const Gallery: FC = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.08 }}
                 onClick={() => setActiveIndex(index)}
-                className={`group relative overflow-hidden rounded-3xl cursor-pointer bg-brand-sand/30 border border-brand-sand/60 shadow-sm hover:shadow-xl transition-all duration-500 ${
-                  isSpan ? 'col-span-2 h-[420px]' : 'h-[420px]'
-                }`}
+                className={`group relative overflow-hidden rounded-3xl cursor-pointer bg-brand-sand/30 border border-brand-sand/60 shadow-sm hover:shadow-xl transition-all duration-500 h-[420px] ${spanClass}`}
               >
                 <img
                   src={photo.src}

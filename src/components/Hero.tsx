@@ -42,8 +42,7 @@ export const Hero: FC<HeroProps> = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="font-alex tracking-normal text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-brand-cream leading-tight my-1 drop-shadow-2xl selection:text-brand-gold"
-            style={{ textShadow: '0 4px 30px rgba(0,0,0,0.85)' }}
+            className="font-alex tracking-normal text-5xl sm:text-7xl md:text-8xl lg:text-[6.5rem] text-brand-cream leading-tight my-1 selection:text-brand-gold"
           >
             Oluwadara & Oreoluwa
           </motion.h1>
@@ -53,7 +52,7 @@ export const Hero: FC<HeroProps> = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="font-serif italic text-lg sm:text-2xl md:text-3xl text-brand-cream/90 max-w-2xl mt-1 mb-2 sm:mb-3 font-light tracking-wide drop-shadow-md"
+            className="font-serif italic text-lg sm:text-2xl md:text-3xl text-brand-cream/90 max-w-2xl mt-1 mb-2 sm:mb-3 font-light tracking-wide"
           >
             We Joyfully invite you to our wedding
           </motion.p>
