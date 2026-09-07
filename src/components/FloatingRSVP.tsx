@@ -11,10 +11,24 @@ export const FloatingRSVP: FC<FloatingRSVPProps> = ({ onRSVPClick }) => {
   useEffect(() => {
     const handleScroll = () => {
       const detailsEl = document.getElementById('details');
+      const footerEl = document.querySelector('footer');
+      
       if (detailsEl) {
-        const rect = detailsEl.getBoundingClientRect();
+        const detailsRect = detailsEl.getBoundingClientRect();
+        let isAboveFooter = true;
+        
+        // Check if footer is scrolling into view
+        if (footerEl) {
+          const footerRect = footerEl.getBoundingClientRect();
+          // Hide it when the footer top enters the viewport
+          if (footerRect.top <= window.innerHeight) {
+            isAboveFooter = false;
+          }
+        }
+
         // Visible once the bottom of the "This Day" section has scrolled up into/past the viewport
-        if (rect.bottom <= window.innerHeight) {
+        // AND we haven't reached the footer yet
+        if (detailsRect.bottom <= window.innerHeight && isAboveFooter) {
           setIsVisible(true);
         } else {
           setIsVisible(false);
