@@ -93,14 +93,14 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-espresso/90 border border-brand-gold/35 text-brand-cream text-[10px] font-sans font-semibold tracking-wider uppercase shadow-md active:scale-95 transition-all"
             >
               <div className="relative flex items-center justify-center w-5 h-5 rounded-full bg-brand-gold/15 text-brand-gold shrink-0">
-                {isPlaying && !isMuted ? (
+                {isMuted ? (
+                  <VolumeX className="w-2.5 h-2.5 text-brand-muted" />
+                ) : (
                   <div className="flex items-end justify-center gap-0.5 h-2.5 w-2.5">
                     <span className="w-0.5 bg-brand-gold rounded-full animate-[pulse_0.7s_ease-in-out_infinite] h-full" />
                     <span className="w-0.5 bg-brand-gold rounded-full animate-[pulse_1.1s_ease-in-out_infinite] h-2/3" />
                     <span className="w-0.5 bg-brand-gold rounded-full animate-[pulse_0.9s_ease-in-out_infinite] h-4/5" />
                   </div>
-                ) : (
-                  <VolumeX className="w-2.5 h-2.5 text-brand-muted" />
                 )}
               </div>
               <span className="text-[10px] font-bold text-brand-cream tracking-wider">DO 4 LOVE</span>

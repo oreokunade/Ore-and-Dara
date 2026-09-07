@@ -10,25 +10,32 @@ class AudioManager {
     this.audio = new Audio('/assets/do4love.mp3');
     this.audio.volume = 0.65;
     this.audio.loop = true;
+    this.audio.muted = false;
+    this.isMuted = false;
 
-    // Autoplay attempt
+    // Autoplay attempt unmuted
     this.audio.play()
       .then(() => {
         this.isPlaying = true;
         this.hasStarted = true;
+        this.isMuted = false;
         this.notify();
       })
       .catch(() => {
+        // Autoplay policy waiting for user gesture
         this.isPlaying = false;
         this.notify();
       });
 
     const startOnInteraction = () => {
       if (this.audio && !this.hasStarted) {
+        this.audio.muted = false;
+        this.isMuted = false;
         this.audio.play()
           .then(() => {
             this.isPlaying = true;
             this.hasStarted = true;
+            this.isMuted = false;
             this.notify();
           })
           .catch(() => {});
@@ -47,10 +54,10 @@ class AudioManager {
     }
 
     if (this.audio.paused) {
+      this.audio.muted = false;
+      this.isMuted = false;
       this.audio.play().then(() => {
         this.isPlaying = true;
-        this.isMuted = false;
-        if (this.audio) this.audio.muted = false;
         this.notify();
       });
     } else {
