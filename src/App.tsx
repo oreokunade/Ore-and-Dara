@@ -108,25 +108,37 @@ export function App() {
         <FloatingRSVP onRSVPClick={scrollToRsvp} />
 
         {/* Link to Wishlist Page */}
-        <section id="wishlist" className="py-24 px-4 bg-brand-cream relative border-t border-brand-espresso/10">
-          <div className="max-w-3xl mx-auto text-center flex flex-col items-center">
-            <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-full overflow-hidden mb-8 shadow-xl relative border-4 border-white">
-              <img src="/assets/0V3A8849_(2).jpg" alt="Oreoluwa & Oluwadara" className="w-full h-full object-cover object-top" />
+        <section id="wishlist" className="py-24 sm:py-32 px-4 sm:px-6 bg-brand-cream relative border-t border-brand-espresso/10">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10 lg:gap-14 bg-white/60 backdrop-blur-sm p-6 sm:p-12 rounded-3xl border border-brand-sand/50 shadow-sm">
+            {/* Couple Portrait Card */}
+            <div className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-2xl border-2 border-brand-gold/30 bg-brand-espresso group relative">
+              <img 
+                src="/assets/wishlist-couple.png" 
+                alt="Our forever starts now - Oreoluwa & Oluwadara" 
+                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" 
+              />
             </div>
-            <p className="text-sm tracking-[0.2em] uppercase text-brand-goldDark font-semibold font-sans mb-3">Wedding Registry</p>
-            <h2 className="text-4xl sm:text-5xl font-serif text-brand-espresso mb-6">Our Wishlist</h2>
-            <p className="font-sans text-brand-muted text-base sm:text-lg leading-relaxed mb-10 max-w-xl mx-auto">
-              To help us start our new home together, we have handpicked items we need most. You can select any item to pay for it and bless our union directly.
-            </p>
-            <button
-              onClick={() => {
-                window.scrollTo(0, 0);
-                navigate('/wishlist');
-              }}
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-brand-espresso text-brand-cream font-sans text-sm font-semibold tracking-widest uppercase hover:bg-brand-charcoal transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
-            >
-              View Curated Registry
-            </button>
+            {/* Wishlist Text & CTA */}
+            <div className="text-center md:text-left flex flex-col items-center md:items-start flex-1">
+              <p className="text-xs tracking-[0.3em] uppercase text-brand-goldDark font-semibold font-sans mb-3">
+                Wedding Registry
+              </p>
+              <h2 className="text-4xl sm:text-5xl font-serif text-brand-espresso mb-5">
+                Our Wishlist
+              </h2>
+              <p className="font-sans text-brand-muted text-base sm:text-lg leading-relaxed mb-8 max-w-lg">
+                To help us start our new home together, we have handpicked items we need most. You can select any item to pay for it and bless our union directly.
+              </p>
+              <button
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate('/wishlist');
+                }}
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-brand-espresso text-brand-cream font-sans text-xs font-semibold tracking-widest uppercase hover:bg-brand-charcoal transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              >
+                View Curated Registry
+              </button>
+            </div>
           </div>
         </section>
         <QandA />

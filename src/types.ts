@@ -57,6 +57,7 @@ export interface GiftReminder {
   itemPrice?: string;
   email: string;
   reservedByName?: string;
+  relation?: string;
   isAnonymous?: boolean;
   remindDate: string;
   expiresAt?: string;
@@ -71,5 +72,6 @@ export interface GiftPledge {
   giverName: string;
   giverEmail?: string;
   giverNote?: string;
+  giverRelation?: string;
   pledgedAt: string;
 }

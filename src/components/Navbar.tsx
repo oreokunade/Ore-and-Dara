@@ -1,6 +1,6 @@
 import { useState, useEffect, FC } from 'react';
 import { Menu, X, Heart, Users, Image as ImageIcon, Palette, ShoppingBag, HelpCircle, VolumeX } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { audioManager } from '../utils/audio';
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
   const [isPlaying, setIsPlaying] = useState(audioManager.isPlaying);
   const [isMuted, setIsMuted] = useState(audioManager.isMuted);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     audioManager.init();
@@ -41,6 +42,41 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
     { name: 'Gallery', href: '/#gallery', icon: ImageIcon },
   ];
 
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    if (href === '/wishlist') {
+      if (location.pathname === '/wishlist') {
+        if ((window as any).lenis) {
+          (window as any).lenis.scrollTo(0);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      } else {
+        navigate('/wishlist');
+        window.scrollTo(0, 0);
+      }
+    } else if (href.startsWith('/#')) {
+      const id = href.replace('/#', '');
+      if (location.pathname === '/') {
+        const element = document.getElementById(id);
+        if (element) {
+          if ((window as any).lenis) {
+            (window as any).lenis.scrollTo(element, { offset: -20 });
+          } else {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+          window.history.pushState(null, '', href);
+        }
+      } else {
+        navigate(href);
+      }
+    } else {
+      navigate(href);
+    }
+  };
+
   return (
     <>
       <header
@@ -68,6 +104,7 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
               <a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="text-xs font-sans tracking-[0.2em] uppercase text-brand-cream/80 hover:text-brand-gold transition-colors duration-200 relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-brand-gold hover:after:w-full after:transition-all after:duration-300"
               >
                 {link.name}
@@ -133,7 +170,7 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className="flex items-center justify-center gap-3 text-lg font-serif text-brand-cream hover:text-brand-gold transition-colors py-2"
                 >
                   <Icon className="w-4 h-4 text-brand-gold" />

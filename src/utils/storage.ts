@@ -173,37 +173,79 @@ export async function getStoredGiftPledgesAdmin(): Promise<GiftPledge[]> {
     return [];
   }
 
-  return (data || []).map(row => ({
-    id: row.id,
-    itemId: row.item_id,
-    itemName: row.item_name,
-    amount: row.amount,
-    giverName: row.giver_name,
-    giverEmail: row.giver_email,
-    giverNote: row.giver_note,
-    pledgedAt: row.created_at
-  }));
+  return (data || []).map(row => {
+    let relation = row.relation;
+    let note = row.giver_note || '';
+    if (!relation && note.startsWith('[Relation:')) {
+      const match = note.match(/^\[Relation:\s*([^\]]+)\]\s*(.*)$/);
+      if (match) {
+        relation = match[1];
+        note = match[2];
+      }
+    }
+
+    return {
+      id: row.id,
+      itemId: row.item_id,
+      itemName: row.item_name,
+      amount: row.amount,
+      giverName: row.giver_name,
+      giverEmail: row.giver_email,
+      giverNote: note,
+      giverRelation: relation,
+      pledgedAt: row.created_at
+    };
+  });
 }
 
 export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'>): Promise<GiftPledge> {
-  const { data, error } = await supabase
+  const insertPayload: any = {
+    item_id: pledge.itemId,
+    item_name: pledge.itemName,
+    amount: pledge.amount,
+    giver_name: pledge.giverName,
+    giver_email: pledge.giverEmail,
+    giver_note: pledge.giverNote
+  };
+  if (pledge.giverRelation) {
+    insertPayload.relation = pledge.giverRelation;
+  }
+
+  let data: any = null;
+  const res = await supabase
     .from('gift_pledges')
-    .insert([
-      {
-        item_id: pledge.itemId,
-        item_name: pledge.itemName,
-        amount: pledge.amount,
-        giver_name: pledge.giverName,
-        giver_email: pledge.giverEmail,
-        giver_note: pledge.giverNote
-      }
-    ])
+    .insert([insertPayload])
     .select()
     .single();
 
-  if (error) {
-    console.error('Error saving pledge:', error);
-    throw error;
+  if (res.error) {
+    console.warn('Attempting fallback save for gift pledge without relation column...', res.error);
+    const noteWithRelation = pledge.giverRelation 
+      ? `[Relation: ${pledge.giverRelation}] ${pledge.giverNote || ''}`.trim()
+      : pledge.giverNote;
+
+    const retry = await supabase
+      .from('gift_pledges')
+      .insert([
+        {
+          item_id: pledge.itemId,
+          item_name: pledge.itemName,
+          amount: pledge.amount,
+          giver_name: pledge.giverName,
+          giver_email: pledge.giverEmail,
+          giver_note: noteWithRelation
+        }
+      ])
+      .select()
+      .single();
+
+    if (retry.error) {
+      console.error('Error saving pledge:', retry.error);
+      throw retry.error;
+    }
+    data = retry.data;
+  } else {
+    data = res.data;
   }
 
   return {
@@ -213,7 +255,8 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
     amount: data.amount,
     giverName: data.giver_name,
     giverEmail: data.giver_email,
-    giverNote: data.giver_note,
+    giverNote: pledge.giverNote,
+    giverRelation: pledge.giverRelation,
     pledgedAt: data.created_at
   };
 }
@@ -238,7 +281,7 @@ export async function exportGiftPledgesCsv(): Promise<void> {
     return;
   }
 
-  const headers = ['Pledge ID', 'Item ID', 'Item Name', 'Amount (NGN)', 'Giver Name', 'Giver Email', 'Message', 'Date'];
+  const headers = ['Pledge ID', 'Item ID', 'Item Name', 'Amount (NGN)', 'Giver Name', 'Giver Email', 'Relationship', 'Message', 'Date'];
   const rows = pledges.map(p => [
     `"${p.id}"`,
     `"${sanitizeCsvCell(p.itemId).replace(/"/g, '""')}"`,
@@ -246,6 +289,7 @@ export async function exportGiftPledgesCsv(): Promise<void> {
     `"${p.amount}"`,
     `"${sanitizeCsvCell(p.giverName).replace(/"/g, '""')}"`,
     `"${sanitizeCsvCell(p.giverEmail || '').replace(/"/g, '""')}"`,
+    `"${sanitizeCsvCell(p.giverRelation || '').replace(/"/g, '""')}"`,
     `"${sanitizeCsvCell(p.giverNote || '').replace(/"/g, '""')}"`,
     `"${new Date(p.pledgedAt).toLocaleString()}"`,
   ]);
@@ -269,6 +313,7 @@ export interface GiftReminder {
   itemPrice: string;
   email: string;
   reservedByName?: string;
+  relation?: string;
   isAnonymous?: boolean;
   remindDate: string; // ISO date string (5 days after reservation)
   expiresAt: string; // ISO date string (7 days after reservation)
@@ -309,6 +354,7 @@ export async function getStoredReminders(): Promise<GiftReminder[]> {
       itemPrice: '',
       email: row.email,
       reservedByName: row.reserved_by_name || (localMatch ? localMatch.reservedByName : undefined),
+      relation: row.relation || (localMatch ? localMatch.relation : undefined),
       isAnonymous: row.is_anonymous !== undefined ? row.is_anonymous : (localMatch ? localMatch.isAnonymous : false),
       remindDate: row.remind_date,
       expiresAt: expiresAt,
@@ -361,6 +407,7 @@ export async function saveReminder(reminder: {
   itemPrice?: string;
   email: string;
   guestName: string;
+  relation?: string;
   isAnonymous?: boolean;
 }): Promise<GiftReminder> {
   const now = new Date();
@@ -371,25 +418,28 @@ export async function saveReminder(reminder: {
 
   let insertedData: any = null;
 
-  // Try to insert with reserved_by_name and is_anonymous column
+  // Try to insert with reserved_by_name, relation, and is_anonymous column
+  const initialPayload: any = {
+    item_id: reminder.itemId,
+    item_name: reminder.itemName,
+    email: reminder.email,
+    remind_date: remindDate,
+    reserved_by_name: reminder.guestName,
+    is_anonymous: !!reminder.isAnonymous
+  };
+  if (reminder.relation) {
+    initialPayload.relation = reminder.relation;
+  }
+
   const { data, error } = await supabase
     .from('gift_reminders')
-    .insert([
-      {
-        item_id: reminder.itemId,
-        item_name: reminder.itemName,
-        email: reminder.email,
-        remind_date: remindDate,
-        reserved_by_name: reminder.guestName,
-        is_anonymous: !!reminder.isAnonymous
-      }
-    ])
+    .insert([initialPayload])
     .select()
     .single();
 
   if (error) {
     // If it's a column missing error, retry with fallbacks
-    console.warn('Supabase missing is_anonymous or reserved_by_name column. Using fallback...', error);
+    console.warn('Supabase missing relation, is_anonymous or reserved_by_name column. Using fallback...', error);
     const retryPayload: any = {
       item_id: reminder.itemId,
       item_name: reminder.itemName,
@@ -398,6 +448,9 @@ export async function saveReminder(reminder: {
     };
     if (!error.message?.includes('reserved_by_name')) {
       retryPayload.reserved_by_name = reminder.guestName;
+    }
+    if (!error.message?.includes('is_anonymous')) {
+      retryPayload.is_anonymous = !!reminder.isAnonymous;
     }
 
     const retry = await supabase
@@ -422,6 +475,7 @@ export async function saveReminder(reminder: {
       itemId: reminder.itemId,
       expiresAt: expiresAt,
       reservedByName: reminder.guestName,
+      relation: reminder.relation,
       isAnonymous: !!reminder.isAnonymous
     });
     localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(local));
@@ -434,6 +488,7 @@ export async function saveReminder(reminder: {
     itemPrice: reminder.itemPrice || '',
     email: insertedData.email,
     reservedByName: insertedData.reserved_by_name || reminder.guestName,
+    relation: insertedData.relation || reminder.relation,
     isAnonymous: insertedData.is_anonymous !== undefined ? insertedData.is_anonymous : !!reminder.isAnonymous,
     remindDate: insertedData.remind_date,
     expiresAt: expiresAt,

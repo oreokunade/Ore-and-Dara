@@ -603,7 +603,14 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
                                 </p>
                               </td>
                               <td className="p-6">
-                                <p className="font-semibold whitespace-nowrap text-base">{p.giverName}</p>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <p className="font-semibold whitespace-nowrap text-base">{p.giverName}</p>
+                                  {p.giverRelation && (
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-gold/15 text-brand-goldDark">
+                                      {p.giverRelation}
+                                    </span>
+                                  )}
+                                </div>
                                 {p.giverEmail && <p className="text-sm text-brand-muted mt-1 font-medium">{p.giverEmail}</p>}
                               </td>
                               <td className="p-6 min-w-[250px]">
@@ -958,8 +965,13 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
                                   <p className="text-xs text-brand-muted font-mono mt-0.5">ID: {r.itemId}</p>
                                 </td>
                                 <td className="p-6">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <p className="font-semibold text-base text-brand-espresso">{r.reservedByName || 'Guest'}</p>
+                                    {r.relation && (
+                                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-gold/15 text-brand-goldDark">
+                                        {r.relation}
+                                      </span>
+                                    )}
                                     {r.isAnonymous && (
                                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-sand text-brand-muted">
                                         Anonymous on Site

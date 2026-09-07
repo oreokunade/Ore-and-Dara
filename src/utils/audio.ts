@@ -13,6 +13,34 @@ class AudioManager {
     this.audio.muted = false;
     this.isMuted = false;
 
+    // Restore saved playback position if available
+    try {
+      const savedTime = sessionStorage.getItem('ore_dara_music_time');
+      if (savedTime) {
+        const timeNum = parseFloat(savedTime);
+        if (!isNaN(timeNum) && timeNum > 0) {
+          this.audio.currentTime = timeNum;
+        }
+      }
+    } catch (e) {}
+
+    // Persist playback position periodically
+    this.audio.addEventListener('timeupdate', () => {
+      if (this.audio && this.audio.currentTime > 0) {
+        try {
+          sessionStorage.setItem('ore_dara_music_time', String(this.audio.currentTime));
+        } catch (e) {}
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (this.audio && this.audio.currentTime > 0) {
+        try {
+          sessionStorage.setItem('ore_dara_music_time', String(this.audio.currentTime));
+        } catch (e) {}
+      }
+    });
+
     // Autoplay attempt unmuted
     this.audio.play()
       .then(() => {

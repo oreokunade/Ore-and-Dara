@@ -23,6 +23,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [giverName, setGiverName] = useState('');
   const [giverEmail, setGiverEmail] = useState('');
+  const [giverRelation, setGiverRelation] = useState('');
   const [giverNote, setGiverNote] = useState('');
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,8 +33,29 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   const [reminderItem, setReminderItem] = useState<WishlistItem | null>(null);
   const [reminderEmail, setReminderEmail] = useState('');
   const [reminderName, setReminderName] = useState('');
+  const [reminderRelation, setReminderRelation] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [reminderSaved, setReminderSaved] = useState(false);
+
+  // Isolate scroll so background page cannot scroll when any modal is open
+  const isAnyModalOpen = activeItem !== null || reminderItem !== null;
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const lenis = (window as any).lenis;
+      if (lenis) lenis.stop();
+
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      return () => {
+        if (lenis) lenis.start();
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [isAnyModalOpen]);
 
   // Bank account details for gifts
   const bankAccounts = [
@@ -135,6 +157,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
         itemPrice: reminderItem.formattedPrice,
         email: reminderEmail.trim(),
         guestName: reminderName.trim(),
+        relation: reminderRelation || undefined,
         isAnonymous: isAnonymous,
       });
 
@@ -178,6 +201,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
     setReminderItem(null);
     setReminderEmail('');
     setReminderName('');
+    setReminderRelation('');
     setIsAnonymous(false);
     setReminderSaved(false);
   };
@@ -199,6 +223,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
         amount: activeItem.price * purchaseQuantity,
         giverName: giverName.trim(),
         giverEmail: giverEmail.trim() || undefined,
+        giverRelation: giverRelation || undefined,
         giverNote: giverNote.trim() || undefined,
       });
 
@@ -236,6 +261,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
     setJustGifted(null);
     setGiverName('');
     setGiverEmail('');
+    setGiverRelation('');
     setGiverNote('');
     setCopiedField(null);
   };
@@ -243,52 +269,72 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   return (
     <section id="wishlist" className="py-24 sm:py-32 px-4 sm:px-6 bg-brand-ivory relative overflow-hidden">
       <div className="max-w-6xl mx-auto relative z-10">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-xs uppercase tracking-[0.3em] font-sans font-semibold text-brand-goldDark mb-3"
-          >
-            Curated Wedding Registry
-          </motion.p>
+        {/* Section Header with Couple Portrait */}
+        <div className="max-w-5xl mx-auto mb-16 sm:mb-20">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-white/70 backdrop-blur-sm p-6 sm:p-10 rounded-3xl border border-brand-sand/50 shadow-md">
+            {/* Couple Image Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-xl border-2 border-brand-gold/30 bg-brand-espresso group relative"
+            >
+              <img
+                src="/assets/wishlist-couple.png"
+                alt="Our forever starts now - Oreoluwa & Oluwadara"
+                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            </motion.div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="font-serif text-4xl sm:text-6xl text-brand-espresso font-normal"
-          >
-            Wishlist Items
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="font-sans text-brand-muted text-[17px] sm:text-lg mt-4 leading-relaxed max-w-2xl mx-auto"
-          >
-            To help us start our new home together, we have handpicked items we need most. You can select any item below to pay for it and bless our union directly.
-          </motion.p>
-
-          {/* Category Filter Tabs - Borderless */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-sans font-semibold tracking-wider transition-all duration-300 ${
-                  selectedCategory === cat
-                    ? 'bg-brand-espresso text-brand-cream shadow-md'
-                    : 'bg-white/80 text-brand-muted hover:bg-white shadow-xs'
-                }`}
+            {/* Content & Category Tabs */}
+            <div className="text-center md:text-left flex-1">
+              <motion.p
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-xs uppercase tracking-[0.3em] font-sans font-semibold text-brand-goldDark mb-3"
               >
-                {cat}
-              </button>
-            ))}
+                Curated Wedding Registry
+              </motion.p>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="font-serif text-4xl sm:text-5xl lg:text-6xl text-brand-espresso font-normal leading-tight"
+              >
+                Wishlist Items
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="font-sans text-brand-muted text-[16px] sm:text-lg mt-4 leading-relaxed max-w-xl"
+              >
+                To help us start our new home together, we have handpicked items we need most. You can select any item below to pay for it and bless our union directly.
+              </motion.p>
+
+              {/* Category Filter Tabs */}
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-8">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-xs font-sans font-semibold tracking-wider transition-all duration-300 ${
+                      selectedCategory === cat
+                        ? 'bg-brand-espresso text-brand-cream shadow-md'
+                        : 'bg-white text-brand-muted hover:bg-brand-sand/40 shadow-xs'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -424,16 +470,18 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+            data-lenis-prevent
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto overscroll-contain"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-brand-cream border border-brand-gold/40 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto"
+              data-lenis-prevent
+              className="bg-brand-cream border border-brand-gold/40 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden my-auto overscroll-contain"
             >
               {/* Modal Header */}
-              <div className="p-5 sm:p-6 border-b border-brand-sand bg-white flex items-center justify-between">
+              <div className="p-5 sm:p-6 border-b border-brand-sand bg-white flex items-center justify-between shrink-0">
                 <div>
                   <span className="text-[10px] uppercase tracking-widest font-sans font-bold text-brand-goldDark">
                     Gift Checkout & Direct Payment
@@ -451,7 +499,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
               </div>
 
               {/* Modal Content */}
-              <div className="p-6 overflow-y-auto space-y-6">
+              <div data-lenis-prevent className="p-6 overflow-y-auto overscroll-contain space-y-6">
                 {justGifted ? (
                   /* Success Confirmation Screen */
                   <div className="text-center py-6 space-y-4">
@@ -648,6 +696,26 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
                       <div>
                         <label className="block text-xs font-sans font-semibold text-brand-espresso mb-1">
+                          Relationship with Couple <span className="text-brand-goldDark">*</span>
+                        </label>
+                        <select
+                          required
+                          value={giverRelation}
+                          onChange={(e) => setGiverRelation(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-brand-sand text-[17px] font-sans text-brand-espresso outline-none focus:border-brand-gold appearance-none cursor-pointer"
+                          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a8a29e\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+                        >
+                          <option value="" disabled>Select your connection</option>
+                          <option value="groom">The Groom</option>
+                          <option value="bride">The Bride</option>
+                          <option value="groomsfamily">Groom's Family</option>
+                          <option value="bridefamily">Bride's Family</option>
+                          <option value="both">Both (Groom & Bride)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-sans font-semibold text-brand-espresso mb-1">
                           Message / Blessing for the Couple <span className="text-brand-muted font-normal">(optional)</span>
                         </label>
                         <input
@@ -689,15 +757,17 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            data-lenis-prevent
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto overscroll-contain"
             onClick={closeReminderModal}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
+              data-lenis-prevent
               onClick={(e) => e.stopPropagation()}
-              className="bg-brand-cream rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl border border-brand-gold/30"
+              className="bg-brand-cream rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl border border-brand-gold/30 max-h-[92vh] flex flex-col overflow-hidden my-auto overscroll-contain"
             >
               {reminderSaved ? (
                 /* Success State */
@@ -744,128 +814,151 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                 </div>
               ) : (
                 /* Form State */
-                <form onSubmit={handleSetReminder} className="space-y-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center">
-                        <Heart className="w-5 h-5 text-brand-goldDark fill-brand-goldDark/30" />
+                <div data-lenis-prevent className="overflow-y-auto overscroll-contain pr-1 -mr-1">
+                  <form onSubmit={handleSetReminder} className="space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-brand-gold/20 flex items-center justify-center">
+                          <Heart className="w-5 h-5 text-brand-goldDark fill-brand-goldDark/30" />
+                        </div>
+                        <div>
+                          <h4 className="font-serif text-xl text-brand-espresso">Reserve</h4>
+                          <p className="text-xs text-brand-muted font-sans">We'll gladly set this aside for you</p>
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={closeReminderModal}
+                        className="p-2 rounded-full hover:bg-brand-sand/50 text-brand-muted transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Item preview */}
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-brand-sand">
+                      <img
+                        src={reminderItem.image}
+                        alt={reminderItem.name}
+                        className="w-14 h-14 rounded-xl object-cover shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-serif text-[17px] text-brand-espresso font-medium truncate">{reminderItem.name}</p>
+                        <p className="font-mono text-lg font-bold text-brand-goldDark">{reminderItem.formattedPrice}</p>
+                      </div>
+                    </div>
+
+                    {/* Gracious Explainer */}
+                    <div className="p-4 rounded-2xl bg-brand-cream/80 border border-brand-sand text-xs font-sans text-brand-espresso space-y-2.5 leading-relaxed">
+                      <p className="font-serif text-[15px] text-brand-espresso font-normal flex items-center gap-1.5">
+                        <Heart className="w-4 h-4 text-brand-goldDark fill-brand-goldDark" />
+                        <span>Thank you so much for thinking of us!</span>
+                      </p>
+                      <ul className="space-y-2 text-brand-muted text-[13px]">
+                        <li className="flex items-start gap-2">
+                          <span className="text-brand-goldDark font-bold mt-0.5">•</span>
+                          <span>
+                            <strong className="text-brand-espresso font-semibold">Take your time:</strong> We’ll gladly save this gift for you for 7 days (until{' '}
+                            <span className="font-medium text-brand-espresso underline underline-offset-2">
+                              {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-NG', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                            ) so nobody else selects it.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-brand-goldDark font-bold mt-0.5">•</span>
+                          <span>
+                            <strong className="text-brand-espresso font-semibold">Gentle reminder:</strong> We’ll send a friendly email with the couple’s account details on{' '}
+                            <span className="font-medium text-brand-espresso underline underline-offset-2">
+                              {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-NG', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </span>
+                            , just in case it slips your mind.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-brand-goldDark font-bold mt-0.5">•</span>
+                          <span>
+                            <strong className="text-brand-espresso font-semibold">No pressure at all:</strong> If you change your mind or prefer another gift, it simply returns to the wishlist after a week for other guests.
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Form Fields */}
+                    <div className="space-y-4">
                       <div>
-                        <h4 className="font-serif text-xl text-brand-espresso">Reserve</h4>
-                        <p className="text-xs text-brand-muted font-sans">We'll gladly set this aside for you</p>
+                        <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-1.5">
+                          Your Full Name <span className="text-brand-goldDark">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Adewale"
+                          value={reminderName}
+                          onChange={(e) => setReminderName(e.target.value)}
+                          className="w-full px-4 py-3 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all"
+                        />
+                        <label className="flex items-center gap-2.5 mt-2.5 cursor-pointer select-none group">
+                          <input
+                            type="checkbox"
+                            checked={isAnonymous}
+                            onChange={(e) => setIsAnonymous(e.target.checked)}
+                            className="w-4 h-4 rounded border-brand-sand text-brand-goldDark focus:ring-brand-gold/30 accent-brand-goldDark cursor-pointer"
+                          />
+                          <span className="text-xs font-sans text-brand-muted group-hover:text-brand-espresso transition-colors">
+                            Reserve anonymously <span className="text-[11px] text-brand-muted/70">(hide my name from the public registry)</span>
+                          </span>
+                        </label>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-1.5">
+                          Where should we send your reminder? <span className="text-brand-goldDark">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="e.g. adewale@example.com"
+                          value={reminderEmail}
+                          onChange={(e) => setReminderEmail(e.target.value)}
+                          className="w-full px-4 py-3 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all"
+                        />
+                        <span className="text-[11px] text-brand-muted font-sans mt-1.5 block">
+                          We'll only use this to send your reminder note with the couple's transfer details.
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-1.5">
+                          Relationship with Couple <span className="text-brand-goldDark">*</span>
+                        </label>
+                        <select
+                          required
+                          value={reminderRelation}
+                          onChange={(e) => setReminderRelation(e.target.value)}
+                          className="w-full px-4 py-3 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all appearance-none cursor-pointer"
+                          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a8a29e\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
+                        >
+                          <option value="" disabled>Select your connection</option>
+                          <option value="groom">The Groom</option>
+                          <option value="bride">The Bride</option>
+                          <option value="groomsfamily">Groom's Family</option>
+                          <option value="bridefamily">Bride's Family</option>
+                          <option value="both">Both (Groom & Bride)</option>
+                        </select>
                       </div>
                     </div>
+
                     <button
-                      type="button"
-                      onClick={closeReminderModal}
-                      className="p-2 rounded-full hover:bg-brand-sand/50 text-brand-muted transition-colors"
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-3.5 rounded-full bg-brand-gold hover:bg-brand-goldDark text-brand-espresso hover:text-white text-xs font-sans font-bold tracking-widest uppercase transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      <X className="w-4 h-4" />
+                      <Heart className="w-4 h-4 fill-current" />
+                      <span>{isSubmitting ? 'Reserving...' : 'Reserve'}</span>
                     </button>
-                  </div>
-
-                  {/* Item preview */}
-                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-brand-sand">
-                    <img
-                      src={reminderItem.image}
-                      alt={reminderItem.name}
-                      className="w-14 h-14 rounded-xl object-cover shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-serif text-[17px] text-brand-espresso font-medium truncate">{reminderItem.name}</p>
-                      <p className="font-mono text-lg font-bold text-brand-goldDark">{reminderItem.formattedPrice}</p>
-                    </div>
-                  </div>
-
-                  {/* Gracious Explainer */}
-                  <div className="p-4 rounded-2xl bg-brand-cream/80 border border-brand-sand text-xs font-sans text-brand-espresso space-y-2.5 leading-relaxed">
-                    <p className="font-serif text-[15px] text-brand-espresso font-normal flex items-center gap-1.5">
-                      <Heart className="w-4 h-4 text-brand-goldDark fill-brand-goldDark" />
-                      <span>Thank you so much for thinking of us!</span>
-                    </p>
-                    <ul className="space-y-2 text-brand-muted text-[13px]">
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-goldDark font-bold mt-0.5">•</span>
-                        <span>
-                          <strong className="text-brand-espresso font-semibold">Take your time:</strong> We’ll gladly save this gift for you for 7 days (until{' '}
-                          <span className="font-medium text-brand-espresso underline underline-offset-2">
-                            {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-NG', { weekday: 'short', month: 'short', day: 'numeric' })}
-                          </span>
-                          ) so nobody else selects it.
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-goldDark font-bold mt-0.5">•</span>
-                        <span>
-                          <strong className="text-brand-espresso font-semibold">Gentle reminder:</strong> We’ll send a friendly email with the couple’s account details on{' '}
-                          <span className="font-medium text-brand-espresso underline underline-offset-2">
-                            {new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-NG', { weekday: 'short', month: 'short', day: 'numeric' })}
-                          </span>
-                          , just in case it slips your mind.
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-brand-goldDark font-bold mt-0.5">•</span>
-                        <span>
-                          <strong className="text-brand-espresso font-semibold">No pressure at all:</strong> If you change your mind or prefer another gift, it simply returns to the wishlist after a week for other guests.
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Form Fields */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-1.5">
-                        Your Full Name <span className="text-brand-goldDark">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. Adewale"
-                        value={reminderName}
-                        onChange={(e) => setReminderName(e.target.value)}
-                        className="w-full px-4 py-3 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all"
-                      />
-                      <label className="flex items-center gap-2.5 mt-2.5 cursor-pointer select-none group">
-                        <input
-                          type="checkbox"
-                          checked={isAnonymous}
-                          onChange={(e) => setIsAnonymous(e.target.checked)}
-                          className="w-4 h-4 rounded border-brand-sand text-brand-goldDark focus:ring-brand-gold/30 accent-brand-goldDark cursor-pointer"
-                        />
-                        <span className="text-xs font-sans text-brand-muted group-hover:text-brand-espresso transition-colors">
-                          Reserve anonymously <span className="text-[11px] text-brand-muted/70">(hide my name from the public registry)</span>
-                        </span>
-                      </label>
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-1.5">
-                        Where should we send your reminder? <span className="text-brand-goldDark">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        placeholder="e.g. adewale@example.com"
-                        value={reminderEmail}
-                        onChange={(e) => setReminderEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all"
-                      />
-                      <span className="text-[11px] text-brand-muted font-sans mt-1.5 block">
-                        We'll only use this to send your reminder note with the couple's transfer details.
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-full bg-brand-gold hover:bg-brand-goldDark text-brand-espresso hover:text-white text-xs font-sans font-bold tracking-widest uppercase transition-all duration-300 shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Heart className="w-4 h-4 fill-current" />
-                    <span>{isSubmitting ? 'Reserving...' : 'Reserve'}</span>
-                  </button>
-                </form>
+                  </form>
+                </div>
               )}
             </motion.div>
           </motion.div>
