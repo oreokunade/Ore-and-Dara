@@ -8,6 +8,7 @@ import {
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
+import { sendReservationReminderEmail } from '../utils/email';
 import { RsvpSubmission, GiftPledge, WishlistItem, GiftReminder } from '../types';
 import { INITIAL_WISHLIST_ITEMS } from '../data/wishlistData';
 import type { AdminRole } from '../pages/AdminPage';
@@ -231,6 +232,39 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
         } catch (err) {
           console.error(err);
           onNotify('Error', 'Failed to release reservation.');
+        }
+      }
+    });
+  };
+
+  const handleSendReminder = async (r: GiftReminder) => {
+    if (!r.email) {
+      onNotify('Error', 'This reservation has no email address.');
+      return;
+    }
+    
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Send Reminder Email',
+      message: `Are you sure you want to send a reminder email to ${r.reservedByName || 'this guest'} at ${r.email}?`,
+      onConfirm: async () => {
+        try {
+          const res = await sendReservationReminderEmail({
+            guestName: r.reservedByName || 'Guest',
+            guestEmail: r.email as string,
+            itemName: r.itemName,
+            itemPrice: r.itemPrice || '',
+            expiresAt: r.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          });
+          
+          if (res.success) {
+            onNotify('Reminder Sent', `A reminder email was sent to ${r.email}.`);
+          } else {
+            throw new Error('Email failed to send');
+          }
+        } catch (err) {
+          console.error(err);
+          onNotify('Error', 'Failed to send reminder email.');
         }
       }
     });
@@ -1016,13 +1050,22 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
                                   {r.expiresAt && <p><strong className="text-brand-espresso">Expires:</strong> {new Date(r.expiresAt).toLocaleDateString()}</p>}
                                 </td>
                                 <td className="p-6 text-right">
-                                  <button
-                                    onClick={() => handleDeleteReservation(r.id, r.itemId, r.reservedByName)}
-                                    className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                                    title="Release reservation (Make item available again)"
-                                  >
-                                    <Trash2 className="w-5 h-5" />
-                                  </button>
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      onClick={() => handleSendReminder(r)}
+                                      className="p-2.5 text-brand-gold hover:text-brand-goldDark hover:bg-brand-gold/10 rounded-xl transition-colors"
+                                      title="Send Reminder Email"
+                                    >
+                                      <Mail className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteReservation(r.id, r.itemId, r.reservedByName)}
+                                      className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                                      title="Release reservation (Make item available again)"
+                                    >
+                                      <Trash2 className="w-5 h-5" />
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             );
