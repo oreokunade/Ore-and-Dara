@@ -64,8 +64,20 @@ export const Footer: FC = () => {
         </button>
 
         {/* Copyright */}
-        <div className="w-full pt-8 border-t border-white/10 flex items-center justify-center text-xs font-sans text-brand-muted">
+        <div className="w-full pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 text-xs font-sans text-brand-muted">
           <div>© 2026 Oluwadara & Oreoluwa. All Rights Reserved.</div>
+          <div className="hidden sm:block text-white/20">&bull;</div>
+          <div>
+            Built by{' '}
+            <a 
+              href="https://oreokunade.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-brand-gold hover:text-white transition-colors underline decoration-brand-gold/30 hover:decoration-white"
+            >
+              Oreoluwa Okunade
+            </a>
+          </div>
         </div>
       </div>
     </footer>
