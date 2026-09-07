@@ -1,7 +1,3 @@
-import { supabase } from './supabase';
-
-const SENDER_EMAIL = import.meta.env.VITE_EMAIL_SENDER || "Ore & Dara's Wedding <onboarding@resend.dev>";
-
 interface SendEmailParams {
   to: string;
   subject: string;
@@ -9,28 +5,34 @@ interface SendEmailParams {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailParams): Promise<{ success: boolean; error?: any }> {
-  // Send emails via Supabase Edge Function (server-side) to keep API keys secure.
-  // NEVER send emails directly from the browser — that would expose the Resend API key
-  // in the client-side JavaScript bundle.
+  // Call the Vercel Serverless Function
   try {
-    const { data, error } = await supabase.functions.invoke('send-email', {
-      body: { to, subject, html, from: SENDER_EMAIL }
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ to, subject, html })
     });
-    if (!error && data) {
+
+    if (response.ok) {
       return { success: true };
     }
-    if (error) {
-      console.error('Edge function error:', error);
-      return { success: false, error };
+    
+    const errorData = await response.json().catch(() => ({}));
+    console.error('Email API error:', errorData);
+    
+    // If running locally, Vite's dev server might not have the API route
+    if (response.status === 404 && import.meta.env.DEV) {
+      console.warn('[email] /api/send-email not found. Emails only send on the deployed Vercel site.');
+      return { success: true }; // Simulate success in dev
     }
+    
+    return { success: false, error: errorData };
   } catch (err) {
-    console.warn('Supabase Edge Function not available. Email not sent:', err);
+    console.warn('[email] Failed to call email API:', err);
+    return { success: false, error: err };
   }
-
-  // If no Edge Function is deployed yet, log a warning and return success
-  // so the rest of the app flow (reservation confirmations, etc.) continues.
-  console.warn('[email] No email backend configured. Email was not sent. Deploy a Supabase Edge Function for production email delivery.');
-  return { success: true };
 }
 
 // --- Luxury Email Templates ---
