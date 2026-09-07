@@ -8,21 +8,23 @@ class AudioManager {
   init() {
     if (this.audio) return;
     this.audio = new Audio('/assets/do4love.mp3');
+    this.audio.preload = 'auto'; // Force browser to start downloading immediately
     this.audio.volume = 0.65;
     this.audio.loop = true;
     this.audio.muted = false;
     this.isMuted = false;
 
-    // Restore saved playback position if available
-    try {
-      const savedTime = sessionStorage.getItem('ore_dara_music_time');
-      if (savedTime) {
-        const timeNum = parseFloat(savedTime);
-        if (!isNaN(timeNum) && timeNum > 0) {
-          this.audio.currentTime = timeNum;
-        }
+    // Safely restore saved playback position once metadata is loaded
+    // Setting currentTime before loadedmetadata can cause Range Request delays or InvalidStateErrors
+    const savedTime = sessionStorage.getItem('ore_dara_music_time');
+    if (savedTime) {
+      const timeNum = parseFloat(savedTime);
+      if (!isNaN(timeNum) && timeNum > 0) {
+        this.audio.addEventListener('loadedmetadata', () => {
+          if (this.audio) this.audio.currentTime = timeNum;
+        }, { once: true });
       }
-    } catch (e) {}
+    }
 
     // Persist playback position periodically
     this.audio.addEventListener('timeupdate', () => {
