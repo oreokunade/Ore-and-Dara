@@ -690,10 +690,11 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
                         <div>
                           <label className="block text-xs font-sans font-semibold text-brand-espresso mb-1">
-                            Your Email <span className="text-brand-muted font-normal">(optional)</span>
+                            Your Email <span className="text-brand-goldDark">*</span>
                           </label>
                           <input
                             type="email"
+                            required
                             placeholder="e.g. bolanle@example.com"
                             value={giverEmail}
                             onChange={(e) => setGiverEmail(e.target.value)}

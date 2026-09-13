@@ -311,11 +311,12 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
-                  Email <span className="text-brand-muted font-normal lowercase">(optional)</span>
+                  Email <span className="text-brand-goldDark">*</span>
                 </label>
                 <input
                   id="email"
                   type="email"
+                  required
                   placeholder="e.g. adewale@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
