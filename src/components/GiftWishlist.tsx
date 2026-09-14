@@ -318,22 +318,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                 To help us start our new home together, we have handpicked items we need most. You can select any item below to pay for it and bless our union directly.
               </motion.p>
 
-              {/* Category Filter Tabs */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-8">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2 rounded-full text-xs font-sans font-semibold tracking-wider transition-all duration-300 ${
-                      selectedCategory === cat
-                        ? 'bg-brand-espresso text-brand-cream shadow-md'
-                        : 'bg-white text-brand-muted hover:bg-brand-sand/40 shadow-xs'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+
             </div>
           </div>
         </div>
