@@ -171,23 +171,17 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
               </div>
 
               <h3 className="font-serif text-2xl sm:text-3xl text-brand-ivory font-light leading-tight drop-shadow-md">
-                Church: Celebration Church Int'l
+                Church
               </h3>
-              
-              <h3 className="font-serif text-2xl sm:text-3xl text-brand-ivory font-light leading-tight mt-4 drop-shadow-md">
-                Reception: Excellence Hotel
-              </h3>
-
-              <p className="font-serif italic text-xl text-brand-goldLight mt-2 drop-shadow-sm">
-                Ogba, Lagos
+              <p className="text-brand-sand text-[17px] font-sans leading-relaxed drop-shadow-sm mt-1 mb-6">
+                Celebration Church Int'l (Celebr8 Centre HQ), Vori Close, off Acme Road, Ogba, Lagos
               </p>
-
-              <div className="w-16 h-[1px] bg-brand-gold/40 my-6" />
-
-              <p className="text-brand-sand text-[17px] font-sans leading-relaxed drop-shadow-sm">
-                <strong>Church:</strong> Celebration Church Int'l (Celebr8 Centre HQ), Vori Close, off Acme Road, Ogba, Lagos
-                <br /><br />
-                <strong>Reception:</strong> Excellence Hotel, Lateef Jakande Rd, Ogba-Aguda, Ikeja, Lagos, Nigeria
+              
+              <h3 className="font-serif text-2xl sm:text-3xl text-brand-ivory font-light leading-tight drop-shadow-md">
+                Reception
+              </h3>
+              <p className="text-brand-sand text-[17px] font-sans leading-relaxed drop-shadow-sm mt-1">
+                Excellence Hotel, Lateef Jakande Rd, Ogba-Aguda, Ikeja, Lagos, Nigeria
               </p>
             </div>
 
