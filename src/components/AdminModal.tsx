@@ -192,9 +192,20 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     // Try Web Share API first (Ideal for WhatsApp on mobile)
     if (navigator.share) {
       try {
+        let filesArray: File[] = [];
+        try {
+          const response = await fetch('/iv.png');
+          const blob = await response.blob();
+          const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type });
+          filesArray = [file];
+        } catch (fetchErr) {
+          console.warn('Could not load IV image for sharing', fetchErr);
+        }
+
         await navigator.share({
           title: 'Ore & Dara Wedding Invitation',
           text: text,
+          files: filesArray.length > 0 ? filesArray : undefined
         });
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(null), 2000);
