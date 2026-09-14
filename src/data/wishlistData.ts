@@ -158,7 +158,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 115500,
     formattedPrice: '₦115,500',
     category: 'Kitchen & Dining',
-    image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/25/1721914/1.jpg',
+    image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/90/2675914/1.jpg',
     description: 'Premium quality non-stick pots and pans set for healthy, easy cooking and effortless cleaning.',
   },
   {
@@ -168,7 +168,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 345000,
     formattedPrice: '₦345,000',
     category: 'Living & Comfort',
-    image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/75/4476914/1.jpg',
+    image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/87/1599383/1.jpg',
     description: 'Reliable high-capacity backup power station to keep essentials running during power outages.',
   },
   {
