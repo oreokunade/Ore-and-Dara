@@ -8,7 +8,7 @@ export const QandA: FC = () => {
   const faqs = [
     {
       question: "What’s the RSVP deadline?",
-      answer: "We kindly request that you RSVP on or before November 30th to help us finalize our preparations."
+      answer: "We kindly request that you RSVP on or before October 31st to help us finalize our preparations."
     },
     {
       question: "Can I bring a guest?",
