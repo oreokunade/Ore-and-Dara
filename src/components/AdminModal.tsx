@@ -397,7 +397,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   return (
     <div 
-      className="fixed inset-0 z-50 min-h-screen w-full bg-brand-ivory flex flex-col font-sans overflow-auto"
+      className="fixed inset-0 z-50 min-h-screen w-full bg-brand-ivory flex flex-col font-sans overflow-hidden"
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
@@ -423,7 +423,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50">
+      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50" style={{ touchAction: 'pan-x' }}>
         {(role === 'master' || ['custom1964', 'groomsfamily', 'bridesfamily'].includes(role)) && (
           <button
             onClick={() => setActiveTab('rsvps')}
@@ -492,7 +492,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto bg-brand-ivory p-6 sm:p-12">
+      <div className="flex-1 overflow-y-auto bg-brand-ivory p-6 sm:p-12" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="max-w-7xl mx-auto">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
