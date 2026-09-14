@@ -181,5 +181,14 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/93/7026814/1.jpg',
     description: 'Long-lasting rechargeable standing fan with built-in LED light and USB phone charging port.',
   },
+  {
+    id: 'wishlist-tabletop-cooker',
+    name: 'Qasa 4 Burners Table Top Glass Gas Cooker',
+    quantity: 1,
+    price: 105000,
+    formattedPrice: '₦105,000',
+    category: 'Kitchen & Dining',
+    image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/73/2491914/1.jpg',
+    description: 'Premium glass surface table top gas cooker with 4 high-efficiency burners for quick and easy meals.',
+  },
 ];
-
