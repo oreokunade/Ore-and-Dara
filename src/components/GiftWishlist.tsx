@@ -16,7 +16,7 @@ interface GiftWishlistProps {
 
 export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   const [items, setItems] = useState<WishlistItem[]>(INITIAL_WISHLIST_ITEMS);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
   const [activeItem, setActiveItem] = useState<WishlistItem | null>(null);
   
   // Checkout Modal State
@@ -125,18 +125,6 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
       return '';
     }
   };
-
-  const categories = [
-    'All',
-    'Living & Comfort',
-    'Kitchen & Dining',
-    'Home & Bedding',
-    'Milestone Gift',
-  ];
-
-  const filteredItems = selectedCategory === 'All'
-    ? items
-    : items.filter((item) => item.category === selectedCategory);
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -325,7 +313,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
         {/* 14 Items Grid - Borderless */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredItems.map((item, index) => (
+          {items.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}

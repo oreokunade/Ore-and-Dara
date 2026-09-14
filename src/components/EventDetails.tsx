@@ -1,6 +1,6 @@
 import { useState, FC } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, ExternalLink, CalendarPlus, ChevronDown, Check } from 'lucide-react';
+import { MapPin, ExternalLink, CalendarPlus, ChevronDown, Check } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { getGoogleCalendarUrl, getOutlookCalendarUrl, downloadIcsFile } from '../utils/calendar';
 
@@ -93,60 +93,14 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Events Left Column (7 cols) */}
           <div className="lg:col-span-7 flex flex-col gap-6">
-            {/* Church Wedding Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="bg-brand-cream/80 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/20 text-brand-goldDark text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-                    <Clock className="w-3.5 h-3.5" /> 11:00 AM
-                  </span>
-                  <h3 className="font-serif text-3xl sm:text-4xl text-brand-espresso font-normal">
-                    Church Wedding
-                  </h3>
-                  <p className="text-brand-muted font-sans text-[17px] mt-2 leading-relaxed">
-                    The solemnization of holy matrimony and exchange of sacred vows before God, family, and cherished friends.
-                  </p>
-                </div>
-                <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-brand-gold/10 items-center justify-center text-brand-goldDark shrink-0">
-                  <span className="font-serif text-xl italic">01</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Reception Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="bg-brand-cream/80 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-gold/15 text-brand-goldDark text-xs font-sans tracking-widest uppercase font-semibold mb-3">
-                    <Clock className="w-3.5 h-3.5" /> 1:30 PM
-                  </span>
-                  <h3 className="font-serif text-3xl sm:text-4xl text-brand-espresso font-normal">
-                    Reception
-                  </h3>
-                  <p className="text-brand-muted font-sans text-[17px] mt-2 leading-relaxed">
-                    An afternoon and evening of joyous celebration, delicious feast, music, heartfelt speeches, and dancing.
-                  </p>
-                </div>
-                <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-brand-gold/10 items-center justify-center text-brand-goldDark shrink-0">
-                  <span className="font-serif text-xl italic">02</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Add to Calendar Action */}
-            <div className="relative">
+            <div className="bg-brand-cream/80 rounded-3xl p-8 sm:p-12 shadow-sm text-center flex flex-col justify-center h-full items-center border border-brand-sand/30">
+                <CalendarPlus className="w-10 h-10 text-brand-goldDark mb-5 opacity-60" />
+                <h3 className="font-serif text-3xl sm:text-4xl text-brand-espresso mb-3">Save the Date</h3>
+                <p className="text-brand-muted font-sans text-[17px] mb-8 max-w-md leading-relaxed">
+                   We are so excited to celebrate our special day with you. Add the wedding to your calendar to stay updated!
+                </p>
+                {/* Add to Calendar Action */}
+                <div className="relative w-full max-w-sm text-left">
               <button
                 onClick={() => setCalendarOpen(!calendarOpen)}
                 className="w-full py-4 px-6 rounded-2xl bg-brand-espresso hover:bg-brand-charcoal text-brand-cream flex items-center justify-between transition-all duration-300 shadow-md"
@@ -191,8 +145,9 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Location / Venue Right Column (5 cols) */}
+        {/* Location / Venue Right Column (5 cols) */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
