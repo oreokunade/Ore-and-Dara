@@ -677,6 +677,18 @@ export async function markInviteCodeAsShared(id: string): Promise<void> {
   }
 }
 
+export async function unmarkInviteCodeAsShared(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('invite_codes')
+    .update({ is_shared: false })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error unmarking code:', error);
+    throw error;
+  }
+}
+
 export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[]> {
   let query = supabase
     .from('invite_codes')

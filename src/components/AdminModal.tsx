@@ -1,10 +1,10 @@
 import { useState, useEffect, FC, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock } from 'lucide-react';
+import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, X } from 'lucide-react';
 import { 
   getStoredRsvps, exportRsvpsCsv, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
-  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, exportInviteCodesCsv, markInviteCodeAsShared, InviteCode,
+  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, exportInviteCodesCsv, markInviteCodeAsShared, unmarkInviteCodeAsShared, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
@@ -264,6 +264,15 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       await markShared();
     } catch (e) {
       onNotify('Error', 'Failed to copy to clipboard.');
+    }
+  };
+
+  const handleUnmarkShared = async (id: string) => {
+    try {
+      await unmarkInviteCodeAsShared(id);
+      setCodes(prev => prev.map(c => c.id === id ? { ...c, is_shared: false } : c));
+    } catch (e) {
+      onNotify('Error', 'Failed to unmark shared status.');
     }
   };
 
@@ -907,9 +916,18 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                     Used
                                   </span>
                                 ) : c.is_shared ? (
-                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
-                                    Copied / Shared
-                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
+                                      Copied / Shared
+                                    </span>
+                                    <button 
+                                      onClick={() => handleUnmarkShared(c.id)}
+                                      className="p-1 rounded-full text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors"
+                                      title="Undo 'Shared' status"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
                                 ) : (
                                   <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap">
                                     Available
