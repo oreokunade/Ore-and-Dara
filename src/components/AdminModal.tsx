@@ -193,7 +193,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 You will need this exclusive code to access the RSVP page. Please keep it safe!
 👉 *${code}* 👈
 
-Enter this code as you fill the RSVP form to be added to the guest list:
+Enter the above code as you fill the RSVP form to be added to the guest list:
 🌐 ${websiteUrl}`;
 
     if (role === 'bridesfamily') {
