@@ -222,18 +222,6 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
     return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
   };
 
-  const toggleSharedStatus = (targetCode: string) => {
-    setSharedCodes((prev) => {
-      const next = new Set(prev);
-      if (next.has(targetCode)) {
-        next.delete(targetCode);
-      } else {
-        next.add(targetCode);
-      }
-      localStorage.setItem('shared_codes', JSON.stringify(Array.from(next)));
-      return next;
-    });
-  };
 
   const handleCopyCode = async (code: string) => {
     const text = getInviteMessage(code);
@@ -924,19 +912,11 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                     Used
                                   </span>
                                 ) : sharedCodes.has(c.code) ? (
-                                  <span 
-                                    onClick={() => toggleSharedStatus(c.code)}
-                                    className="cursor-pointer px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap hover:bg-amber-200 transition-colors"
-                                    title="Click to mark as Available"
-                                  >
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
                                     Copied / Shared
                                   </span>
                                 ) : (
-                                  <span 
-                                    onClick={() => toggleSharedStatus(c.code)}
-                                    className="cursor-pointer px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap hover:bg-emerald-200 transition-colors"
-                                    title="Click to mark as Shared"
-                                  >
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap">
                                     Available
                                   </span>
                                 )}
