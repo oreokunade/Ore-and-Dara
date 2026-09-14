@@ -619,6 +619,7 @@ export interface InviteCode {
   id: string;
   code: string;
   is_used: boolean;
+  is_shared?: boolean;
   used_by?: string;
   created_by?: string;
   created_at: string;
@@ -660,6 +661,18 @@ export async function deleteInviteCodes(ids: string[]): Promise<void> {
     
   if (error) {
     console.error('Error deleting invite codes:', error);
+    throw error;
+  }
+}
+
+export async function markInviteCodeAsShared(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('invite_codes')
+    .update({ is_shared: true })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error marking code as shared:', error);
     throw error;
   }
 }

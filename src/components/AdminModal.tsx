@@ -4,7 +4,7 @@ import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Cop
 import { 
   getStoredRsvps, exportRsvpsCsv, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
-  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, exportInviteCodesCsv, InviteCode,
+  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, exportInviteCodesCsv, markInviteCodeAsShared, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
@@ -30,14 +30,6 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [reservations, setReservations] = useState<GiftReminder[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-  const [sharedCodes, setSharedCodes] = useState<Set<string>>(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem('shared_codes') || '[]'));
-    } catch {
-      return new Set();
-    }
-  });
-
   const getRoleCodeLimit = () => {
     if (role === 'master') return Infinity;
     if (role === 'custom1964') return 20;
@@ -226,14 +218,17 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
   const handleCopyCode = async (code: string) => {
     const text = getInviteMessage(code);
 
-    const markShared = () => {
+    const markShared = async () => {
       setCopiedCode(code);
-      setSharedCodes((prev) => {
-        const next = new Set(prev);
-        next.add(code);
-        localStorage.setItem('shared_codes', JSON.stringify(Array.from(next)));
-        return next;
-      });
+      const target = codes.find(c => c.code === code);
+      if (target && !target.is_shared) {
+        try {
+          await markInviteCodeAsShared(target.id);
+          setCodes(prev => prev.map(c => c.id === target.id ? { ...c, is_shared: true } : c));
+        } catch (e) {
+          console.error('Failed to save shared status to DB', e);
+        }
+      }
       setTimeout(() => setCopiedCode(null), 2000);
     };
 
@@ -255,7 +250,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
           text: text,
           files: filesArray.length > 0 ? filesArray : undefined
         });
-        markShared();
+        await markShared();
         return;
       } catch (e) {
         // Fallback to clipboard if share was cancelled or failed
@@ -266,7 +261,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
     // Fallback to standard clipboard
     try {
       await navigator.clipboard.writeText(text);
-      markShared();
+      await markShared();
     } catch (e) {
       onNotify('Error', 'Failed to copy to clipboard.');
     }
@@ -911,7 +906,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                   <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-brand-sand text-brand-muted whitespace-nowrap">
                                     Used
                                   </span>
-                                ) : sharedCodes.has(c.code) ? (
+                                ) : c.is_shared ? (
                                   <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
                                     Copied / Shared
                                   </span>
