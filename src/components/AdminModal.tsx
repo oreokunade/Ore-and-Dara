@@ -30,6 +30,20 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [reservations, setReservations] = useState<GiftReminder[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [sharedCodes, setSharedCodes] = useState<Set<string>>(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem('shared_codes') || '[]'));
+    } catch {
+      return new Set();
+    }
+  });
+
+  const getRoleCodeLimit = () => {
+    if (role === 'master') return Infinity;
+    if (role === 'custom1964') return 20;
+    return 100;
+  };
+  const roleCodeLimit = getRoleCodeLimit();
 
   const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
   const [bulkGenAmount, setBulkGenAmount] = useState<string>('1');
@@ -117,8 +131,8 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     if (isNaN(amount) || amount < 1) amount = 1;
     if (amount > 100) amount = 100;
 
-    if (role !== 'master' && codes.length + amount > 100) {
-      alert(`You can only create up to 100 codes. You have ${codes.length} already.`);
+    if (role !== 'master' && codes.length + amount > roleCodeLimit) {
+      alert(`You can only create up to ${roleCodeLimit} codes. You have ${codes.length} already.`);
       return;
     }
 
@@ -211,6 +225,17 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
   const handleCopyCode = async (code: string) => {
     const text = getInviteMessage(code);
     
+    const markShared = () => {
+      setCopiedCode(code);
+      setSharedCodes((prev) => {
+        const next = new Set(prev);
+        next.add(code);
+        localStorage.setItem('shared_codes', JSON.stringify(Array.from(next)));
+        return next;
+      });
+      setTimeout(() => setCopiedCode(null), 2000);
+    };
+
     // Try Web Share API first (Ideal for WhatsApp on mobile)
     if (navigator.share) {
       try {
@@ -229,8 +254,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
           text: text,
           files: filesArray.length > 0 ? filesArray : undefined
         });
-        setCopiedCode(code);
-        setTimeout(() => setCopiedCode(null), 2000);
+        markShared();
         return;
       } catch (e) {
         // Fallback to clipboard if share was cancelled or failed
@@ -241,8 +265,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
     // Fallback to standard clipboard
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedCode(code);
-      setTimeout(() => setCopiedCode(null), 2000);
+      markShared();
     } catch (e) {
       onNotify('Error', 'Failed to copy to clipboard.');
     }
@@ -780,8 +803,8 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     <input
                       type="number"
                       min="1"
-                      max={role !== 'master' ? Math.max(0, 100 - codes.length) : 100}
-                      disabled={role !== 'master' && codes.length >= 100}
+                      max={role !== 'master' ? Math.max(0, roleCodeLimit - codes.length) : 100}
+                      disabled={role !== 'master' && codes.length >= roleCodeLimit}
                       value={bulkGenAmount}
                       onChange={(e) => setBulkGenAmount(e.target.value)}
                       className="w-20 px-4 py-4 bg-brand-cream/50 border border-brand-sand/50 rounded-xl text-center font-sans font-bold text-brand-espresso focus:outline-none focus:border-brand-gold disabled:opacity-50"
@@ -789,7 +812,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     />
                     <button
                       onClick={handleGenerateCode}
-                      disabled={isGenerating || (role !== 'master' && codes.length >= 100)}
+                      disabled={isGenerating || (role !== 'master' && codes.length >= roleCodeLimit)}
                       className="flex items-center gap-2 px-8 py-4 bg-brand-goldDark text-white text-sm font-sans font-bold uppercase tracking-wider rounded-2xl hover:bg-brand-espresso transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                     >
                       <Plus className="w-5 h-5" /> {isGenerating ? 'Wait...' : 'Generate'}
@@ -799,13 +822,13 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
                 {/* Codes Table */}
                 <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-                  <div className="p-6 border-b border-brand-sand/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
+                  <div className="p-4 sm:p-6 border-b border-brand-sand/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
                     <div>
                       <div className="flex items-center gap-3">
                         <h3 className="font-serif text-2xl text-brand-espresso">All Invite Codes</h3>
                         {role !== 'master' && (
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= 100 ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
-                            {codes.length} / 100 Cap
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= roleCodeLimit ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
+                            {codes.length} / {roleCodeLimit} Cap
                           </span>
                         )}
                       </div>
@@ -882,13 +905,17 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                   </button>
                                 </div>
                               </td>
-                              <td className="p-6">
+                              <td className="p-4 sm:p-6">
                                 {c.is_used ? (
-                                  <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-sand text-brand-muted">
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-brand-sand text-brand-muted whitespace-nowrap">
                                     Used
                                   </span>
+                                ) : sharedCodes.has(c.code) ? (
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
+                                    Copied / Shared
+                                  </span>
                                 ) : (
-                                  <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap">
                                     Available
                                   </span>
                                 )}
