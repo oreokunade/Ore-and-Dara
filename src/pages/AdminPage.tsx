@@ -11,8 +11,9 @@ const PIN_SALT = 'OreDara_Wedding_2026_Salt_';
 const ADMIN_PIN_HASH = 'bb9ae744d70739c6f2e387a3df677fab506c447835fcce4389973772bfff0a84';
 const GROOMS_FAMILY_PIN_HASH = 'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7';
 const BRIDES_FAMILY_PIN_HASH = '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d';
+const CUSTOM_1964_PIN_HASH = 'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'; // PIN: 1964
 
-export type AdminRole = 'master' | 'groomsfamily' | 'bridesfamily';
+export type AdminRole = 'master' | 'groomsfamily' | 'bridesfamily' | 'custom1964';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -71,6 +72,10 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
       setAuthenticatedRole('bridesfamily');
+    } else if (enteredHash === CUSTOM_1964_PIN_HASH) {
+      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
+      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      setAuthenticatedRole('custom1964');
     } else {
       const attempts = parseInt(localStorage.getItem(ATTEMPTS_STORAGE_KEY) || '0', 10) + 1;
       localStorage.setItem(ATTEMPTS_STORAGE_KEY, attempts.toString());
