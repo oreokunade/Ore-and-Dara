@@ -21,7 +21,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify, role = 'master' }) => {
-  const [activeTab, setActiveTab] = useState<'rsvps' | 'gifts' | 'codes' | 'wishlist' | 'reservations'>('rsvps');
+  const [activeTab, setActiveTab] = useState<'rsvps' | 'gifts' | 'codes' | 'wishlist' | 'reservations'>('codes');
   const [rsvpFilter, setRsvpFilter] = useState<'all' | 'groom' | 'bride' | 'groomsfamily' | 'bridefamily' | 'both'>('all');
   const [rsvps, setRsvps] = useState<RsvpSubmission[]>([]);
   const [pledges, setPledges] = useState<GiftPledge[]>([]);
