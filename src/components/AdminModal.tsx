@@ -397,7 +397,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   return (
     <div 
-      className="fixed inset-0 z-50 min-h-screen w-full bg-brand-ivory flex flex-col font-sans overflow-hidden"
+      className="fixed inset-0 z-50 h-[100dvh] w-full bg-brand-ivory flex flex-col font-sans overflow-hidden"
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
@@ -492,7 +492,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto bg-brand-ivory p-6 sm:p-12" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto bg-brand-ivory p-6 sm:p-12" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div className="max-w-7xl mx-auto">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
