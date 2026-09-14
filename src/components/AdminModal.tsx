@@ -196,7 +196,9 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     const codeSection = `
 ✨ *IMPORTANT: YOUR RSVP CODE* ✨
 
-You will need this exclusive code to access the RSVP page. Please keep it safe!
+You will need this exclusive code to access the RSVP page. 
+⚠️ *NOTE: THIS CODE CAN ONLY BE USED ONCE!* ⚠️
+
 👉 *${code}* 👈
 
 Enter the above code as you fill the RSVP form to be added to the guest list:
