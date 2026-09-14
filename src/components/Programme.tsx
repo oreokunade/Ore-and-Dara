@@ -5,7 +5,7 @@ import { Church, Utensils, Heart } from 'lucide-react';
 export const Programme: FC = () => {
   const schedule = [
     {
-      time: '9:00 AM',
+      time: '8:00 AM',
       title: 'Traditional Engagement',
       subtitle: 'The Joining of Families',
       description: 'Join us as our families unite in tradition and love to celebrate our engagement.',
@@ -21,7 +21,7 @@ export const Programme: FC = () => {
       highlight: true,
     },
     {
-      time: '1:30 PM',
+      time: '2:00 PM',
       title: 'Reception & Banquet',
       subtitle: 'Feast, Speeches & Celebration',
       description: 'Grand entrance of the bridal party, couple first dance, gourmet dinner service, toasts, and cake cutting.',

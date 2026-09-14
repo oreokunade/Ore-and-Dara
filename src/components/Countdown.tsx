@@ -105,7 +105,7 @@ export const Countdown: FC = () => {
           className="mt-10 inline-flex items-center gap-2 text-xs sm:text-[17px] text-brand-muted font-sans"
         >
           <Clock className="w-4 h-4 text-brand-gold" />
-          <span>Saturday, December 12, 2026 • 11:00 AM WAT</span>
+          <span>Saturday, December 12, 2026</span>
         </motion.div>
       </div>
     </section>

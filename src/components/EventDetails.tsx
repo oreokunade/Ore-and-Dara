@@ -171,7 +171,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
               </div>
 
               <h3 className="font-serif text-2xl sm:text-3xl text-brand-ivory font-light leading-tight drop-shadow-md">
-                Church: Celebr8 Center HQ
+                Church: Celebration Church Int'l
               </h3>
               
               <h3 className="font-serif text-2xl sm:text-3xl text-brand-ivory font-light leading-tight mt-4 drop-shadow-md">
@@ -179,19 +179,21 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
               </h3>
 
               <p className="font-serif italic text-xl text-brand-goldLight mt-2 drop-shadow-sm">
-                Lagos, Nigeria
+                Ogba, Lagos
               </p>
 
               <div className="w-16 h-[1px] bg-brand-gold/40 my-6" />
 
               <p className="text-brand-sand text-[17px] font-sans leading-relaxed drop-shadow-sm">
-                The Church ceremony will be held at Celebr8 Center HQ, followed by the wedding reception in the distinguished event halls of Excellence Hotel, Ogba, Ikeja / Lagos.
+                <strong>Church:</strong> Celebration Church Int'l (Celebr8 Centre HQ), Vori Close, off Acme Road, Ogba, Lagos
+                <br /><br />
+                <strong>Reception:</strong> Excellence Hotel, Lateef Jakande Rd, Ogba-Aguda, Ikeja, Lagos, Nigeria
               </p>
             </div>
 
             <div className="relative z-10 mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
               <a
-                href="https://maps.google.com/?q=Celebr8+Center+HQ+Lagos+Nigeria"
+                href="https://maps.google.com/?q=Celebration+Church+Int'l+(Celebr8+Centre+HQ),+Vori+Close,+off+Acme+Road,+Ogba,+Lagos"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-white/10 hover:bg-white/20 text-brand-cream text-xs font-sans font-semibold tracking-widest uppercase transition-all duration-300 backdrop-blur-sm"
@@ -200,7 +202,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
                 <ExternalLink className="w-4 h-4" />
               </a>
               <a
-                href="https://maps.google.com/?q=Excellence+Hotel+Lagos+Nigeria"
+                href="https://maps.google.com/?q=Excellence+Hotel,+Lateef+Jakande+Rd,+Ogba-Aguda,+Ikeja,+Lagos,+Nigeria"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-brand-gold hover:bg-brand-cream text-brand-espresso text-xs font-sans font-semibold tracking-widest uppercase transition-all duration-300 shadow-md"
