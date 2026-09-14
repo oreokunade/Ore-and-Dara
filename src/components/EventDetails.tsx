@@ -93,14 +93,20 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Events Left Column (7 cols) */}
           <div className="lg:col-span-7 flex flex-col gap-6">
-            <div className="bg-brand-cream/80 rounded-3xl p-8 sm:p-12 shadow-sm text-center flex flex-col justify-center h-full items-center border border-brand-sand/30">
-                <CalendarPlus className="w-10 h-10 text-brand-goldDark mb-5 opacity-60" />
-                <h3 className="font-serif text-3xl sm:text-4xl text-brand-espresso mb-3">Save the Date</h3>
-                <p className="text-brand-muted font-sans text-[17px] mb-8 max-w-md leading-relaxed">
-                   We are so excited to celebrate our special day with you. Add the wedding to your calendar to stay updated!
-                </p>
-                {/* Add to Calendar Action */}
-                <div className="relative w-full max-w-sm text-left">
+            <div className="bg-brand-cream/80 rounded-3xl p-8 sm:p-12 shadow-sm text-center flex flex-col justify-center h-full items-center border border-brand-sand/30 relative overflow-hidden">
+                {/* Faint Background Image */}
+                <div className="absolute inset-0 z-0 opacity-15">
+                  <img src="/assets/hero-image-new.jpg" alt="Couple" className="w-full h-full object-cover object-top mix-blend-luminosity grayscale" />
+                </div>
+                
+                <div className="relative z-10 flex flex-col items-center w-full">
+                  <CalendarPlus className="w-10 h-10 text-brand-goldDark mb-5 opacity-80" />
+                  <h3 className="font-serif text-3xl sm:text-4xl text-brand-espresso mb-3">Save the Date</h3>
+                  <p className="text-brand-muted font-sans text-[17px] mb-8 max-w-md leading-relaxed font-medium">
+                     We are so excited to celebrate our special day with you. Add the wedding to your calendar to stay updated!
+                  </p>
+                  {/* Add to Calendar Action */}
+                  <div className="relative w-full max-w-sm text-left">
               <button
                 onClick={() => setCalendarOpen(!calendarOpen)}
                 className="w-full py-4 px-6 rounded-2xl bg-brand-espresso hover:bg-brand-charcoal text-brand-cream flex items-center justify-between transition-all duration-300 shadow-md"
@@ -143,6 +149,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
                   </button>
                 </div>
               )}
+            </div>
             </div>
           </div>
         </div>
