@@ -14,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  ifreq.method !== 'POST') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     switch (action) {
       case 'getStoredRsvps':
-        ({ data, error } = await supabaseAdmin.from('rsvps').select('*').order('submittedAt', { ascending: false }));
+        ({ data, error } = await supabaseAdmin.from('rsvps').select('*').order('created_at', { ascending: false }));
         break;
       case 'deleteRsvp':
         ({ data, error } = await supabaseAdmin.from('rsvps').delete().eq('id', payload.id));
