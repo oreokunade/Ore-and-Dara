@@ -12,30 +12,41 @@ function sanitizeCsvCell(val: string): string {
   return val;
 }
 
+// --- Helper for Backend Admin Proxy ---
+async function adminDb(action: string, payload: any = {}) {
+  const pinHash = localStorage.getItem('admin_pin_hash');
+  if (!pinHash) throw new Error('Not authenticated');
+
+  const res = await fetch('/api/admin-db', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pinHash, action, payload })
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || 'Admin request failed');
+  return json.data;
+}
+
 // --- RSVPs ---
 
 export async function getStoredRsvps(): Promise<RsvpSubmission[]> {
-  const { data, error } = await supabase
-    .from('rsvps')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
+  try {
+    const data = await adminDb('getStoredRsvps');
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      firstName: row.first_name || (row.full_name ? row.full_name.split(' ')[0] : ''),
+      lastName: row.last_name || (row.full_name ? row.full_name.substring(row.full_name.indexOf(' ') + 1) : ''),
+      email: row.email,
+      attendance: row.attendance as 'yes' | 'no',
+      relation: row.relation,
+      message: row.message,
+      submittedAt: row.created_at
+    }));
+  } catch (error) {
     console.error('Error fetching RSVPs:', error);
     return [];
   }
-
-  // Map snake_case to camelCase
-  return (data || []).map(row => ({
-    id: row.id,
-    firstName: row.first_name || (row.full_name ? row.full_name.split(' ')[0] : ''),
-    lastName: row.last_name || (row.full_name ? row.full_name.substring(row.full_name.indexOf(' ') + 1) : ''),
-    email: row.email,
-    attendance: row.attendance as 'yes' | 'no',
-    relation: row.relation,
-    message: row.message,
-    submittedAt: row.created_at
-  }));
 }
 
 export async function saveRsvp(submission: Omit<RsvpSubmission, 'id' | 'submittedAt'>): Promise<RsvpSubmission> {
@@ -78,15 +89,7 @@ export async function saveRsvp(submission: Omit<RsvpSubmission, 'id' | 'submitte
 }
 
 export async function deleteRsvp(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('rsvps')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting RSVP:', error);
-    throw error;
-  }
+  await adminDb('deleteRsvp', { id });
 }
 
 export function getUserActiveRsvp(): RsvpSubmission | null {
@@ -163,39 +166,35 @@ export async function getStoredGiftPledges(): Promise<GiftPledge[]> {
 // Admin-only version — full data including email and private notes.
 // Only called from AdminModal.tsx (behind the admin PIN gate).
 export async function getStoredGiftPledgesAdmin(): Promise<GiftPledge[]> {
-  const { data, error } = await supabase
-    .from('gift_pledges')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const data = await adminDb('getStoredGiftPledgesAdmin');
+    return (data || []).map((row: any) => {
+      let relation = row.relation;
+      let note = row.giver_note || '';
+      if (!relation && note.startsWith('[Relation:')) {
+        const match = note.match(/^\[Relation:\s*([^\]]+)\]\s*(.*)$/);
+        if (match) {
+          relation = match[1];
+          note = match[2];
+        }
+      }
 
-  if (error) {
+      return {
+        id: row.id,
+        itemId: row.item_id,
+        itemName: row.item_name,
+        amount: row.amount,
+        giverName: row.giver_name,
+        giverEmail: row.giver_email,
+        giverNote: note,
+        giverRelation: relation,
+        pledgedAt: row.created_at
+      };
+    });
+  } catch (error) {
     console.error('Error fetching pledges (admin):', error);
     return [];
   }
-
-  return (data || []).map(row => {
-    let relation = row.relation;
-    let note = row.giver_note || '';
-    if (!relation && note.startsWith('[Relation:')) {
-      const match = note.match(/^\[Relation:\s*([^\]]+)\]\s*(.*)$/);
-      if (match) {
-        relation = match[1];
-        note = match[2];
-      }
-    }
-
-    return {
-      id: row.id,
-      itemId: row.item_id,
-      itemName: row.item_name,
-      amount: row.amount,
-      giverName: row.giver_name,
-      giverEmail: row.giver_email,
-      giverNote: note,
-      giverRelation: relation,
-      pledgedAt: row.created_at
-    };
-  });
 }
 
 export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'>): Promise<GiftPledge> {
@@ -262,15 +261,7 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
 }
 
 export async function deleteGiftPledge(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('gift_pledges')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting pledge:', error);
-    throw error;
-  }
+  await adminDb('deleteGiftPledge', { id });
 }
 
 export async function exportGiftPledgesCsv(): Promise<void> {
@@ -568,27 +559,16 @@ export async function getStoredWishlistItems(): Promise<WishlistItem[]> {
 }
 
 export async function saveWishlistItem(item: Omit<WishlistItem, 'id' | 'isFunded' | 'fundedBy' | 'isReserved' | 'reservedUntil' | 'reservedByEmail' | 'reservedByName'>): Promise<WishlistItem> {
-  const { data, error } = await supabase
-    .from('wishlist_items')
-    .insert([
-      {
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        formatted_price: item.formattedPrice,
-        category: item.category,
-        image: item.image,
-        description: item.description
-      }
-    ])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error saving wishlist item:', error);
-    throw error;
-  }
-
+  const payload = {
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+    formatted_price: item.formattedPrice,
+    category: item.category,
+    image: item.image,
+    description: item.description
+  };
+  const data = await adminDb('saveWishlistItem', { item: payload });
   return {
     id: data.id,
     name: data.name,
@@ -602,15 +582,7 @@ export async function saveWishlistItem(item: Omit<WishlistItem, 'id' | 'isFunded
 }
 
 export async function deleteWishlistItem(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('wishlist_items')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting wishlist item:', error);
-    throw error;
-  }
+  await adminDb('deleteWishlistItem', { id });
 }
 
 // --- Invite Codes ---
@@ -627,112 +599,58 @@ export interface InviteCode {
 
 export async function generateInviteCode(createdBy: string = 'master'): Promise<string> {
   const code = Math.floor(10000 + Math.random() * 90000).toString(); // 5 digit random number
-  const { error } = await supabase.from('invite_codes').insert([{ code, created_by: createdBy }]);
-  
-  if (error) {
-    if (error.code === '42703') {
-       const retry = await supabase.from('invite_codes').insert([{ code }]);
-       if (retry.error) throw retry.error;
-       return code;
-    }
-    if (error.code === '23505') { 
-      return generateInviteCode(createdBy);
-    }
-    console.error('Error generating code:', error);
-    throw error;
-  }
+  await adminDb('generateInviteCode', { code: { code, created_by: createdBy } });
   return code;
 }
 
 export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'master'): Promise<string[]> {
-  const promises = [];
+  const codes = [];
+  const payload = [];
   for (let i = 0; i < count; i++) {
-    promises.push(generateInviteCode(createdBy));
+    const code = Math.floor(10000 + Math.random() * 90000).toString();
+    codes.push(code);
+    payload.push({ code, created_by: createdBy });
   }
-  return Promise.all(promises);
+  await adminDb('bulkGenerateInviteCodes', { codes: payload });
+  return codes;
 }
 
 export async function deleteInviteCodes(ids: string[]): Promise<void> {
   if (!ids.length) return;
-  const { error } = await supabase
-    .from('invite_codes')
-    .delete()
-    .in('id', ids);
-    
-  if (error) {
-    console.error('Error deleting invite codes:', error);
-    throw error;
-  }
+  await adminDb('deleteInviteCodes', { ids });
 }
 
 export async function markInviteCodeAsShared(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('invite_codes')
-    .update({ is_shared: true })
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error marking code as shared:', error);
-    throw error;
-  }
+  await adminDb('markInviteCodeAsShared', { id });
 }
 
 export async function unmarkInviteCodeAsShared(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('invite_codes')
-    .update({ is_shared: false })
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error unmarking code:', error);
-    throw error;
-  }
+  await adminDb('unmarkInviteCodeAsShared', { id });
 }
 
 export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[]> {
-  let query = supabase
-    .from('invite_codes')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (filterByRole && filterByRole !== 'master') {
-    query = query.eq('created_by', filterByRole);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    // If error is about created_by column missing, fetch all and filter in JS if needed
-    if (error.code === '42703') {
-       const fallback = await supabase.from('invite_codes').select('*').order('created_at', { ascending: false });
-       return (fallback.data || []) as InviteCode[];
+  try {
+    let data = await adminDb('getInviteCodes');
+    if (filterByRole && filterByRole !== 'master') {
+      data = data.filter((c: any) => c.created_by === filterByRole);
     }
-    console.error('Error fetching codes:', error);
+    return data as InviteCode[];
+  } catch (err) {
+    console.error('Error fetching invite codes:', err);
     return [];
   }
-  return data || [];
 }
 
 export async function verifyInviteCode(code: string): Promise<InviteCode | null> {
-  const { data, error } = await supabase
-    .from('invite_codes')
-    .select('*')
-    .eq('code', code)
-    .eq('is_used', false)
-    .single();
-  
-  if (error || !data) {
+  const { data, error } = await supabase.rpc('verify_invite_code', { p_code: code });
+  if (error || !data || data.length === 0) {
     return null;
   }
-  return data as InviteCode;
+  return data[0] as InviteCode;
 }
 
 export async function markCodeAsUsed(code: string, usedBy: string): Promise<void> {
-  const { error } = await supabase
-    .from('invite_codes')
-    .update({ is_used: true, used_by: usedBy })
-    .eq('code', code);
-  
+  const { error } = await supabase.rpc('mark_code_as_used', { p_code: code, p_used_by: usedBy });
   if (error) console.error('Error marking code used:', error);
 }
 
