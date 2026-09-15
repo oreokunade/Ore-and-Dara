@@ -713,7 +713,7 @@ export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[
   return data || [];
 }
 
-export async function verifyInviteCode(code: string): Promise<boolean> {
+export async function verifyInviteCode(code: string): Promise<InviteCode | null> {
   const { data, error } = await supabase
     .from('invite_codes')
     .select('*')
@@ -722,9 +722,9 @@ export async function verifyInviteCode(code: string): Promise<boolean> {
     .single();
   
   if (error || !data) {
-    return false;
+    return null;
   }
-  return true;
+  return data as InviteCode;
 }
 
 export async function markCodeAsUsed(code: string, usedBy: string): Promise<void> {

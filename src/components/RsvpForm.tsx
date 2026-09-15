@@ -67,8 +67,8 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
     setIsSubmitting(true);
 
     // 1. Verify the invite code in Supabase
-    const isValid = await verifyInviteCode(passcode.trim());
-    if (!isValid) {
+    const inviteCodeObj = await verifyInviteCode(passcode.trim());
+    if (!inviteCodeObj) {
       setErrorMessage('Invalid or already used invite code. Please check your invitation or contact the couple.');
       setIsSubmitting(false);
       return;
@@ -88,6 +88,41 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       // 3. Mark the invite code as used
       await markCodeAsUsed(passcode.trim(), `${firstName.trim()} ${lastName.trim()}`);
 
+      // 4. Trigger Google Sheets Webhook (if configured)
+      const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          const roleLabels: Record<string, string> = {
+            'master': 'Master',
+            'custom1964': "Ore's Dad",
+            'groomsfamily': "Ore's Mum",
+            'bridesfamily': "Dara's Mum"
+          };
+          const creatorLabel = roleLabels[inviteCodeObj.created_by || 'master'] || 'Unknown';
+          
+          await fetch(webhookUrl, {
+            method: 'POST',
+            mode: 'no-cors', // So it doesn't fail due to CORS from Google Apps Script
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
+              email: email.trim() || '',
+              attendance: attendance === 'yes' ? 'Attending' : 'Declined',
+              relation: relation || '',
+              message: message.trim() || '',
+              code: passcode.trim(),
+              creator: creatorLabel
+            })
+          });
+        } catch (webhookErr) {
+          console.error('Failed to send to Google Sheets:', webhookErr);
+          // Don't fail the RSVP process if webhook fails
+        }
+      }
+
       setSubmittedData(saved);
       setIsSubmitting(false);
 
@@ -101,7 +136,7 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       }
       onNotify('RSVP Received', 'Thank you for responding!');
       
-      // 4. Send email confirmation if an email was provided
+      // 5. Send email confirmation if an email was provided
       if (email.trim()) {
         import('../utils/email').then(({ sendRsvpConfirmationEmail }) => {
           sendRsvpConfirmationEmail({
