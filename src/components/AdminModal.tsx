@@ -586,10 +586,11 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                             <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
                               <Filter className="w-3.5 h-3.5" /> Creator
                             </div>
-                            {[
-                              { id: 'all', label: 'All' },
-                              { id: 'master', label: 'Master (1212)' },
-                              { id: 'custom1964', label: "Ore's Dad (1964)" },
+                              {[
+                                { id: 'all', label: 'All' },
+                                { id: 'ore', label: 'Ore (1999)' },
+                                { id: 'dara', label: 'Dara (2003)' },
+                                { id: 'custom1964', label: "Ore's Dad (1964)" },
                               { id: 'groomsfamily', label: "Ore's Mum (1972)" },
                               { id: 'bridesfamily', label: "Dara's Mum (1975)" }
                             ].map((f) => (
@@ -912,10 +913,11 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                           <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
                             <Filter className="w-3.5 h-3.5" /> Creator
                           </div>
-                          {[
-                            { id: 'all', label: 'All' },
-                            { id: 'master', label: 'Master (1212)' },
-                            { id: 'custom1964', label: "Ore's Dad (1964)" },
+                            {[
+                              { id: 'all', label: 'All' },
+                              { id: 'ore', label: 'Ore (1999)' },
+                              { id: 'dara', label: 'Dara (2003)' },
+                              { id: 'custom1964', label: "Ore's Dad (1964)" },
                             { id: 'groomsfamily', label: "Ore's Mum (1972)" },
                             { id: 'bridesfamily', label: "Dara's Mum (1975)" }
                           ].map((f) => (
