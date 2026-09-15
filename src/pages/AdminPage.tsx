@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom';
 const PIN_SALT = 'OreDara_Wedding_2026_Salt_';
 
 // Salted SHA-256 hashes of authorized PINs
-const ORE_PIN_HASH = 'ce8457d59078a699acb70416f88155a96a906b7b7aad43708402e3a3bcc8a4b4'; // 1999
-const DARA_PIN_HASH = '77459b9b941bcb4714d0c121313c900ecf30541d158eb2b9b178cdb8eca6457e'; // 2003
+const ORE_PIN_HASH = '8c07cfdfbe255d306247038188b8020416cdb8c97260969c13cfb06378d8cba2'; // 1999
+const DARA_PIN_HASH = '39a7cc6fbd4379686efcca59317abe6ac88f6a35af4b043faa5e977ff3c9bf19'; // 2003
 const GROOMS_FAMILY_PIN_HASH = 'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7';
 const BRIDES_FAMILY_PIN_HASH = '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d';
 const CUSTOM_1964_PIN_HASH = 'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'; // PIN: 1964

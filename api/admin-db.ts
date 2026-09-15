@@ -22,8 +22,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Verify the PIN hash securely on the server
   const validHashes = [
-    'ce8457d59078a699acb70416f88155a96a906b7b7aad43708402e3a3bcc8a4b4', // Ore (1999)
-    '77459b9b941bcb4714d0c121313c900ecf30541d158eb2b9b178cdb8eca6457e', // Dara (2003)
+    '8c07cfdfbe255d306247038188b8020416cdb8c97260969c13cfb06378d8cba2', // Ore (1999)
+    '39a7cc6fbd4379686efcca59317abe6ac88f6a35af4b043faa5e977ff3c9bf19', // Dara (2003)
     'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7', // Groom's fam
     '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d', // Bride's fam
     'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'  // Ore's dad
