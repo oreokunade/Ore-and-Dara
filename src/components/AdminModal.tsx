@@ -711,7 +711,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                 {rsvp.message && (
                                   <div className="flex items-start gap-2 text-sm italic bg-brand-ivory p-3 rounded-xl">
                                     <MessageSquare className="w-4 h-4 shrink-0 mt-0.5 text-brand-goldDark" />
-                                    <span className="line-clamp-2">{rsvp.message}</span>
+                                    <span className="break-words whitespace-pre-wrap">{rsvp.message}</span>
                                   </div>
                                 )}
                               </td>
