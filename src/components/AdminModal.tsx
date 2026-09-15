@@ -20,7 +20,7 @@ interface AdminDashboardProps {
   role?: AdminRole;
 }
 
-export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify, role = 'master' }) => {
+export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify, role = 'ore' }) => {
   const [activeTab, setActiveTab] = useState<'rsvps' | 'gifts' | 'codes' | 'wishlist' | 'reservations'>('codes');
 
   const [rsvps, setRsvps] = useState<RsvpSubmission[]>([]);
@@ -31,7 +31,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const getRoleCodeLimit = () => {
-    if (role === 'master') return Infinity;
+    if (['ore', 'dara'].includes(role || '')) return Infinity;
     if (role === 'custom1964') return 20;
     return 100;
   };
@@ -63,11 +63,11 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       setIsLoading(true);
       const load = async () => {
         try {
-          if (role === 'master') {
+          if (['ore', 'dara'].includes(role || '')) {
             const [loadedRsvps, loadedPledges, loadedCodes, loadedItems, loadedReservations] = await Promise.all([
               getStoredRsvps(),
               getStoredGiftPledgesAdmin(),
-              getInviteCodes('master'),
+              getInviteCodes(),
               getStoredWishlistItems(),
               getStoredReminders()
             ]);
@@ -117,7 +117,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   const filteredRsvps = useMemo(() => {
     let result = rsvps;
-    if (role === 'master' && creatorFilter !== 'all') {
+    if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
       const creatorCodes = codes.filter(c => c.created_by === creatorFilter && c.is_used && c.used_by);
       const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
       result = result.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
@@ -126,7 +126,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   }, [rsvps, creatorFilter, role, codes]);
 
   const filteredCodes = useMemo(() => {
-    if (role === 'master' && creatorFilter !== 'all') {
+    if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
       return codes.filter(c => c.created_by === creatorFilter);
     }
     return codes;
@@ -137,7 +137,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     if (isNaN(amount) || amount < 1) amount = 1;
     if (amount > 100) amount = 100;
 
-    if (role !== 'master' && codes.length + amount > roleCodeLimit) {
+    if (!['ore', 'dara'].includes(role || '') && codes.length + amount > roleCodeLimit) {
       alert(`You can only create up to ${roleCodeLimit} codes. You have ${codes.length} already.`);
       return;
     }
@@ -222,7 +222,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
     } else if (role === 'groomsfamily') {
       return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
-    } else if (role === 'master') {
+    } else if (['ore', 'dara'].includes(role || '')) {
       return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\nAs we begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\n*Oluwadara & Oreoluwa*\n${codeSection}`;
     }
     
@@ -469,7 +469,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
       {/* Navigation Tabs */}
       <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50" style={{ touchAction: 'pan-x' }}>
-        {(role === 'master' || ['custom1964', 'groomsfamily', 'bridesfamily'].includes(role)) && (
+        {(['ore', 'dara'].includes(role || '') || ['custom1964', 'groomsfamily', 'bridesfamily'].includes(role)) && (
           <button
             onClick={() => setActiveTab('rsvps')}
             className={`px-6 py-3 rounded-t-2xl text-xs font-sans font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
@@ -478,10 +478,10 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                 : 'bg-white text-brand-muted hover:bg-brand-sand/50'
             }`}
           >
-            <Users className="w-4 h-4" /> {role !== 'master' ? 'My Guests RSVPs' : 'Guest RSVPs'}
+            <Users className="w-4 h-4" /> {!['ore', 'dara'].includes(role || '') ? 'My Guests RSVPs' : 'Guest RSVPs'}
           </button>
         )}
-        {role === 'master' && (
+        {['ore', 'dara'].includes(role || '') && (
           <button
             onClick={() => setActiveTab('gifts')}
             className={`px-6 py-3 rounded-t-2xl text-xs font-sans font-bold tracking-widest uppercase transition-colors flex items-center gap-2 ${
@@ -505,7 +505,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
           <KeyRound className="w-4 h-4" /> Invite Codes
         </button>
 
-        {role === 'master' && (
+        {['ore', 'dara'].includes(role || '') && (
           <>
             <button
               onClick={() => setActiveTab('wishlist')}
@@ -581,7 +581,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
 
                         {/* Creator Filter for Master */}
-                        {role === 'master' && (
+                        {['ore', 'dara'].includes(role || '') && (
                           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                             <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
                               <Filter className="w-3.5 h-3.5" /> Creator
@@ -630,10 +630,11 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                             'Submitted At': new Date(r.submittedAt).toLocaleString()
                           }));
 
-                          if (role === 'master') {
-                            const roles = ['master', 'custom1964', 'groomsfamily', 'bridesfamily'];
+                          if (['ore', 'dara'].includes(role || '')) {
+                            const roles = ['ore', 'dara', 'custom1964', 'groomsfamily', 'bridesfamily'];
                             const roleLabels: Record<string, string> = {
-                              'master': 'Master',
+                              'ore': 'Ore',
+                                'dara': 'Dara',
                               'custom1964': "Ore's Dad",
                               'groomsfamily': "Ore's Mum",
                               'bridesfamily': "Dara's Mum"
@@ -871,8 +872,8 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     <input
                       type="number"
                       min="1"
-                      max={role !== 'master' ? Math.max(0, roleCodeLimit - codes.length) : 100}
-                      disabled={role !== 'master' && codes.length >= roleCodeLimit}
+                      max={!['ore', 'dara'].includes(role || '') ? Math.max(0, roleCodeLimit - codes.length) : 100}
+                      disabled={!['ore', 'dara'].includes(role || '') && codes.length >= roleCodeLimit}
                       value={bulkGenAmount}
                       onChange={(e) => setBulkGenAmount(e.target.value)}
                       className="w-20 px-4 py-4 bg-brand-cream/50 border border-brand-sand/50 rounded-xl text-center font-sans font-bold text-brand-espresso focus:outline-none focus:border-brand-gold disabled:opacity-50"
@@ -880,7 +881,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     />
                     <button
                       onClick={handleGenerateCode}
-                      disabled={isGenerating || (role !== 'master' && codes.length >= roleCodeLimit)}
+                      disabled={isGenerating || (!['ore', 'dara'].includes(role || '') && codes.length >= roleCodeLimit)}
                       className="flex items-center gap-2 px-8 py-4 bg-brand-goldDark text-white text-sm font-sans font-bold uppercase tracking-wider rounded-2xl hover:bg-brand-espresso transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                     >
                       <Plus className="w-5 h-5" /> {isGenerating ? 'Wait...' : 'Generate'}
@@ -895,7 +896,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <div>
                         <div className="flex items-center gap-3">
                           <h3 className="font-serif text-2xl text-brand-espresso shrink-0">All Invite Codes</h3>
-                          {role !== 'master' && (
+                          {!['ore', 'dara'].includes(role || '') && (
                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= roleCodeLimit ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
                               {codes.length} / {roleCodeLimit} Cap
                             </span>
@@ -906,7 +907,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                         </p>
                       </div>
 
-                      {role === 'master' && (
+                      {['ore', 'dara'].includes(role || '') && (
                         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                           <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
                             <Filter className="w-3.5 h-3.5" /> Creator
@@ -961,10 +962,11 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                               'Created At': new Date(c.created_at).toLocaleString()
                             }));
 
-                            if (role === 'master') {
-                              const roles = ['master', 'custom1964', 'groomsfamily', 'bridesfamily'];
+                            if (['ore', 'dara'].includes(role || '')) {
+                              const roles = ['ore', 'dara', 'custom1964', 'groomsfamily', 'bridesfamily'];
                               const roleLabels: Record<string, string> = {
-                                'master': 'Master',
+                                'ore': 'Ore',
+                                'dara': 'Dara',
                                 'custom1964': "Ore's Dad",
                                 'groomsfamily': "Ore's Mum",
                                 'bridesfamily': "Dara's Mum"

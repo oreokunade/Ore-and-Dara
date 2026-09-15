@@ -597,13 +597,13 @@ export interface InviteCode {
   created_at: string;
 }
 
-export async function generateInviteCode(createdBy: string = 'master'): Promise<string> {
+export async function generateInviteCode(createdBy: string = 'ore'): Promise<string> {
   const code = Math.floor(10000 + Math.random() * 90000).toString(); // 5 digit random number
   await adminDb('generateInviteCode', { code: { code, created_by: createdBy } });
   return code;
 }
 
-export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'master'): Promise<string[]> {
+export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'ore'): Promise<string[]> {
   const codes = [];
   const payload = [];
   for (let i = 0; i < count; i++) {
@@ -631,7 +631,7 @@ export async function unmarkInviteCodeAsShared(id: string): Promise<void> {
 export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[]> {
   try {
     let data = await adminDb('getInviteCodes');
-    if (filterByRole && filterByRole !== 'master') {
+    if (filterByRole && !['ore', 'dara'].includes(filterByRole)) {
       data = data.filter((c: any) => c.created_by === filterByRole);
     }
     return data as InviteCode[];

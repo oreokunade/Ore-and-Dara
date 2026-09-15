@@ -8,12 +8,13 @@ import { useNavigate } from 'react-router-dom';
 const PIN_SALT = 'OreDara_Wedding_2026_Salt_';
 
 // Salted SHA-256 hashes of authorized PINs
-const ADMIN_PIN_HASH = 'bb9ae744d70739c6f2e387a3df677fab506c447835fcce4389973772bfff0a84';
+const ORE_PIN_HASH = 'ce8457d59078a699acb70416f88155a96a906b7b7aad43708402e3a3bcc8a4b4'; // 1999
+const DARA_PIN_HASH = '77459b9b941bcb4714d0c121313c900ecf30541d158eb2b9b178cdb8eca6457e'; // 2003
 const GROOMS_FAMILY_PIN_HASH = 'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7';
 const BRIDES_FAMILY_PIN_HASH = '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d';
 const CUSTOM_1964_PIN_HASH = 'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'; // PIN: 1964
 
-export type AdminRole = 'master' | 'groomsfamily' | 'bridesfamily' | 'custom1964';
+export type AdminRole = 'ore' | 'dara' | 'groomsfamily' | 'bridesfamily' | 'custom1964';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
@@ -60,11 +61,16 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
     setPinError('');
     const enteredHash = await hashPin(pin);
     
-    if (enteredHash === ADMIN_PIN_HASH) {
+    if (enteredHash === ORE_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
       localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('master');
+      setAuthenticatedRole('ore');
+    } else if (enteredHash === DARA_PIN_HASH) {
+      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
+      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      localStorage.setItem('admin_pin_hash', enteredHash);
+      setAuthenticatedRole('dara');
     } else if (enteredHash === GROOMS_FAMILY_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
