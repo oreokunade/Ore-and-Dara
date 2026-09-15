@@ -675,6 +675,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
+                          <th className="p-6 font-semibold w-16 text-center text-brand-muted">#</th>
                           <th className="p-6 font-semibold">Guest Name</th>
                           <th className="p-6 font-semibold">Status</th>
                           <th className="p-6 font-semibold">Contact / Message</th>
@@ -685,13 +686,16 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <tbody className="text-sm font-sans text-brand-espresso">
                         {filteredRsvps.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="p-12 text-center text-brand-muted text-base">
+                            <td colSpan={6} className="p-12 text-center text-brand-muted text-base">
                               {rsvps.length > 0 ? 'No guests found for this filter.' : 'No RSVPs received yet.'}
                             </td>
                           </tr>
                         ) : (
-                          filteredRsvps.map((rsvp) => (
+                          filteredRsvps.map((rsvp, index) => (
                             <tr key={rsvp.id} className="border-b border-brand-sand/30 hover:bg-brand-cream/20 transition-colors">
+                              <td className="p-6 text-center text-brand-muted/70 font-mono text-xs">
+                                {index + 1}
+                              </td>
                               <td className="p-6 font-semibold whitespace-nowrap text-base">
                                 {rsvp.firstName} {rsvp.lastName}
                               </td>
@@ -1005,6 +1009,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                               className="w-4 h-4 rounded text-brand-gold cursor-pointer"
                             />
                           </th>
+                          <th className="p-6 font-semibold w-16 text-center text-brand-muted">#</th>
                           <th className="p-6 font-semibold">Code</th>
                           <th className="p-6 font-semibold">Status</th>
                           <th className="p-6 font-semibold">Used By</th>
@@ -1014,12 +1019,12 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <tbody className="text-sm font-sans text-brand-espresso">
                         {filteredCodes.length === 0 ? (
                           <tr>
-                            <td colSpan={5} className="p-12 text-center text-brand-muted text-base">
+                            <td colSpan={6} className="p-12 text-center text-brand-muted text-base">
                               No invite codes generated yet.
                             </td>
                           </tr>
                         ) : (
-                          filteredCodes.map((c) => (
+                          filteredCodes.map((c, index) => (
                             <tr key={c.id} className="border-b border-brand-sand/30 hover:bg-brand-cream/20 transition-colors">
                               <td className="p-6 text-center">
                                 <input
@@ -1030,6 +1035,9 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                   className="w-4 h-4 rounded text-brand-gold cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                                   title={c.is_used ? "Used codes cannot be deleted" : "Select code"}
                                 />
+                              </td>
+                              <td className="p-6 text-center text-brand-muted/70 font-mono text-xs">
+                                {index + 1}
                               </td>
                               <td className="p-6">
                                 <div className="flex items-center gap-4">
