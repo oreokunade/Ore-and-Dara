@@ -85,40 +85,6 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       // 3. Mark the invite code as used
       await markCodeAsUsed(passcode.trim(), `${firstName.trim()} ${lastName.trim()}`);
 
-      // 4. Trigger Google Sheets Webhook (if configured)
-      const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
-      if (webhookUrl) {
-        try {
-          const roleLabels: Record<string, string> = {
-            'master': 'Master',
-            'custom1964': "Ore's Dad",
-            'groomsfamily': "Ore's Mum",
-            'bridesfamily': "Dara's Mum"
-          };
-          const creatorLabel = roleLabels[inviteCodeObj.created_by || 'master'] || 'Unknown';
-          
-          await fetch(webhookUrl, {
-            method: 'POST',
-            mode: 'no-cors', // So it doesn't fail due to CORS from Google Apps Script
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              firstName: firstName.trim(),
-              lastName: lastName.trim(),
-              email: email.trim() || '',
-              attendance: attendance === 'yes' ? 'Attending' : 'Declined',
-              message: message.trim() || '',
-              code: passcode.trim(),
-              creator: creatorLabel
-            })
-          });
-        } catch (webhookErr) {
-          console.error('Failed to send to Google Sheets:', webhookErr);
-          // Don't fail the RSVP process if webhook fails
-        }
-      }
-
       setSubmittedData(saved);
       setIsSubmitting(false);
 
@@ -131,18 +97,31 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
         });
       }
       onNotify('RSVP Received', 'Thank you for responding!');
-      
-      // 5. Send email confirmation if an email was provided
-      if (email.trim()) {
-        import('../utils/email').then(({ sendRsvpConfirmationEmail }) => {
-          sendRsvpConfirmationEmail({
-            guestName: firstName.trim(),
-            guestEmail: email.trim(),
-            attendance: attendance as 'yes' | 'no',
-            websiteUrl: window.location.origin
-          }).catch(err => console.error('Failed to send RSVP email:', err));
-        });
-      }
+
+      // 4. Trigger Webhook and Email securely via Backend API
+      const roleLabels: Record<string, string> = {
+        'master': 'Master',
+        'custom1964': "Ore's Dad",
+        'groomsfamily': "Ore's Mum",
+        'bridesfamily': "Dara's Mum"
+      };
+      const creatorLabel = roleLabels[inviteCodeObj.created_by || 'master'] || 'Unknown';
+
+      fetch('/api/submit-rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim() || undefined,
+          attendance: attendance === 'yes' ? 'Attending' : 'Declined',
+          message: message.trim() || undefined,
+          code: passcode.trim(),
+          creator: creatorLabel,
+          websiteUrl: window.location.origin
+        })
+      }).catch(err => console.error('Backend tasks failed:', err));
+
     } catch (e) {
       console.error(e);
       onNotify('Error', 'Failed to save RSVP. Please try again.');
