@@ -99,8 +99,10 @@ export async function sendRsvpConfirmationEmail(params: {
   guestName: string;
   guestEmail: string;
   attendance: 'yes' | 'no';
+  websiteUrl?: string;
 }): Promise<{ success: boolean; error?: any }> {
   let content = '';
+  const registryUrl = params.websiteUrl ? `${params.websiteUrl}/#gifts` : 'https://ore-and-dara.vercel.app/#gifts';
 
   if (params.attendance === 'yes') {
     content = `
@@ -112,7 +114,7 @@ export async function sendRsvpConfirmationEmail(params: {
       </p>
       
       <!-- Wedding Details Box -->
-      <div style="background-color: #faf8f2; border: 1px solid #e7e0d3; border-radius: 16px; padding: 20px 25px; margin-bottom: 30px;">
+      <div style="background-color: #faf8f2; border: 1px solid #e7e0d3; border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;">
         <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">
           Wedding Details
         </p>
@@ -120,9 +122,19 @@ export async function sendRsvpConfirmationEmail(params: {
         <p style="margin: 0; font-size: 15px; color: #1c1917;"><strong>Location:</strong> Lagos, Nigeria</p>
       </div>
 
-      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+      <p style="margin: 0 0 25px 0; font-size: 15px; line-height: 1.6; color: #44403c;">
         We will share more specific details regarding the venue and schedule closer to the big day. Thank you for your continued love and support!
       </p>
+
+      <!-- Gifts Section -->
+      <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e7e0d3;">
+        <p style="margin: 0 0 15px 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+          Your presence at our wedding is the greatest gift we could ask for! Should you wish to bless us with a gift, you are welcome to make a cash contribution or visit our online registry.
+        </p>
+        <p style="margin: 0; text-align: center;">
+          <a href="${registryUrl}" style="display: inline-block; padding: 12px 24px; background-color: #1c1917; color: #c5a880; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Gift Registry</a>
+        </p>
+      </div>
     `;
   } else {
     content = `
@@ -132,9 +144,19 @@ export async function sendRsvpConfirmationEmail(params: {
       <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #44403c;">
         We have received your RSVP. While we are sad that you won't be able to join us in person, we completely understand and truly appreciate you letting us know.
       </p>
-      <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+      <p style="margin: 0 0 25px 0; font-size: 15px; line-height: 1.6; color: #44403c;">
         Thank you for all your love, prayers, and support as we embark on this new chapter together!
       </p>
+
+      <!-- Gifts Section -->
+      <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e7e0d3;">
+        <p style="margin: 0 0 15px 0; font-size: 15px; line-height: 1.6; color: #44403c;">
+          If you would still like to bless us with a gift from afar, you are welcome to make a cash contribution or visit our online registry.
+        </p>
+        <p style="margin: 0; text-align: center;">
+          <a href="${registryUrl}" style="display: inline-block; padding: 12px 24px; background-color: #1c1917; color: #c5a880; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Gift Registry</a>
+        </p>
+      </div>
     `;
   }
 

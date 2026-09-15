@@ -138,7 +138,8 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
           sendRsvpConfirmationEmail({
             guestName: firstName.trim(),
             guestEmail: email.trim(),
-            attendance: attendance as 'yes' | 'no'
+            attendance: attendance as 'yes' | 'no',
+            websiteUrl: window.location.origin
           }).catch(err => console.error('Failed to send RSVP email:', err));
         });
       }
