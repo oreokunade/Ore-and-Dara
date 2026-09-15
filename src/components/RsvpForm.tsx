@@ -15,7 +15,6 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [attendance, setAttendance] = useState<'yes' | 'no' | ''>('');
-  const [relation, setRelation] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -40,7 +39,6 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       setLastName(existing.lastName || '');
       setEmail(existing.email || '');
       setAttendance(existing.attendance);
-      setRelation(existing.relation || '');
       setMessage(existing.message || '');
     }
   }, []);
@@ -81,7 +79,6 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
         lastName: lastName.trim(),
         email: email.trim() || undefined,
         attendance: attendance as 'yes' | 'no',
-        relation: relation || undefined,
         message: message.trim() || undefined,
       });
 
@@ -111,7 +108,6 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
               lastName: lastName.trim(),
               email: email.trim() || '',
               attendance: attendance === 'yes' ? 'Attending' : 'Declined',
-              relation: relation || '',
               message: message.trim() || '',
               code: passcode.trim(),
               creator: creatorLabel
@@ -359,27 +355,7 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
                 />
               </div>
 
-              {/* Who do you know? */}
-              <div>
-                <label htmlFor="relation" className="block text-xs uppercase tracking-widest font-sans font-bold text-brand-espresso mb-2">
-                  Who are you celebrating with? <span className="text-brand-goldDark">*</span>
-                </label>
-                <select
-                  id="relation"
-                  required
-                  value={relation}
-                  onChange={(e) => setRelation(e.target.value)}
-                  className="w-full px-4 py-3.5 rounded-2xl bg-white border border-brand-sand focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 outline-none text-brand-espresso font-sans text-[17px] transition-all appearance-none cursor-pointer"
-                  style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23a8a29e\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 1rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.5em 1.5em' }}
-                >
-                  <option value="" disabled>Select your connection</option>
-                  <option value="groom">The Groom</option>
-                  <option value="bride">The Bride</option>
-                  <option value="groomsfamily">Groom's Family</option>
-                  <option value="bridefamily">Bride's Family</option>
-                  <option value="both">Both (Groom & Bride)</option>
-                </select>
-              </div>
+
 
               {/* Will you attend? */}
               <div>

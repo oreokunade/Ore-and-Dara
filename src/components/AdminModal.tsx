@@ -22,7 +22,7 @@ interface AdminDashboardProps {
 
 export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify, role = 'master' }) => {
   const [activeTab, setActiveTab] = useState<'rsvps' | 'gifts' | 'codes' | 'wishlist' | 'reservations'>('codes');
-  const [rsvpFilter, setRsvpFilter] = useState<'all' | 'groom' | 'bride' | 'groomsfamily' | 'bridefamily' | 'both'>('all');
+
   const [rsvps, setRsvps] = useState<RsvpSubmission[]>([]);
   const [pledges, setPledges] = useState<GiftPledge[]>([]);
   const [codes, setCodes] = useState<InviteCode[]>([]);
@@ -117,16 +117,13 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   const filteredRsvps = useMemo(() => {
     let result = rsvps;
-    if (rsvpFilter !== 'all') {
-      result = result.filter((r) => r.relation === rsvpFilter);
-    }
     if (role === 'master' && creatorFilter !== 'all') {
       const creatorCodes = codes.filter(c => c.created_by === creatorFilter && c.is_used && c.used_by);
       const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
       result = result.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
     }
     return result;
-  }, [rsvps, rsvpFilter, creatorFilter, role, codes]);
+  }, [rsvps, creatorFilter, role, codes]);
 
   const filteredCodes = useMemo(() => {
     if (role === 'master' && creatorFilter !== 'all') {
@@ -442,17 +439,6 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
     });
   };
 
-  const getRelationLabel = (val?: string) => {
-    if (!val) return '-';
-    const mapping: Record<string, string> = {
-      groom: 'Groom',
-      bride: 'Bride',
-      groomsfamily: "Groom's Family",
-      bridefamily: "Bride's Family",
-      both: 'Both'
-    };
-    return mapping[val] || val;
-  };
 
   return (
     <div 
@@ -592,32 +578,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <h3 className="font-serif text-2xl text-brand-espresso shrink-0">Guest List</h3>
                       
                       <div className="flex flex-col gap-3 w-full sm:w-auto">
-                        {/* Relation Filter */}
-                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                          <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
-                            <Filter className="w-3.5 h-3.5" /> Relation
-                          </div>
-                          {[
-                            { id: 'all', label: 'All' },
-                            { id: 'groom', label: 'Groom' },
-                            { id: 'bride', label: 'Bride' },
-                            { id: 'groomsfamily', label: "Groom's Fam" },
-                            { id: 'bridefamily', label: "Bride's Fam" },
-                            { id: 'both', label: 'Both' }
-                          ].map((f) => (
-                            <button
-                              key={f.id}
-                              onClick={() => setRsvpFilter(f.id as any)}
-                              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
-                                rsvpFilter === f.id 
-                                  ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
-                                  : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
-                              }`}
-                            >
-                              {f.label}
-                            </button>
-                          ))}
-                        </div>
+
 
                         {/* Creator Filter for Master */}
                         {role === 'master' && (
@@ -665,7 +626,6 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                             'Last Name': r.lastName,
                             'Email': r.email || '',
                             'Attendance': r.attendance === 'yes' ? 'Attending' : 'Declined',
-                            'Connection': r.relation || '',
                             'Message': r.message || '',
                             'Submitted At': new Date(r.submittedAt).toLocaleString()
                           }));
@@ -717,7 +677,6 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
                           <th className="p-6 font-semibold">Guest Name</th>
                           <th className="p-6 font-semibold">Status</th>
-                          <th className="p-6 font-semibold">Connection</th>
                           <th className="p-6 font-semibold">Contact / Message</th>
                           <th className="p-6 font-semibold">Date</th>
                           <th className="p-6 font-semibold text-right">Action</th>
@@ -726,7 +685,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <tbody className="text-sm font-sans text-brand-espresso">
                         {filteredRsvps.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="p-12 text-center text-brand-muted text-base">
+                            <td colSpan={5} className="p-12 text-center text-brand-muted text-base">
                               {rsvps.length > 0 ? 'No guests found for this filter.' : 'No RSVPs received yet.'}
                             </td>
                           </tr>
@@ -742,9 +701,6 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                                 }`}>
                                   {rsvp.attendance === 'yes' ? 'Attending' : 'Declined'}
                                 </span>
-                              </td>
-                              <td className="p-6 font-medium capitalize">
-                                {getRelationLabel(rsvp.relation)}
                               </td>
                               <td className="p-6 min-w-[250px]">
                                 {rsvp.email && (
