@@ -113,10 +113,27 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   const totalGiftValue = pledges.reduce((acc, p) => acc + p.amount, 0);
 
+  const [creatorFilter, setCreatorFilter] = useState<string>('all');
+
   const filteredRsvps = useMemo(() => {
-    if (rsvpFilter === 'all') return rsvps;
-    return rsvps.filter((r) => r.relation === rsvpFilter);
-  }, [rsvps, rsvpFilter]);
+    let result = rsvps;
+    if (rsvpFilter !== 'all') {
+      result = result.filter((r) => r.relation === rsvpFilter);
+    }
+    if (role === 'master' && creatorFilter !== 'all') {
+      const creatorCodes = codes.filter(c => c.created_by === creatorFilter && c.is_used && c.used_by);
+      const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
+      result = result.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
+    }
+    return result;
+  }, [rsvps, rsvpFilter, creatorFilter, role, codes]);
+
+  const filteredCodes = useMemo(() => {
+    if (role === 'master' && creatorFilter !== 'all') {
+      return codes.filter(c => c.created_by === creatorFilter);
+    }
+    return codes;
+  }, [codes, creatorFilter, role]);
 
   const handleGenerateCode = async () => {
     let amount = parseInt(bulkGenAmount, 10);
@@ -574,31 +591,61 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full">
                       <h3 className="font-serif text-2xl text-brand-espresso shrink-0">Guest List</h3>
                       
-                      {/* Filter Pills */}
-                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
-                          <Filter className="w-3.5 h-3.5" /> Filter
+                      <div className="flex flex-col gap-3 w-full sm:w-auto">
+                        {/* Relation Filter */}
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                          <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
+                            <Filter className="w-3.5 h-3.5" /> Relation
+                          </div>
+                          {[
+                            { id: 'all', label: 'All' },
+                            { id: 'groom', label: 'Groom' },
+                            { id: 'bride', label: 'Bride' },
+                            { id: 'groomsfamily', label: "Groom's Fam" },
+                            { id: 'bridefamily', label: "Bride's Fam" },
+                            { id: 'both', label: 'Both' }
+                          ].map((f) => (
+                            <button
+                              key={f.id}
+                              onClick={() => setRsvpFilter(f.id as any)}
+                              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                                rsvpFilter === f.id 
+                                  ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
+                                  : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
+                              }`}
+                            >
+                              {f.label}
+                            </button>
+                          ))}
                         </div>
-                        {[
-                          { id: 'all', label: 'All' },
-                          { id: 'groom', label: 'Groom' },
-                          { id: 'bride', label: 'Bride' },
-                          { id: 'groomsfamily', label: "Groom's Fam" },
-                          { id: 'bridefamily', label: "Bride's Fam" },
-                          { id: 'both', label: 'Both' }
-                        ].map((f) => (
-                          <button
-                            key={f.id}
-                            onClick={() => setRsvpFilter(f.id as any)}
-                            className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
-                              rsvpFilter === f.id 
-                                ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
-                                : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
-                            }`}
-                          >
-                            {f.label}
-                          </button>
-                        ))}
+
+                        {/* Creator Filter for Master */}
+                        {role === 'master' && (
+                          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                            <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
+                              <Filter className="w-3.5 h-3.5" /> Creator
+                            </div>
+                            {[
+                              { id: 'all', label: 'All' },
+                              { id: 'master', label: 'Master (1212)' },
+                              { id: 'custom1964', label: "Ore's Dad (1964)" },
+                              { id: 'groomsfamily', label: "Ore's Mum (1972)" },
+                              { id: 'bridesfamily', label: "Dara's Mum (1975)" }
+                            ].map((f) => (
+                              <button
+                                key={f.id}
+                                onClick={() => setCreatorFilter(f.id)}
+                                className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                                  creatorFilter === f.id 
+                                    ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
+                                    : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
+                                }`}
+                              >
+                                {f.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -829,21 +876,51 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
                 {/* Codes Table */}
                 <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-                  <div className="p-4 sm:p-6 border-b border-brand-sand/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-serif text-2xl text-brand-espresso">All Invite Codes</h3>
-                        {role !== 'master' && (
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= roleCodeLimit ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
-                            {codes.length} / {roleCodeLimit} Cap
-                          </span>
-                        )}
+                  <div className="p-4 sm:p-6 border-b border-brand-sand/30 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-serif text-2xl text-brand-espresso shrink-0">All Invite Codes</h3>
+                          {role !== 'master' && (
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= roleCodeLimit ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
+                              {codes.length} / {roleCodeLimit} Cap
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-brand-muted font-sans mt-1">
+                          {filteredCodes.filter(c => !c.is_used).length} Available • {filteredCodes.filter(c => c.is_used).length} Used
+                        </p>
                       </div>
-                      <p className="text-xs text-brand-muted font-sans mt-1">
-                        {codes.filter(c => !c.is_used).length} Available • {codes.filter(c => c.is_used).length} Used
-                      </p>
+
+                      {role === 'master' && (
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                          <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
+                            <Filter className="w-3.5 h-3.5" /> Creator
+                          </div>
+                          {[
+                            { id: 'all', label: 'All' },
+                            { id: 'master', label: 'Master (1212)' },
+                            { id: 'custom1964', label: "Ore's Dad (1964)" },
+                            { id: 'groomsfamily', label: "Ore's Mum (1972)" },
+                            { id: 'bridesfamily', label: "Dara's Mum (1975)" }
+                          ].map((f) => (
+                            <button
+                              key={f.id}
+                              onClick={() => setCreatorFilter(f.id)}
+                              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                                creatorFilter === f.id 
+                                  ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
+                                  : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
+                              }`}
+                            >
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
+
+                    <div className="flex flex-wrap items-center gap-3 shrink-0">
                       {selectedCodes.size > 0 && (
                         <button
                           onClick={handleDeleteSelectedCodes}
@@ -879,14 +956,14 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                         </tr>
                       </thead>
                       <tbody className="text-sm font-sans text-brand-espresso">
-                        {codes.length === 0 ? (
+                        {filteredCodes.length === 0 ? (
                           <tr>
                             <td colSpan={5} className="p-12 text-center text-brand-muted text-base">
                               No invite codes generated yet.
                             </td>
                           </tr>
                         ) : (
-                          codes.map((c) => (
+                          filteredCodes.map((c) => (
                             <tr key={c.id} className="border-b border-brand-sand/30 hover:bg-brand-cream/20 transition-colors">
                               <td className="p-6 text-center">
                                 <input
