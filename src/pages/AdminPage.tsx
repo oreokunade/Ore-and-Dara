@@ -63,18 +63,22 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
     if (enteredHash === ADMIN_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      localStorage.setItem('admin_pin_hash', enteredHash);
       setAuthenticatedRole('master');
     } else if (enteredHash === GROOMS_FAMILY_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      localStorage.setItem('admin_pin_hash', enteredHash);
       setAuthenticatedRole('groomsfamily');
     } else if (enteredHash === BRIDES_FAMILY_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      localStorage.setItem('admin_pin_hash', enteredHash);
       setAuthenticatedRole('bridesfamily');
     } else if (enteredHash === CUSTOM_1964_PIN_HASH) {
       localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
       localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      localStorage.setItem('admin_pin_hash', enteredHash);
       setAuthenticatedRole('custom1964');
     } else {
       const attempts = parseInt(localStorage.getItem(ATTEMPTS_STORAGE_KEY) || '0', 10) + 1;
@@ -97,6 +101,7 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
       <AdminModal
         isOpen={true}
         onClose={() => {
+          localStorage.removeItem('admin_pin_hash');
           setAuthenticatedRole(null);
           setPin('');
         }}
