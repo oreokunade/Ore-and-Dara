@@ -2,9 +2,9 @@ import { useState, useEffect, FC, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, X } from 'lucide-react';
 import { 
-  getStoredRsvps, exportRsvpsCsv, deleteRsvp,
+  getStoredRsvps, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
-  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, exportInviteCodesCsv, markInviteCodeAsShared, unmarkInviteCodeAsShared, InviteCode,
+  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, unmarkInviteCodeAsShared, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
@@ -650,10 +650,64 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     </div>
 
                     <button
-                      onClick={exportRsvpsCsv}
+                      onClick={async () => {
+                        if (rsvps.length === 0) {
+                          onNotify('Export Failed', 'No RSVPs to export');
+                          return;
+                        }
+                        
+                        try {
+                          const XLSX = await import('xlsx');
+                          const wb = XLSX.utils.book_new();
+                          
+                          const formatData = (data: typeof rsvps) => data.map(r => ({
+                            'First Name': r.firstName,
+                            'Last Name': r.lastName,
+                            'Email': r.email || '',
+                            'Attendance': r.attendance === 'yes' ? 'Attending' : 'Declined',
+                            'Connection': r.relation || '',
+                            'Message': r.message || '',
+                            'Submitted At': new Date(r.submittedAt).toLocaleString()
+                          }));
+
+                          if (role === 'master') {
+                            const roles = ['master', 'custom1964', 'groomsfamily', 'bridesfamily'];
+                            const roleLabels: Record<string, string> = {
+                              'master': 'Master',
+                              'custom1964': "Ore's Dad",
+                              'groomsfamily': "Ore's Mum",
+                              'bridesfamily': "Dara's Mum"
+                            };
+                            
+                            // Add a sheet for each creator
+                            roles.forEach(creatorRole => {
+                              const creatorCodes = codes.filter(c => c.created_by === creatorRole && c.is_used && c.used_by);
+                              const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
+                              const roleRsvps = rsvps.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
+                              
+                              if (roleRsvps.length > 0) {
+                                const ws = XLSX.utils.json_to_sheet(formatData(roleRsvps));
+                                XLSX.utils.book_append_sheet(wb, ws, roleLabels[creatorRole]);
+                              }
+                            });
+                            
+                            // Add an "All RSVPs" sheet for complete visibility
+                            const wsAll = XLSX.utils.json_to_sheet(formatData(rsvps));
+                            XLSX.utils.book_append_sheet(wb, wsAll, 'All RSVPs');
+                          } else {
+                            const ws = XLSX.utils.json_to_sheet(formatData(filteredRsvps));
+                            XLSX.utils.book_append_sheet(wb, ws, 'My Guest List');
+                          }
+                          
+                          XLSX.writeFile(wb, `Ore_Dara_Wedding_Guestlist_${new Date().toISOString().split('T')[0]}.xlsx`);
+                        } catch (e) {
+                          console.error('Export error:', e);
+                          onNotify('Export Failed', 'There was an error generating the Excel file.');
+                        }
+                      }}
                       className="flex items-center justify-center gap-2 px-5 py-3 bg-brand-espresso text-brand-goldLight text-xs font-sans uppercase tracking-wider rounded-xl hover:bg-brand-charcoal transition-colors font-bold shrink-0 w-full xl:w-auto mt-4 xl:mt-0"
                     >
-                      <Download className="w-4 h-4" /> Export CSV
+                      <Download className="w-4 h-4" /> Export Excel
                     </button>
                   </div>
 
@@ -930,10 +984,56 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                         </button>
                       )}
                       <button
-                        onClick={() => exportInviteCodesCsv(role)}
+                        onClick={async () => {
+                          if (codes.length === 0) {
+                            onNotify('Export Failed', 'No invite codes to export');
+                            return;
+                          }
+                          
+                          try {
+                            const XLSX = await import('xlsx');
+                            const wb = XLSX.utils.book_new();
+                            
+                            const formatData = (data: typeof codes) => data.map(c => ({
+                              'Code': c.code,
+                              'Status': c.is_used ? 'Used' : c.is_shared ? 'Shared' : 'Available',
+                              'Used By': c.used_by || '',
+                              'Created At': new Date(c.created_at).toLocaleString()
+                            }));
+
+                            if (role === 'master') {
+                              const roles = ['master', 'custom1964', 'groomsfamily', 'bridesfamily'];
+                              const roleLabels: Record<string, string> = {
+                                'master': 'Master',
+                                'custom1964': "Ore's Dad",
+                                'groomsfamily': "Ore's Mum",
+                                'bridesfamily': "Dara's Mum"
+                              };
+                              
+                              roles.forEach(creatorRole => {
+                                const creatorCodes = codes.filter(c => c.created_by === creatorRole);
+                                if (creatorCodes.length > 0) {
+                                  const ws = XLSX.utils.json_to_sheet(formatData(creatorCodes));
+                                  XLSX.utils.book_append_sheet(wb, ws, roleLabels[creatorRole]);
+                                }
+                              });
+                              
+                              const wsAll = XLSX.utils.json_to_sheet(formatData(codes));
+                              XLSX.utils.book_append_sheet(wb, wsAll, 'All Codes');
+                            } else {
+                              const ws = XLSX.utils.json_to_sheet(formatData(filteredCodes));
+                              XLSX.utils.book_append_sheet(wb, ws, 'My Invite Codes');
+                            }
+                            
+                            XLSX.writeFile(wb, `Ore_Dara_Wedding_Codes_${new Date().toISOString().split('T')[0]}.xlsx`);
+                          } catch (e) {
+                            console.error('Export error:', e);
+                            onNotify('Export Failed', 'There was an error generating the Excel file.');
+                          }
+                        }}
                         className="flex items-center gap-2 px-5 py-2.5 bg-brand-espresso text-brand-goldLight text-xs font-sans uppercase tracking-wider rounded-xl hover:bg-brand-charcoal transition-colors font-bold"
                       >
-                        <Download className="w-4 h-4" /> Export CSV
+                        <Download className="w-4 h-4" /> Export Excel
                       </button>
                     </div>
                   </div>
