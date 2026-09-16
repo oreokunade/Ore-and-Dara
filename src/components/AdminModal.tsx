@@ -248,6 +248,38 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       setTimeout(() => setCopiedCode(null), 2000);
     };
 
+    // Try Web Share API first (Best for mobile and some desktops)
+    if (navigator.share) {
+      try {
+        let filesArray: File[] = [];
+        try {
+          const response = await fetch('/iv.png');
+          const blob = await response.blob();
+          const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type });
+          filesArray = [file];
+        } catch (fetchErr) {
+          console.warn('Could not load IV image for sharing', fetchErr);
+        }
+
+        if (navigator.canShare && navigator.canShare({ files: filesArray })) {
+          await navigator.share({
+            title: 'Ore & Dara Wedding Invitation',
+            text: text,
+            files: filesArray
+          });
+        } else {
+          await navigator.share({
+            title: 'Ore & Dara Wedding Invitation',
+            text: text
+          });
+        }
+        await markShared();
+        return;
+      } catch (e) {
+        console.log('Share API failed/cancelled, falling back to clipboard');
+      }
+    }
+
     try {
       let imageBlob: Blob | null = null;
       try {
