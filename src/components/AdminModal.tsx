@@ -273,14 +273,35 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
         console.log('Share API failed/cancelled, falling back to clipboard');
       }
     }
-    
-    // Fallback to standard clipboard
-    try {
-      await navigator.clipboard.writeText(text);
-      await markShared();
-    } catch (e) {
-      onNotify('Error', 'Failed to copy to clipboard.');
-    }
+        // Fallback to standard clipboard
+      try {
+        let imageBlob: Blob | null = null;
+        try {
+          const response = await fetch('/iv.png');
+          imageBlob = await response.blob();
+        } catch (e) {
+          console.warn('Could not fetch image for clipboard', e);
+        }
+
+        if (imageBlob && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+          try {
+            const clipboardItem = new ClipboardItem({
+              'text/plain': new Blob([text], { type: 'text/plain' }),
+              [imageBlob.type]: imageBlob
+            });
+            await navigator.clipboard.write([clipboardItem]);
+            await markShared();
+            return;
+          } catch (writeError) {
+            console.warn('Failed to write ClipboardItem, falling back to text only', writeError);
+          }
+        }
+
+        await navigator.clipboard.writeText(text);
+        await markShared();
+      } catch (e) {
+        onNotify('Error', 'Failed to copy to clipboard.');
+      }
   };
 
   const handleUnmarkShared = async (id: string) => {
