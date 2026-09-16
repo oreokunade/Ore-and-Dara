@@ -248,60 +248,34 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       setTimeout(() => setCopiedCode(null), 2000);
     };
 
-    // Try Web Share API first (Ideal for WhatsApp on mobile)
-    if (navigator.share) {
+    try {
+      let imageBlob: Blob | null = null;
       try {
-        let filesArray: File[] = [];
-        try {
-          const response = await fetch('/iv.png');
-          const blob = await response.blob();
-          const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type });
-          filesArray = [file];
-        } catch (fetchErr) {
-          console.warn('Could not load IV image for sharing', fetchErr);
-        }
-
-        await navigator.share({
-          title: 'Ore & Dara Wedding Invitation',
-          text: text,
-          files: filesArray.length > 0 ? filesArray : undefined
-        });
-        await markShared();
-        return;
+        const response = await fetch('/iv.png');
+        imageBlob = await response.blob();
       } catch (e) {
-        // Fallback to clipboard if share was cancelled or failed
-        console.log('Share API failed/cancelled, falling back to clipboard');
+        console.warn('Could not fetch image for clipboard', e);
       }
+
+      if (imageBlob && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
+        try {
+          const clipboardItem = new ClipboardItem({
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+            [imageBlob.type]: imageBlob
+          });
+          await navigator.clipboard.write([clipboardItem]);
+          await markShared();
+          return;
+        } catch (writeError) {
+          console.warn('Failed to write ClipboardItem, falling back to text only', writeError);
+        }
+      }
+
+      await navigator.clipboard.writeText(text);
+      await markShared();
+    } catch (e) {
+      onNotify('Error', 'Failed to copy to clipboard.');
     }
-        // Fallback to standard clipboard
-      try {
-        let imageBlob: Blob | null = null;
-        try {
-          const response = await fetch('/iv.png');
-          imageBlob = await response.blob();
-        } catch (e) {
-          console.warn('Could not fetch image for clipboard', e);
-        }
-
-        if (imageBlob && navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined') {
-          try {
-            const clipboardItem = new ClipboardItem({
-              'text/plain': new Blob([text], { type: 'text/plain' }),
-              [imageBlob.type]: imageBlob
-            });
-            await navigator.clipboard.write([clipboardItem]);
-            await markShared();
-            return;
-          } catch (writeError) {
-            console.warn('Failed to write ClipboardItem, falling back to text only', writeError);
-          }
-        }
-
-        await navigator.clipboard.writeText(text);
-        await markShared();
-      } catch (e) {
-        onNotify('Error', 'Failed to copy to clipboard.');
-      }
   };
 
   const handleUnmarkShared = async (id: string) => {
@@ -489,7 +463,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50" style={{ touchAction: 'pan-x' }}>
+      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50">
         {(['ore', 'dara'].includes(role || '') || ['custom1964', 'groomsfamily', 'bridesfamily'].includes(role)) && (
           <button
             onClick={() => setActiveTab('rsvps')}
