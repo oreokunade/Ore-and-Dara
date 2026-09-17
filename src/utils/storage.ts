@@ -650,7 +650,11 @@ export async function verifyInviteCode(code: string): Promise<InviteCode | null>
 }
 
 export async function markCodeAsUsed(code: string, usedBy: string): Promise<void> {
-  const { error } = await supabase.rpc('mark_code_as_used', { p_code: code, p_used_by: usedBy });
+  const { error } = await supabase
+    .from('invite_codes')
+    .update({ is_used: true, used_by: usedBy })
+    .eq('code', code);
+    
   if (error) console.error('Error marking code used:', error);
 }
 
