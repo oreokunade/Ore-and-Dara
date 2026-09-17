@@ -101,6 +101,8 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
       // 4. Trigger Webhook and Email securely via Backend API
       const roleLabels: Record<string, string> = {
         'master': 'Master',
+        'ore': 'Ore',
+        'dara': 'Dara',
         'custom1964': "Ore's Dad",
         'groomsfamily': "Ore's Mum",
         'bridesfamily': "Dara's Mum"
