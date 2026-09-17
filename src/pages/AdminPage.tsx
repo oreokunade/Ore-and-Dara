@@ -54,8 +54,35 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
     return () => clearInterval(interval);
   }, []);
 
-  const handlePinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Global key listener so they don't have to click the input
+  useEffect(() => {
+    if (authenticatedRole || lockoutRemaining > 0) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if they are holding modifier keys
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      
+      // Ignore if they are typing directly inside the input field to prevent double-entry
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'Backspace') {
+        setPin(prev => prev.slice(0, -1));
+      } else if (/^\d$/.test(e.key)) {
+        setPin(prev => (prev.length < 4 ? prev + e.key : prev));
+      } else if (e.key === 'Enter' && pin.length === 4) {
+        // We can't easily trigger the synthetic event here, but the form handles its own Enter if focused.
+        // If not focused, we can programmatically submit
+        const form = document.getElementById('admin-login-form');
+        if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [authenticatedRole, lockoutRemaining, pin]);
+
+  const handlePinSubmit = async (e: Event | React.FormEvent) => {
+    if (e && 'preventDefault' in e) e.preventDefault();
     if (lockoutRemaining > 0) return;
 
     setPinError('');
@@ -123,6 +150,7 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-gold/5 rounded-full blur-3xl pointer-events-none" />
 
       <motion.form
+        id="admin-login-form"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handlePinSubmit}
