@@ -496,7 +496,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50">
+      <div className="flex items-center gap-2 px-6 sm:px-12 pt-8 pb-0 shrink-0 overflow-x-auto bg-brand-ivory z-10 border-b border-brand-sand/50" data-lenis-prevent="true">
         {(['ore', 'dara'].includes(role || '') || ['custom1964', 'groomsfamily', 'bridesfamily'].includes(role)) && (
           <button
             onClick={() => setActiveTab('rsvps')}
@@ -565,7 +565,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto bg-brand-ivory p-6 sm:p-12" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto bg-brand-ivory p-6 sm:p-12" style={{ WebkitOverflowScrolling: 'touch' }} data-lenis-prevent="true">
         <div className="max-w-7xl mx-auto">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -701,7 +701,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                     </button>
                   </div>
 
-                  <div className="overflow-x-auto min-h-[400px]">
+                  <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
@@ -814,7 +814,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       <Download className="w-4 h-4" /> Export CSV
                     </button>
                   </div>
-                  <div className="overflow-x-auto min-h-[400px]">
+                  <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
@@ -1029,7 +1029,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                       </button>
                     </div>
                   </div>
-                  <div className="overflow-x-auto min-h-[400px]">
+                  <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
@@ -1194,7 +1194,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
                 {/* Wishlist Table */}
                 <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto min-h-[400px]">
+                  <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
@@ -1273,7 +1273,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
                 {/* Reservations Table */}
                 <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto min-h-[400px]">
+                  <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-cream/30 text-xs uppercase tracking-widest font-sans text-brand-muted border-b border-brand-sand/30">
