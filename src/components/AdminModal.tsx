@@ -21,7 +21,19 @@ interface AdminDashboardProps {
 }
 
 export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify, role = 'ore' }) => {
-  const [activeTab, setActiveTab] = useState<'rsvps' | 'gifts' | 'codes' | 'wishlist' | 'reservations'>('codes');
+  const [activeTab, setActiveTab] = useState<'rsvps' | 'codes' | 'gifts' | 'wishlist' | 'reservations'>('rsvps');
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Completely pause Lenis smooth scroll while Admin Dashboard is open
+  useEffect(() => {
+    const lenis = (window as any).lenis;
+    if (lenis) {
+      lenis.stop();
+    }
+    return () => {
+      if (lenis) lenis.start();
+    };
+  }, []);
 
   const [rsvps, setRsvps] = useState<RsvpSubmission[]>([]);
   const [pledges, setPledges] = useState<GiftPledge[]>([]);
@@ -29,7 +41,6 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [reservations, setReservations] = useState<GiftReminder[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const getRoleCodeLimit = () => {
     if (['ore', 'dara'].includes(role || '')) return Infinity;
     if (role === 'custom1964') return 20;
