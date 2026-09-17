@@ -474,6 +474,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
+      data-lenis-prevent="true"
       onKeyDown={(e) => {
         if (e.key === 'Escape') onClose();
       }}
