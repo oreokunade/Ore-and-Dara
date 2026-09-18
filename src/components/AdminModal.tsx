@@ -219,15 +219,21 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     const websiteUrl = window.location.origin;
     
     const codeSection = `
-✨ *IMPORTANT: YOUR RSVP CODE* ✨
+📌 *IMPORTANT: YOUR RSVP CODE* 📌
 
 You will need this exclusive code to fill the RSVP form. 
-⚠️ *NOTE: THIS CODE CAN ONLY BE USED ONCE!* ⚠️
+🚨 *NOTE: THIS CODE CAN ONLY BE USED ONCE!* 🚨
 
-👉 *${code}* 👈
+🎫 *${code}* 🎫
 
 Enter the above code as you fill the RSVP form to be added to the guest list:
-🌐 ${websiteUrl}`;
+🔗 ${websiteUrl}
+
+🎁 *Gift Registry:*
+If you would like to bless the couple with a gift, you can visit their registry here:
+🔗 ${websiteUrl}/#gifts
+
+⚠️ *Please Note:* This is strictly an adult-only event (No children). We appreciate your understanding!`;
 
     if (role === 'bridesfamily') {
       return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
