@@ -218,26 +218,22 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     const getInviteMessage = (code: string, creatorRole: string) => {
       const websiteUrl = window.location.origin;
       
-      const codeSection = `
-📌 *YOUR EXCLUSIVE RSVP CODE* 📌
-
+      const codeSection = `📌 *YOUR EXCLUSIVE RSVP CODE* 📌
 To help us finalize our guest list, please use your unique code 👉 *${code}* 👈 to RSVP online here: 
 🔗 ${websiteUrl}
-
 *(Kindly note that this code can only be used once)*
-
 ✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`;
 
       if (creatorRole === 'bridesfamily') {
-        return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*!\n\n${codeSection}`;
+        return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
       } else if (creatorRole === 'groomsfamily') {
-        return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n\n${codeSection}`;
+        return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
       } else if (['ore', 'dara'].includes(creatorRole || '')) {
-        return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\n${codeSection}`;
+        return `*WEDDING INVITATION 💍*\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n${codeSection}`;
       }
       
       // Default for 'custom1964' or anything else
-      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
     };
 
 
