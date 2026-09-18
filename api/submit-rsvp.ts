@@ -77,6 +77,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                           <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">Wedding Details</p>
                           <p style="margin: 0 0 8px 0; font-size: 15px; color: #1c1917;"><strong>Date:</strong> Saturday, December 12, 2026</p>
                           <p style="margin: 0; font-size: 15px; color: #1c1917;"><strong>Location:</strong> Lagos, Nigeria</p>
+                          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e7e0d3;">
+                            <p style="margin: 0; font-size: 13px; color: #78716c; font-style: italic;">* Please note that this is strictly an <strong>adult-only</strong> event (No children).</p>
+                          </div>
                         </div>
                         <p style="margin: 0 0 25px 0; font-size: 15px; line-height: 1.6; color: #44403c;">We will share more specific details regarding the venue and schedule closer to the big day. Thank you for your continued love and support!</p>
                         <div style="margin-top: 25px; padding-top: 25px; border-top: 1px solid #e7e0d3;">

@@ -389,7 +389,10 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
               </div>
 
               {/* Submit Button & Error Message */}
-              <div className="space-y-4 pt-2">
+              <div className="space-y-4 pt-4">
+                <p className="text-center text-sm font-sans text-brand-muted pb-2 border-b border-brand-sand/50 mb-2">
+                  Please note that this is strictly an <span className="font-semibold text-brand-espresso">adult-only</span> event (No children).
+                </p>
                 <button
                   type="submit"
                   disabled={isSubmitting}

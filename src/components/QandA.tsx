@@ -15,6 +15,10 @@ export const QandA: FC = () => {
       answer: "While we would love to celebrate with everyone, our venue capacity is limited. We are only able to accommodate guests who have received a formal invite."
     },
     {
+      question: "Can I bring my children?",
+      answer: "While we love your little ones, this is strictly an adult-only event. We appreciate you making arrangements ahead of time so you can relax and celebrate with us!"
+    },
+    {
       question: "Would there be parking spaces available?",
       answer: "Yes, ample parking space will be available within the compounds of both venues for your convenience."
     },
