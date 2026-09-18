@@ -221,13 +221,12 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     const codeSection = `
 📌 *IMPORTANT: YOUR RSVP CODE* 📌
 
-You will need this exclusive code to fill the RSVP form. 
-🚨 *NOTE: THIS CODE CAN ONLY BE USED ONCE!*
+You will need this exclusive code to fill the RSVP form. It is mandatory to fill out the form to be added to the guest list!
 
-👉 *${code}* 👈
-
-Enter the above code as you fill the RSVP form to be added to the guest list:
+Enter this code 👉 *${code}* 👈 as you fill the RSVP form here:
 🔗 ${websiteUrl}
+
+🚨 *NOTE: THIS CODE CAN ONLY BE USED ONCE!*
 
 🎁 *Gift Registry:*
 If you would like to bless the couple with a gift, you can visit their registry here:
