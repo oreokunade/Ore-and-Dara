@@ -263,7 +263,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
       try {
         let filesArray: File[] = [];
         try {
-          const response = await fetch('/iv.png');
+          const response = await fetch('/invitation.png');
           const blob = await response.blob();
           const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type });
           filesArray = [file];
@@ -293,7 +293,7 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
     try {
       let imageBlob: Blob | null = null;
       try {
-        const response = await fetch('/iv.png');
+        const response = await fetch('/invitation.png');
         imageBlob = await response.blob();
       } catch (e) {
         console.warn('Could not fetch image for clipboard', e);
