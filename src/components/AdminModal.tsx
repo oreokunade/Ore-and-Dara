@@ -226,10 +226,6 @@ To help us finalize our guest list, please use your unique code 👉 *${code}* �
 
 *(Kindly note that this code can only be used once)*
 
-🎁 *Gift Registry:*
-If you would like to give a wedding gift, the registry is available here:
-🔗 ${websiteUrl}/wishlist
-
 ✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`;
 
       if (creatorRole === 'bridesfamily') {
