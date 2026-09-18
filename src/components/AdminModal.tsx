@@ -231,20 +231,20 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
 
 🎁 *Gift Registry:*
 If you would like to bless the couple with a gift, you can visit their registry here:
-🔗 ${websiteUrl}/#gifts
+🔗 ${websiteUrl}/wishlist
 
 ⚠️ *Please Note:* This is strictly an adult-only event (No children). We appreciate your understanding!`;
 
     if (role === 'bridesfamily') {
-      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
     } else if (role === 'groomsfamily') {
-      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
     } else if (['ore', 'dara'].includes(role || '')) {
-      return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\nAs we begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\n*Oluwadara & Oreoluwa*\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\n*Oluwadara & Oreoluwa*\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
     }
     
     // Default for 'custom1964' or anything else
-    return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
+    return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
   };
 
 
