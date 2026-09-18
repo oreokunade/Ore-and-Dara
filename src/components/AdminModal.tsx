@@ -222,9 +222,9 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 📌 *IMPORTANT: YOUR RSVP CODE* 📌
 
 You will need this exclusive code to fill the RSVP form. 
-🚨 *NOTE: THIS CODE CAN ONLY BE USED ONCE!* 🚨
+🚨 *NOTE: THIS CODE CAN ONLY BE USED ONCE!*
 
-🎫 *${code}* 🎫
+👉 *${code}* 👈
 
 Enter the above code as you fill the RSVP form to be added to the guest list:
 🔗 ${websiteUrl}
@@ -236,15 +236,15 @@ If you would like to bless the couple with a gift, you can visit their registry 
 ⚠️ *Please Note:* This is strictly an adult-only event (No children). We appreciate your understanding!`;
 
     if (role === 'bridesfamily') {
-      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
     } else if (role === 'groomsfamily') {
-      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
+      return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
     } else if (['ore', 'dara'].includes(role || '')) {
       return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\nAs we begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\n*Oluwadara & Oreoluwa*\n${codeSection}`;
     }
     
     // Default for 'custom1964' or anything else
-    return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, we would be honoured to have you celebrate this special milestone with us.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nAs we look forward with joy and gratitude to this blessed union, we kindly ask for your prayers and well wishes for *Oluwadara and Oreoluwa*\n\nYour presence, love, support, and prayers mean so much to us, and we look forward to celebrating this beautiful day with you.\n\nWith love,\nThe Families\n${codeSection}`;
+    return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nAs they begin this beautiful journey together, it would mean the world to us to have you by our sides.\n\nPlease accept this as the formal invitation. Details of the *Aso Ebi* will follow shortly.\n\nWe can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n${codeSection}`;
   };
 
 
