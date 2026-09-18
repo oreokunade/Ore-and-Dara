@@ -595,18 +595,18 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                 className="space-y-8"
               >
                 {/* RSVP Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                  <div className="bg-white p-6 rounded-3xl shadow-sm">
-                    <p className="text-xs uppercase tracking-widest text-brand-muted font-bold mb-2">Attending Guests</p>
-                    <p className="text-4xl font-sans font-semibold text-emerald-700">{attendingCount}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Attending</p>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-emerald-700">{attendingCount}</p>
                   </div>
-                  <div className="bg-white p-6 rounded-3xl shadow-sm">
-                    <p className="text-xs uppercase tracking-widest text-brand-muted font-bold mb-2">Declined</p>
-                    <p className="text-4xl font-sans font-semibold text-rose-700">{declinedCount}</p>
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Declined</p>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-rose-700">{declinedCount}</p>
                   </div>
-                  <div className="bg-white p-6 rounded-3xl shadow-sm">
-                    <p className="text-xs uppercase tracking-widest text-brand-muted font-bold mb-2">Total Responses</p>
-                    <p className="text-4xl font-sans font-semibold text-brand-espresso">{totalResponses}</p>
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm col-span-2 sm:col-span-1">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Total Responses</p>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-brand-espresso">{totalResponses}</p>
                   </div>
                 </div>
 
@@ -791,24 +791,24 @@ Enter the above code as you fill the RSVP form to be added to the guest list:
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-8"
               >
-                {/* Gifts Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="bg-white p-6 rounded-3xl shadow-sm flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-goldDark">
-                      <Gift className="w-7 h-7" />
+                {/* Gift Stats */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-6">
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-goldDark shrink-0">
+                      <Gift className="w-5 h-5 sm:w-7 sm:h-7" />
                     </div>
                     <div>
-                      <p className="text-xs uppercase tracking-widest text-brand-muted font-bold mb-1">Total Gifts Paid</p>
-                      <p className="text-4xl font-sans font-semibold text-brand-espresso">{pledges.length}</p>
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-0.5 sm:mb-1 line-clamp-1">Gifts Paid</p>
+                      <p className="text-2xl sm:text-4xl font-sans font-semibold text-brand-espresso">{pledges.length}</p>
                     </div>
                   </div>
-                  <div className="bg-white p-6 rounded-3xl shadow-sm flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700">
-                      <span className="font-mono text-2xl font-bold">₦</span>
+                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5">
+                    <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                      <span className="font-mono text-xl sm:text-2xl font-bold">₦</span>
                     </div>
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-brand-muted font-bold mb-1">Total Value</p>
-                      <p className="text-4xl font-sans font-semibold text-brand-espresso">
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-0.5 sm:mb-1 line-clamp-1">Total Value</p>
+                      <p className="text-xl sm:text-4xl font-sans font-semibold text-brand-espresso truncate">
                         {totalGiftValue.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 })}
                       </p>
                     </div>
