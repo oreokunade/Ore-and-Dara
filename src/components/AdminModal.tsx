@@ -215,7 +215,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     }
   };
 
-  const getInviteMessage = (code: string) => {
+  const getInviteMessage = (code: string, creatorRole: string) => {
     const websiteUrl = window.location.origin;
     
     const codeSection = `
@@ -234,11 +234,11 @@ If you would like to bless the couple with a gift, you can visit their registry 
 
 ⚠️ *Please Note:* This is strictly an adult-only event (No children). We appreciate your understanding!`;
 
-    if (role === 'bridesfamily') {
+    if (creatorRole === 'bridesfamily') {
       return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*.\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
-    } else if (role === 'groomsfamily') {
+    } else if (creatorRole === 'groomsfamily') {
       return `*WEDDING INVITATION 💍*\n\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*.\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\nThe Families\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
-    } else if (['ore', 'dara'].includes(role || '')) {
+    } else if (['ore', 'dara'].includes(creatorRole || '')) {
       return `*WEDDING INVITATION 💍*\n\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n\nPlease accept this as the formal invitation. We can't wait to celebrate this special day with you!\n\nWith love,\n*Oluwadara & Oreoluwa*\n\nDetails of the *Aso Ebi* will follow shortly.\n${codeSection}`;
     }
     
@@ -248,7 +248,8 @@ If you would like to bless the couple with a gift, you can visit their registry 
 
 
   const handleCopyCode = async (code: string) => {
-    const text = getInviteMessage(code);
+    const target = codes.find(c => c.code === code);
+    const text = getInviteMessage(code, target?.created_by || role || '');
 
     const markShared = async () => {
       setCopiedCode(code);
