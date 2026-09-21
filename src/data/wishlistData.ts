@@ -304,7 +304,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
   },
   {
     id: 'wishlist-hollyland-mic',
-    name: 'Hollyland Lark M2 Microphone',
+    name: 'Hollyland Lark M2 Microphone Combo version',
     quantity: 1,
     price: 160000,
     formattedPrice: '₦160,000',

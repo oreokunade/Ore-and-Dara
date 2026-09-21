@@ -268,60 +268,75 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   };
 
   return (
-    <section id="wishlist" className="py-24 sm:py-32 px-4 sm:px-6 bg-brand-ivory relative overflow-hidden">
+    <section id="wishlist" className="py-24 sm:py-32 px-2 sm:px-6 bg-brand-ivory relative overflow-hidden">
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Section Header with Couple Portrait */}
-        <div className="max-w-5xl mx-auto mb-16 sm:mb-20">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-white/70 backdrop-blur-sm p-6 sm:p-10 rounded-3xl border border-brand-sand/50 shadow-md">
-            {/* Couple Image Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+        <div className="flex flex-col md:flex-row items-center gap-10 lg:gap-16 mb-16 sm:mb-20 bg-white/50 rounded-3xl p-6 sm:p-10 border border-brand-sand/50 shadow-sm backdrop-blur-sm">
+          {/* Couple Image Focus */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="w-full md:w-1/3 aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border-4 border-white relative group shrink-0"
+          >
+            <div className="absolute inset-0 bg-brand-espresso/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
+            <img 
+              src="/assets/Image2.jpeg" 
+              alt="Oreoluwa & Oluwadara - Our forever starts now"
+              className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            />
+          </motion.div>
+
+          {/* Content & Category Tabs */}
+          <div className="text-center md:text-left flex-1">
+            <motion.p 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-xl border-2 border-brand-gold/30 bg-brand-espresso group relative aspect-[3/4]"
+              className="text-xs uppercase tracking-[0.3em] font-sans font-semibold text-brand-goldDark mb-3"
             >
-              <img
-                src="/assets/0V3A8999.jpg"
-                alt="Oreoluwa & Oluwadara - Our forever starts now"
-                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-              />
-            </motion.div>
-
-            {/* Content & Category Tabs */}
-            <div className="text-center md:text-left flex-1">
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-xs uppercase tracking-[0.3em] font-sans font-semibold text-brand-goldDark mb-3"
-              >
-                Curated Wedding Registry
-              </motion.p>
-
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="font-serif text-4xl sm:text-5xl lg:text-6xl text-brand-espresso font-normal leading-tight"
-              >
-                Wishlist Items
-              </motion.h2>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="font-sans text-brand-muted text-[16px] sm:text-lg mt-4 leading-relaxed max-w-xl"
-              >
-                To help us start our new home together, we have handpicked items we need most. You can select any item below to pay for it and bless our union directly.
-              </motion.p>
+              Curated Wedding Registry
+            </motion.p>
+            
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="font-serif text-4xl sm:text-5xl lg:text-6xl text-brand-espresso font-normal leading-tight"
+            >
+              Wishlist Items
+            </motion.h2>
+            
+            <motion.p 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="font-sans text-brand-muted text-[16px] sm:text-lg mt-4 leading-relaxed max-w-xl"
+            >
+              To help us start our new home together, we have handpicked items we need most. You can select any item below to pay for it and bless our union directly.
+            </motion.p>
 
 
-            </div>
           </div>
+        </div>
+
+        {/* Categories (Desktop only for cleaner mobile view) */}
+        <div className="hidden md:flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-6 py-2.5 rounded-full text-xs font-sans font-bold tracking-widest uppercase transition-all duration-300 ${
+                activeCategory === category 
+                  ? 'bg-brand-espresso text-brand-cream shadow-md scale-105' 
+                  : 'bg-white/50 text-brand-muted hover:bg-white hover:text-brand-espresso hover:shadow-sm'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
         {/* 14 Items Grid - Borderless */}
@@ -347,18 +362,18 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                 {!item.isFunded && item.isReserved && (
                   <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-brand-espresso/85 backdrop-blur-xs text-brand-cream text-[10px] font-sans font-semibold tracking-wider flex items-center gap-1 shadow-sm">
                     <Clock className="w-3 h-3 text-brand-gold" />
-                    Reserved • {getDaysRemaining(item.reservedUntil)}d left
+                    Reserved
                   </span>
                 )}
 
                 {item.isFunded && (
-                  <div className="absolute inset-0 bg-brand-cream/50 backdrop-blur-[3px] flex items-center justify-center p-4 z-10">
-                    <div className="bg-white/95 px-6 py-4 rounded-3xl shadow-xl border border-brand-sand flex flex-col items-center w-full max-w-[200px] transform transition-transform hover:scale-105">
-                      <div className="w-10 h-10 rounded-full bg-brand-gold/15 flex items-center justify-center mb-2">
-                        <Heart className="w-5 h-5 text-brand-goldDark fill-brand-goldDark" />
+                  <div className="absolute inset-0 bg-brand-cream/50 backdrop-blur-[3px] flex items-center justify-center p-2 sm:p-4 z-10">
+                    <div className="bg-white/95 px-2 py-3 sm:px-6 sm:py-4 rounded-2xl sm:rounded-3xl shadow-xl border border-brand-sand flex flex-col items-center w-full max-w-[90%] sm:max-w-[200px] transform transition-transform hover:scale-105">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-gold/15 flex items-center justify-center mb-1.5 sm:mb-2 shrink-0">
+                        <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-brand-goldDark fill-brand-goldDark" />
                       </div>
-                      <span className="font-serif italic text-lg text-brand-espresso mb-0.5">Gifted with love</span>
-                      <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-brand-muted text-center line-clamp-1 w-full">
+                      <span className="font-serif italic text-sm sm:text-lg text-brand-espresso mb-0.5 text-center leading-tight">Gifted with love</span>
+                      <span className="text-[8px] sm:text-[10px] font-sans font-bold uppercase tracking-widest text-brand-muted text-center line-clamp-1 w-full mt-1">
                         By {item.fundedBy || 'Cherished Guest'}
                       </span>
                     </div>
