@@ -63,10 +63,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ({ data, error } = await supabaseAdmin.from('invite_codes').select('*').order('created_at', { ascending: false }));
         break;
       case 'generateInviteCode':
-        ({ data, error } = await supabaseAdmin.from('invite_codes').insert([payload.code]).select().single());
+        ({ data, error } = await supabaseAdmin.from('invite_codes').upsert([payload.code], { onConflict: 'code', ignoreDuplicates: true }).select().single());
         break;
       case 'bulkGenerateInviteCodes':
-        ({ data, error } = await supabaseAdmin.from('invite_codes').insert(payload.codes).select());
+        ({ data, error } = await supabaseAdmin.from('invite_codes').upsert(payload.codes, { onConflict: 'code', ignoreDuplicates: true }).select());
         break;
       case 'deleteInviteCodes':
         ({ data, error } = await supabaseAdmin.from('invite_codes').delete().in('id', payload.ids));

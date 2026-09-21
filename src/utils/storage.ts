@@ -622,19 +622,39 @@ export interface InviteCode {
 }
 
 export async function generateInviteCode(createdBy: string = 'ore'): Promise<string> {
-  const code = Math.floor(10000 + Math.random() * 90000).toString(); // 5 digit random number
+  const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
+  const existingSet = new Set(existingCodes.map(c => c.code));
+  
+  let code = '';
+  while (true) {
+    code = Math.floor(10000 + Math.random() * 90000).toString();
+    if (!existingSet.has(code)) break;
+  }
+  
   await adminDb('generateInviteCode', { code: { code, created_by: createdBy } });
   return code;
 }
 
 export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'ore'): Promise<string[]> {
+  const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
+  const existingSet = new Set(existingCodes.map(c => c.code));
+  
   const codes = [];
   const payload = [];
+  
   for (let i = 0; i < count; i++) {
-    const code = Math.floor(10000 + Math.random() * 90000).toString();
+    let code = '';
+    while (true) {
+      code = Math.floor(10000 + Math.random() * 90000).toString();
+      if (!existingSet.has(code)) {
+        existingSet.add(code);
+        break;
+      }
+    }
     codes.push(code);
     payload.push({ code, created_by: createdBy });
   }
+  
   await adminDb('bulkGenerateInviteCodes', { codes: payload });
   return codes;
 }
