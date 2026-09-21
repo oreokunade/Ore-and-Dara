@@ -1,17 +1,9 @@
 import { FC } from 'react';
 import { motion } from 'framer-motion';
-import { Church, Utensils, Heart } from 'lucide-react';
+import { Church, Utensils } from 'lucide-react';
 
 export const Programme: FC = () => {
   const schedule = [
-    {
-      time: '8:00 AM',
-      title: 'Traditional Engagement',
-      subtitle: 'The Joining of Families',
-      description: 'Join us as our families unite in tradition and love to celebrate our engagement.',
-      icon: Heart,
-      highlight: true,
-    },
     {
       time: '11:00 AM',
       title: 'Church Wedding',

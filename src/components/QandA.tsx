@@ -28,7 +28,7 @@ export const QandA: FC = () => {
     },
     {
       question: "Is the wedding indoors or outdoors?",
-      answer: "All of our events—including the traditional marriage, church ceremony, and reception—will be held beautifully indoors."
+      answer: "All of our events—including the church ceremony and reception—will be held beautifully indoors."
     },
     {
       question: "What’s the colour of the day?",

@@ -325,7 +325,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
         </div>
 
         {/* 14 Items Grid - Borderless */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
           {items.map((item, index) => (
             <motion.div
               key={item.id}
@@ -367,66 +367,66 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
               </div>
 
               {/* Content */}
-              <div className="p-5 flex-1 flex flex-col">
-                <span className="text-[10px] uppercase tracking-widest font-sans font-semibold text-brand-goldDark mb-1">
+              <div className="p-3 sm:p-5 flex-1 flex flex-col">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-widest font-sans font-semibold text-brand-goldDark mb-1">
                   {item.category}
                 </span>
-                <h3 className="font-serif text-lg text-brand-espresso font-normal leading-snug line-clamp-2">
+                <h3 className="font-serif text-sm sm:text-lg text-brand-espresso font-normal leading-snug line-clamp-2">
                   {item.name}
                 </h3>
-                <p className="text-brand-muted text-xs font-sans mt-1.5 line-clamp-2 leading-relaxed flex-1">
+                <p className="text-brand-muted text-[10px] sm:text-xs font-sans mt-1 sm:mt-1.5 line-clamp-2 leading-relaxed flex-1">
                   {item.description}
                 </p>
 
                 {/* Price & Quantity */}
-                <div className="mt-4 mb-4 flex items-center justify-between">
-                  <span className="font-mono text-2xl font-bold text-brand-espresso">
-                    {item.price === 0 ? null : item.formattedPrice}
+                <div className="mt-2 sm:mt-4 mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0 min-h-[28px]">
+                  <span className="font-mono text-base sm:text-2xl font-bold text-brand-espresso">
+                    {item.formattedPrice}
                   </span>
                   {item.quantity > 1 && (
-                    <span className="px-3 py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[10px] font-sans font-bold uppercase tracking-wider">
+                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider self-start sm:self-auto">
                       Qty: {item.quantity} Needed
                     </span>
                   )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-2.5 border-t border-brand-sand/40 pt-4">
+                <div className="space-y-2 sm:space-y-2.5 border-t border-brand-sand/40 pt-2.5 sm:pt-4">
                   <button
                     onClick={() => {
                       setActiveItem(item);
                       setPurchaseQuantity(1);
                     }}
-                    className={`w-full py-3 rounded-xl text-xs font-sans font-bold tracking-widest uppercase transition-all duration-200 shadow-sm flex items-center justify-center gap-2 ${
+                    className={`w-full py-2 sm:py-3 rounded-xl text-[10px] sm:text-xs font-sans font-bold tracking-widest uppercase transition-all duration-200 shadow-sm flex items-center justify-center gap-1 sm:gap-2 ${
                       item.isFunded
                         ? 'bg-brand-sand/50 text-brand-muted hover:bg-brand-sand'
                         : 'bg-brand-espresso hover:bg-brand-gold hover:text-brand-espresso text-brand-cream'
                     }`}
                   >
-                    <CreditCard className="w-4 h-4" />
+                    <CreditCard className="w-3 sm:w-4 h-3 sm:h-4" />
                     <span>{item.price === 0 ? 'Give' : (item.isFunded ? 'Gift Again' : 'Pay for Item')}</span>
                   </button>
 
                   {!item.isFunded && (
                     item.isReserved ? (
-                      <div className="w-full relative overflow-hidden rounded-xl border border-brand-espresso/10 bg-gradient-to-r from-brand-sand/40 to-brand-sand/10 p-3">
-                        <div className="flex items-center justify-between relative z-10 gap-2">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0 border border-brand-sand/60">
-                              <Heart className="w-3 h-3 text-brand-goldDark fill-brand-goldDark" />
+                      <div className="w-full relative overflow-hidden rounded-xl border border-brand-espresso/10 bg-gradient-to-r from-brand-sand/40 to-brand-sand/10 p-2 sm:p-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between relative z-10 gap-1 sm:gap-2">
+                          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+                            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0 border border-brand-sand/60">
+                              <Heart className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-goldDark fill-brand-goldDark" />
                             </div>
                             <div className="flex flex-col items-start min-w-0">
-                              <span className="text-[10px] font-sans font-bold tracking-wider text-brand-goldDark uppercase leading-tight">
+                              <span className="text-[9px] sm:text-[10px] font-sans font-bold tracking-wider text-brand-goldDark uppercase leading-tight">
                                 Reserved
                               </span>
-                              <span className="text-[11px] font-sans font-semibold text-brand-espresso leading-tight mt-0.5 truncate max-w-[130px] sm:max-w-[150px]" title={item.isAnonymousReservation ? 'a guest' : (item.reservedByName || 'a guest')}>
+                              <span className="text-[10px] sm:text-[11px] font-sans font-semibold text-brand-espresso leading-tight mt-0.5 truncate w-full sm:max-w-[150px]" title={item.isAnonymousReservation ? 'a guest' : (item.reservedByName || 'a guest')}>
                                 By {item.isAnonymousReservation ? 'a guest' : (item.reservedByName || 'a guest')}
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-col items-end shrink-0">
-                            <span className="text-[9px] uppercase font-sans font-bold tracking-wider text-brand-muted">Held till</span>
-                            <span className="text-xs font-sans font-bold text-brand-espresso mt-0.5 whitespace-nowrap">
+                          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center shrink-0 mt-1 sm:mt-0">
+                            <span className="text-[8px] sm:text-[9px] uppercase font-sans font-bold tracking-wider text-brand-muted">Held till</span>
+                            <span className="text-[10px] sm:text-xs font-sans font-bold text-brand-espresso mt-0 sm:mt-0.5 whitespace-nowrap ml-1 sm:ml-0">
                               {formatShortDate(item.reservedUntil)}
                             </span>
                           </div>
@@ -436,10 +436,10 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                       item.price !== 0 && (
                         <button
                           onClick={() => setReminderItem(item)}
-                          className="w-full py-2.5 rounded-xl text-xs font-sans font-semibold tracking-wider transition-all duration-200 border border-brand-sand bg-white text-brand-espresso hover:border-brand-gold/60 hover:bg-brand-cream/30 flex items-center justify-center gap-1.5"
+                          className="w-full py-1.5 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-sans font-semibold tracking-wider transition-all duration-200 border border-brand-sand bg-white text-brand-espresso hover:border-brand-gold/60 hover:bg-brand-cream/30 flex items-center justify-center gap-1 sm:gap-1.5"
                         >
-                          <Clock className="w-3.5 h-3.5 text-brand-goldDark" />
-                          <span className="uppercase tracking-widest text-[11px]">Reserve</span>
+                          <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand-goldDark" />
+                          <span className="uppercase tracking-widest text-[9px] sm:text-[11px]">Reserve</span>
                         </button>
                       )
                     )
