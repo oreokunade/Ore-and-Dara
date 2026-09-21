@@ -303,6 +303,16 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     description: 'Modern electric toaster for quick and even browning.',
   },
   {
+    id: 'wishlist-hollyland-mic',
+    name: 'Hollyland Lark M2 Microphone',
+    quantity: 1,
+    price: 160000,
+    formattedPrice: '₦160,000',
+    category: 'Electronics',
+    image: '/assets/Hollyland lark m2.jpg',
+    description: 'High-quality wireless microphone perfect for recording content and creating memories.',
+  },
+  {
     id: 'wishlist-cash-gift',
     name: 'Cash Gift',
     quantity: 1,
