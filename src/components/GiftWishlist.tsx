@@ -111,13 +111,6 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
     loadData();
   }, []);
 
-  const getDaysRemaining = (isoString?: string) => {
-    if (!isoString) return 7;
-    const diff = new Date(isoString).getTime() - Date.now();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return Math.max(1, days);
-  };
-
   const formatShortDate = (isoString?: string) => {
     if (!isoString) return '';
     try {
@@ -320,23 +313,6 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
 
           </div>
-        </div>
-
-        {/* Categories (Desktop only for cleaner mobile view) */}
-        <div className="hidden md:flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`px-6 py-2.5 rounded-full text-xs font-sans font-bold tracking-widest uppercase transition-all duration-300 ${
-                activeCategory === category 
-                  ? 'bg-brand-espresso text-brand-cream shadow-md scale-105' 
-                  : 'bg-white/50 text-brand-muted hover:bg-white hover:text-brand-espresso hover:shadow-sm'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
         </div>
 
         {/* 14 Items Grid - Borderless */}
