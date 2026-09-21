@@ -21,6 +21,8 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
   
   // Checkout Modal State
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  const [cashGiftAmount, setCashGiftAmount] = useState<number>(0);
+  const [customCashAmount, setCustomCashAmount] = useState<string>('');
   const [giverName, setGiverName] = useState('');
   const [giverEmail, setGiverEmail] = useState('');
   const [giverRelation, setGiverRelation] = useState('');
@@ -205,10 +207,21 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
     setIsSubmitting(true);
 
     try {
+      const isCashGift = activeItem.price === 0;
+      const finalAmount = isCashGift 
+        ? (cashGiftAmount === -1 ? parseInt(customCashAmount.replace(/\D/g, '') || '0', 10) : cashGiftAmount)
+        : activeItem.price * purchaseQuantity;
+
+      if (isCashGift && finalAmount < 1000) {
+        onNotify('Error', 'Please enter a valid cash gift amount (Minimum ₦1,000)');
+        setIsSubmitting(false);
+        return;
+      }
+
       const pledge = await saveGiftPledge({
         itemId: activeItem.id,
-        itemName: purchaseQuantity > 1 ? `${activeItem.name} (Qty: ${purchaseQuantity})` : activeItem.name,
-        amount: activeItem.price * purchaseQuantity,
+        itemName: isCashGift ? 'Cash Gift' : (purchaseQuantity > 1 ? `${activeItem.name} (Qty: ${purchaseQuantity})` : activeItem.name),
+        amount: finalAmount,
         giverName: giverName.trim(),
         giverEmail: giverEmail.trim() || undefined,
         giverRelation: giverRelation || undefined,
@@ -368,7 +381,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                 {/* Price & Quantity */}
                 <div className="mt-4 mb-4 flex items-center justify-between">
                   <span className="font-mono text-2xl font-bold text-brand-espresso">
-                    {item.formattedPrice}
+                    {item.price === 0 ? null : item.formattedPrice}
                   </span>
                   {item.quantity > 1 && (
                     <span className="px-3 py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[10px] font-sans font-bold uppercase tracking-wider">
@@ -521,32 +534,88 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                         </h4>
                         
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 gap-3">
-                          <div className="flex items-center gap-3 bg-brand-sand/30 rounded-lg p-1.5 w-max">
-                            <button 
-                              type="button"
-                              onClick={() => setPurchaseQuantity(Math.max(1, purchaseQuantity - 1))}
-                              className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
-                              disabled={purchaseQuantity <= 1}
-                            >
-                              -
-                            </button>
-                            <span className="font-sans font-semibold text-sm w-4 text-center">{purchaseQuantity}</span>
-                            <button 
-                              type="button"
-                              onClick={() => setPurchaseQuantity(Math.min(activeItem.quantity, purchaseQuantity + 1))}
-                              className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
-                              disabled={purchaseQuantity >= activeItem.quantity}
-                            >
-                              +
-                            </button>
-                          </div>
+                          {activeItem.price === 0 ? (
+                            <div className="w-full flex flex-col gap-3">
+                              <span className="text-[10px] uppercase text-brand-muted font-sans font-semibold">Select Amount:</span>
+                              <div className="grid grid-cols-3 gap-2">
+                                {[10000, 20000, 50000, 100000, 500000].map(amt => (
+                                  <button
+                                    key={amt}
+                                    type="button"
+                                    onClick={() => setCashGiftAmount(amt)}
+                                    className={`py-2 px-1 rounded-lg text-xs font-sans font-semibold transition-colors border ${
+                                      cashGiftAmount === amt
+                                        ? 'bg-brand-espresso text-brand-cream border-brand-espresso'
+                                        : 'bg-white text-brand-espresso border-brand-sand/60 hover:border-brand-gold'
+                                    }`}
+                                  >
+                                    ₦{(amt / 1000).toFixed(0)}k
+                                  </button>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() => setCashGiftAmount(-1)}
+                                  className={`py-2 px-1 rounded-lg text-xs font-sans font-semibold transition-colors border ${
+                                    cashGiftAmount === -1
+                                      ? 'bg-brand-espresso text-brand-cream border-brand-espresso'
+                                      : 'bg-white text-brand-espresso border-brand-sand/60 hover:border-brand-gold'
+                                  }`}
+                                >
+                                  Custom
+                                </button>
+                              </div>
+                              {cashGiftAmount === -1 && (
+                                <div className="mt-2 relative">
+                                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-medium text-brand-espresso">₦</span>
+                                  <input
+                                    type="text"
+                                    value={customCashAmount}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/\D/g, '');
+                                      setCustomCashAmount(val ? parseInt(val, 10).toLocaleString('en-NG') : '');
+                                    }}
+                                    placeholder="Enter amount"
+                                    className="w-full pl-8 pr-4 py-3 bg-white border border-brand-sand rounded-xl font-mono text-sm focus:outline-none focus:border-brand-gold"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex flex-col items-end mt-2">
+                                <span className="text-[10px] uppercase text-brand-muted font-sans font-semibold">Total Gift:</span>
+                                <span className="font-mono text-xl font-bold text-brand-espresso">
+                                  {(cashGiftAmount === -1 ? parseInt(customCashAmount.replace(/\D/g, '') || '0', 10) : cashGiftAmount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 })}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-3 bg-brand-sand/30 rounded-lg p-1.5 w-max">
+                                <button 
+                                  type="button"
+                                  onClick={() => setPurchaseQuantity(Math.max(1, purchaseQuantity - 1))}
+                                  className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
+                                  disabled={purchaseQuantity <= 1}
+                                >
+                                  -
+                                </button>
+                                <span className="font-sans font-semibold text-sm w-4 text-center">{purchaseQuantity}</span>
+                                <button 
+                                  type="button"
+                                  onClick={() => setPurchaseQuantity(Math.min(activeItem.quantity, purchaseQuantity + 1))}
+                                  className="w-11 h-11 flex items-center justify-center rounded-md bg-white text-brand-espresso shadow-sm hover:bg-brand-sand transition-colors disabled:opacity-50 text-xl"
+                                  disabled={purchaseQuantity >= activeItem.quantity}
+                                >
+                                  +
+                                </button>
+                              </div>
 
-                          <div className="flex flex-col items-start sm:items-end">
-                            <span className="text-[10px] uppercase text-brand-muted font-sans font-semibold">Total Cost:</span>
-                            <span className="font-mono text-xl font-bold text-brand-espresso">
-                              {(activeItem.price * purchaseQuantity).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 })}
-                            </span>
-                          </div>
+                              <div className="flex flex-col items-start sm:items-end">
+                                <span className="text-[10px] uppercase text-brand-muted font-sans font-semibold">Total Cost:</span>
+                                <span className="font-mono text-xl font-bold text-brand-espresso">
+                                  {(activeItem.price * purchaseQuantity).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 })}
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -832,7 +901,9 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="font-serif text-[17px] text-brand-espresso font-medium truncate">{reminderItem.name}</p>
-                        <p className="font-mono text-lg font-bold text-brand-goldDark">{reminderItem.formattedPrice}</p>
+                        <p className="font-mono text-lg font-bold text-brand-goldDark">
+                          {reminderItem.price === 0 ? null : reminderItem.formattedPrice}
+                        </p>
                       </div>
                     </div>
 
