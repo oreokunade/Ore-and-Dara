@@ -333,7 +333,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.04 }}
-              className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
+              className="min-w-0 bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
             >
               {/* Image */}
               <div className="relative aspect-[4/3] overflow-hidden bg-brand-cream">
