@@ -309,7 +309,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 0,
     formattedPrice: 'Any Amount',
     category: 'Milestone Gift',
-    image: '/assets/cash-gift.jpg',
+    image: '/assets/Cash.jpeg',
     description: 'Bless the couple with a cash gift to help them start their new life together.',
   },
 ];
