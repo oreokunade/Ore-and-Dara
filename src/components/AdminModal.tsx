@@ -485,6 +485,9 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     setNewItemImage(item.image);
     setNewItemDesc(item.description);
     setIsAddingItem(true);
+    setTimeout(() => {
+      document.getElementById('wishlist-form-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   };
 
   const handleDeleteWishlistItem = async (id: string) => {
@@ -1193,6 +1196,9 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                         setNewItemQuantity('1');
                       } else {
                         setIsAddingItem(true);
+                        setTimeout(() => {
+                          document.getElementById('wishlist-form-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
                       }
                     }}
                     className="flex items-center gap-2 px-8 py-4 bg-brand-goldDark text-white text-sm font-sans font-bold uppercase tracking-wider rounded-2xl hover:bg-brand-espresso transition-colors shrink-0"
@@ -1202,7 +1208,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                 </div>
 
                 {isAddingItem && (
-                  <div className="bg-white p-8 rounded-3xl shadow-sm">
+                  <div id="wishlist-form-container" className="bg-white p-8 rounded-3xl shadow-sm scroll-mt-24">
                     <h3 className="font-serif text-xl text-brand-espresso mb-6">{editingItemId ? 'Edit Wishlist Item' : 'Add New Wishlist Item'}</h3>
                     <form onSubmit={handleAddWishlistItem} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
