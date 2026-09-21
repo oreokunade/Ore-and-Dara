@@ -307,7 +307,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     name: 'Cash Gift',
     quantity: 1,
     price: 0,
-    formattedPrice: 'Any Amount',
+    formattedPrice: '',
     category: 'Milestone Gift',
     image: '/assets/Cash.jpeg',
     description: 'Bless the couple with a cash gift to help them start their new life together.',

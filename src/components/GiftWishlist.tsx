@@ -379,16 +379,18 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                 </p>
 
                 {/* Price & Quantity */}
-                <div className="mt-2 sm:mt-4 mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0 min-h-[28px]">
-                  <span className="font-mono text-base sm:text-2xl font-bold text-brand-espresso">
-                    {item.formattedPrice}
-                  </span>
-                  {item.quantity > 1 && (
-                    <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider self-start sm:self-auto">
-                      Qty: {item.quantity} Needed
+                {item.price > 0 && (
+                  <div className="mt-2 sm:mt-4 mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
+                    <span className="font-mono text-base sm:text-2xl font-bold text-brand-espresso">
+                      {item.formattedPrice}
                     </span>
-                  )}
-                </div>
+                    {item.quantity > 1 && (
+                      <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider self-start sm:self-auto">
+                        Qty: {item.quantity} Needed
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Action Buttons */}
                 <div className="space-y-2 sm:space-y-2.5 border-t border-brand-sand/40 pt-2.5 sm:pt-4">
