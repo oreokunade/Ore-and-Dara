@@ -247,7 +247,7 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
     data = res.data;
   }
 
-  return {
+  const result = {
     id: data.id,
     itemId: data.item_id,
     itemName: data.item_name,
@@ -258,6 +258,29 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
     giverRelation: pledge.giverRelation,
     pledgedAt: data.created_at
   };
+
+  // Notify Master Admins
+  try {
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: ['oreokunade@gmail.com', 'saoluwadara@gmail.com'],
+        subject: `New Gift Received: ${result.itemName}`,
+        html: `
+          <h2>New Gift Pledge!</h2>
+          <p><strong>Item:</strong> ${result.itemName}</p>
+          <p><strong>Amount:</strong> ₦${result.amount.toLocaleString()}</p>
+          <p><strong>From:</strong> ${result.giverName} (${result.giverEmail})</p>
+          <p><strong>Note:</strong> ${result.giverNote || 'None'}</p>
+        `
+      })
+    }).catch(console.error);
+  } catch (err) {
+    console.error('Failed to queue admin notification:', err);
+  }
+
+  return result;
 }
 
 export async function deleteGiftPledge(id: string): Promise<void> {
@@ -472,7 +495,7 @@ export async function saveReminder(reminder: {
     localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(local));
   } catch(e) {}
 
-  return {
+  const result = {
     id: insertedData.id,
     itemId: insertedData.item_id,
     itemName: insertedData.item_name,
@@ -485,6 +508,28 @@ export async function saveReminder(reminder: {
     expiresAt: expiresAt,
     createdAt: insertedData.created_at
   };
+
+  // Notify Master Admins
+  try {
+    fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: ['oreokunade@gmail.com', 'saoluwadara@gmail.com'],
+        subject: `New Gift Reservation: ${result.itemName}`,
+        html: `
+          <h2>New Gift Reservation!</h2>
+          <p><strong>Item:</strong> ${result.itemName}</p>
+          <p><strong>Reserved By:</strong> ${result.isAnonymous ? 'Anonymous' : result.reservedByName} (${result.email})</p>
+          <p><strong>Expires At:</strong> ${new Date(result.expiresAt).toLocaleString()}</p>
+        `
+      })
+    }).catch(console.error);
+  } catch (err) {
+    console.error('Failed to queue admin notification:', err);
+  }
+
+  return result;
 }
 
 export function getLocalReminders(): string[] {

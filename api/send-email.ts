@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: SENDER_EMAIL,
-        to: [to],
+        to: Array.isArray(to) ? to : [to],
         subject,
         html
       })
