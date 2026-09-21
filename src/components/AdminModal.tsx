@@ -1,11 +1,11 @@
 import { useState, useEffect, FC, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, X } from 'lucide-react';
+import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, X, Edit2 } from 'lucide-react';
 import { 
   getStoredRsvps, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
   getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, unmarkInviteCodeAsShared, InviteCode,
-  getStoredWishlistItems, saveWishlistItem, deleteWishlistItem,
+  getStoredWishlistItems, saveWishlistItem, deleteWishlistItem, updateWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
 import { sendReservationReminderEmail } from '../utils/email';
@@ -67,6 +67,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [newItemImage, setNewItemImage] = useState('');
   const [newItemDesc, setNewItemDesc] = useState('');
   const [isSubmittingItem, setIsSubmittingItem] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -429,18 +430,36 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
       const formatted = priceNum.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
       const qty = parseInt(newItemQuantity, 10) || 1;
 
-      const newItem = await saveWishlistItem({
-        name: newItemName,
-        quantity: qty,
-        price: priceNum,
-        formattedPrice: formatted,
-        category: newItemCategory,
-        image: newItemImage,
-        description: newItemDesc
-      });
+      if (editingItemId) {
+        // Update existing item
+        const updatedItem = await updateWishlistItem({
+          id: editingItemId,
+          name: newItemName,
+          quantity: qty,
+          price: priceNum,
+          formattedPrice: formatted,
+          category: newItemCategory,
+          image: newItemImage,
+          description: newItemDesc
+        });
 
-      setWishlistItems([...wishlistItems, newItem]);
-      onNotify('Item Added', `${newItemName} was added to the wishlist.`);
+        setWishlistItems(wishlistItems.map(i => i.id === editingItemId ? updatedItem : i));
+        onNotify('Item Updated', `${newItemName} was updated successfully.`);
+      } else {
+        // Add new item
+        const newItem = await saveWishlistItem({
+          name: newItemName,
+          quantity: qty,
+          price: priceNum,
+          formattedPrice: formatted,
+          category: newItemCategory,
+          image: newItemImage,
+          description: newItemDesc
+        });
+
+        setWishlistItems([...wishlistItems, newItem]);
+        onNotify('Item Added', `${newItemName} was added to the wishlist.`);
+      }
       
       // Reset form
       setNewItemName('');
@@ -449,11 +468,23 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
       setNewItemDesc('');
       setNewItemQuantity('1');
       setIsAddingItem(false);
+      setEditingItemId(null);
     } catch (err) {
       console.error(err);
-      alert('Failed to add wishlist item. Please verify your Supabase wishlist_items table.');
+      alert(editingItemId ? 'Failed to update wishlist item.' : 'Failed to add wishlist item. Please verify your Supabase wishlist_items table.');
     }
     setIsSubmittingItem(false);
+  };
+
+  const handleEditWishlistItem = (item: WishlistItem) => {
+    setEditingItemId(item.id);
+    setNewItemName(item.name);
+    setNewItemCategory(item.category);
+    setNewItemPrice(String(item.price));
+    setNewItemQuantity(String(item.quantity));
+    setNewItemImage(item.image);
+    setNewItemDesc(item.description);
+    setIsAddingItem(true);
   };
 
   const handleDeleteWishlistItem = async (id: string) => {
@@ -1151,7 +1182,19 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                     </p>
                   </div>
                   <button
-                    onClick={() => setIsAddingItem(!isAddingItem)}
+                    onClick={() => {
+                      if (isAddingItem) {
+                        setIsAddingItem(false);
+                        setEditingItemId(null);
+                        setNewItemName('');
+                        setNewItemPrice('');
+                        setNewItemImage('');
+                        setNewItemDesc('');
+                        setNewItemQuantity('1');
+                      } else {
+                        setIsAddingItem(true);
+                      }
+                    }}
                     className="flex items-center gap-2 px-8 py-4 bg-brand-goldDark text-white text-sm font-sans font-bold uppercase tracking-wider rounded-2xl hover:bg-brand-espresso transition-colors shrink-0"
                   >
                     <Plus className="w-5 h-5" /> {isAddingItem ? 'Cancel' : 'Add Item'}
@@ -1160,7 +1203,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
 
                 {isAddingItem && (
                   <div className="bg-white p-8 rounded-3xl shadow-sm">
-                    <h3 className="font-serif text-xl text-brand-espresso mb-6">Add New Wishlist Item</h3>
+                    <h3 className="font-serif text-xl text-brand-espresso mb-6">{editingItemId ? 'Edit Wishlist Item' : 'Add New Wishlist Item'}</h3>
                     <form onSubmit={handleAddWishlistItem} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -1194,7 +1237,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                         </div>
                       </div>
                       <button type="submit" disabled={isSubmittingItem} className="px-8 py-3 bg-brand-espresso text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-brand-goldDark transition-colors">
-                        {isSubmittingItem ? 'Saving...' : 'Save Item'}
+                        {isSubmittingItem ? 'Saving...' : editingItemId ? 'Save Changes' : 'Add to Wishlist'}
                       </button>
                     </form>
                   </div>
@@ -1235,13 +1278,22 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                                 </span>
                               </td>
                               <td className="p-6 text-right">
-                                <button
-                                  onClick={() => handleDeleteWishlistItem(item.id)}
-                                  className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                                  title="Delete Item"
-                                >
-                                  <Trash2 className="w-5 h-5" />
-                                </button>
+                                <div className="flex items-center justify-end gap-1">
+                                  <button
+                                    onClick={() => handleEditWishlistItem(item)}
+                                    className="p-2.5 text-brand-muted hover:text-brand-espresso hover:bg-brand-sand/50 rounded-xl transition-colors"
+                                    title="Edit Item"
+                                  >
+                                    <Edit2 className="w-5 h-5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteWishlistItem(item.id)}
+                                    className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                                    title="Delete Item"
+                                  >
+                                    <Trash2 className="w-5 h-5" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))

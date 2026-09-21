@@ -585,6 +585,30 @@ export async function deleteWishlistItem(id: string): Promise<void> {
   await adminDb('deleteWishlistItem', { id });
 }
 
+export async function updateWishlistItem(item: Omit<WishlistItem, 'isFunded' | 'fundedBy' | 'isReserved' | 'reservedUntil' | 'reservedByEmail' | 'reservedByName'>): Promise<WishlistItem> {
+  const payload = {
+    id: item.id,
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+    formatted_price: item.formattedPrice,
+    category: item.category,
+    image: item.image,
+    description: item.description
+  };
+  const data = await adminDb('saveWishlistItem', { item: payload });
+  return {
+    id: data.id,
+    name: data.name,
+    quantity: data.quantity,
+    price: data.price,
+    formattedPrice: data.formatted_price,
+    category: data.category,
+    image: data.image,
+    description: data.description
+  };
+}
+
 // --- Invite Codes ---
 
 export interface InviteCode {
