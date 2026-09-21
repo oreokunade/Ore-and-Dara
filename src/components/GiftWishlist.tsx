@@ -404,7 +404,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                     }`}
                   >
                     <CreditCard className="w-4 h-4" />
-                    <span>{item.isFunded ? 'Gift Again' : 'Pay for Item'}</span>
+                    <span>{item.price === 0 ? 'Give' : (item.isFunded ? 'Gift Again' : 'Pay for Item')}</span>
                   </button>
 
                   {!item.isFunded && (
@@ -433,13 +433,15 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                         </div>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => setReminderItem(item)}
-                        className="w-full py-2.5 rounded-xl text-xs font-sans font-semibold tracking-wider transition-all duration-200 border border-brand-sand bg-white text-brand-espresso hover:border-brand-gold/60 hover:bg-brand-cream/30 flex items-center justify-center gap-1.5"
-                      >
-                        <Clock className="w-3.5 h-3.5 text-brand-goldDark" />
-                        <span className="uppercase tracking-widest text-[11px]">Reserve</span>
-                      </button>
+                      item.price !== 0 && (
+                        <button
+                          onClick={() => setReminderItem(item)}
+                          className="w-full py-2.5 rounded-xl text-xs font-sans font-semibold tracking-wider transition-all duration-200 border border-brand-sand bg-white text-brand-espresso hover:border-brand-gold/60 hover:bg-brand-cream/30 flex items-center justify-center gap-1.5"
+                        >
+                          <Clock className="w-3.5 h-3.5 text-brand-goldDark" />
+                          <span className="uppercase tracking-widest text-[11px]">Reserve</span>
+                        </button>
+                      )
                     )
                   )}
                 </div>
