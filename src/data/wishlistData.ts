@@ -249,7 +249,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 16500,
     formattedPrice: '₦16,500',
     category: 'Kitchen & Dining',
-    image: '/assets/knife-set.jpg',
+    image: '/assets/knife-set-v3.jpg',
     description: 'Complete set of high-quality stainless steel kitchen knives.',
   },
   {
@@ -259,7 +259,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 18000,
     formattedPrice: '₦18,000',
     category: 'Kitchen & Dining',
-    image: '/assets/cutlery-set.jpg',
+    image: '/assets/cutlery-set-v3.jpg',
     description: 'Beautifully crafted cutlery set for dining and hosting.',
   },
   {
@@ -269,7 +269,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 12500,
     formattedPrice: '₦12,500',
     category: 'Kitchen & Dining',
-    image: '/assets/mug-set.jpg',
+    image: '/assets/mug-set-v3.jpg',
     description: 'Matching ceramic coffee mugs for a perfect morning brew.',
   },
   {
@@ -279,7 +279,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 25000,
     formattedPrice: '₦25,000',
     category: 'Home & Bedding',
-    image: '/assets/blanket.jpg',
+    image: '/assets/blanket-v3.jpg',
     description: 'Ultra-soft fleece blanket for warmth and comfort.',
   },
   {
@@ -289,7 +289,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 18500,
     formattedPrice: '₦18,500',
     category: 'Home & Bedding',
-    image: '/assets/throw-pillows.jpg',
+    image: '/assets/throw-pillows-v3.jpg',
     description: 'Set of stylish decorative throw pillows to elevate the living room.',
   },
   {
@@ -299,7 +299,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 14000,
     formattedPrice: '₦14,000',
     category: 'Kitchen & Dining',
-    image: '/assets/toaster.jpg',
+    image: '/assets/toaster-v3.jpg',
     description: 'Modern electric toaster for quick and even browning.',
   },
   {
