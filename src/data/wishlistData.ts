@@ -249,7 +249,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 16500,
     formattedPrice: '₦16,500',
     category: 'Kitchen & Dining',
-    image: '/assets/knife-set-v3.jpg',
+    image: '/assets/knife-set-v5.jpg',
     description: 'Complete set of high-quality stainless steel kitchen knives.',
   },
   {
@@ -259,7 +259,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 18000,
     formattedPrice: '₦18,000',
     category: 'Kitchen & Dining',
-    image: '/assets/cutlery-set-v3.jpg',
+    image: '/assets/cutlery-set-v5.jpg',
     description: 'Beautifully crafted cutlery set for dining and hosting.',
   },
   {
@@ -269,7 +269,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 12500,
     formattedPrice: '₦12,500',
     category: 'Kitchen & Dining',
-    image: '/assets/mug-set-v3.jpg',
+    image: '/assets/mug-set-v5.webp',
     description: 'Matching ceramic coffee mugs for a perfect morning brew.',
   },
   {
@@ -279,7 +279,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 25000,
     formattedPrice: '₦25,000',
     category: 'Home & Bedding',
-    image: '/assets/blanket-v3.jpg',
+    image: '/assets/blanket-v5.jpg',
     description: 'Ultra-soft fleece blanket for warmth and comfort.',
   },
   {
@@ -299,7 +299,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     price: 14000,
     formattedPrice: '₦14,000',
     category: 'Kitchen & Dining',
-    image: '/assets/toaster-v3.jpg',
+    image: '/assets/toaster-v5.jpg',
     description: 'Modern electric toaster for quick and even browning.',
   },
   {
