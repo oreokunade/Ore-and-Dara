@@ -330,11 +330,6 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                   loading="lazy"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                {item.quantity > 1 && (
-                  <span className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-brand-gold text-brand-espresso text-[10px] font-sans font-bold uppercase tracking-wider">
-                    Qty: {item.quantity} Needed
-                  </span>
-                )}
 
                 {!item.isFunded && item.isReserved && (
                   <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-brand-espresso/85 backdrop-blur-xs text-brand-cream text-[10px] font-sans font-semibold tracking-wider flex items-center gap-1 shadow-sm">
@@ -370,11 +365,16 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                   {item.description}
                 </p>
 
-                {/* Price */}
-                <div className="mt-4 mb-4">
+                {/* Price & Quantity */}
+                <div className="mt-4 mb-4 flex items-center justify-between">
                   <span className="font-mono text-2xl font-bold text-brand-espresso">
                     {item.formattedPrice}
                   </span>
+                  {item.quantity > 1 && (
+                    <span className="px-3 py-1 rounded-full bg-brand-gold/40 text-brand-espresso text-[10px] font-sans font-bold uppercase tracking-wider">
+                      Qty: {item.quantity} Needed
+                    </span>
+                  )}
                 </div>
 
                 {/* Action Buttons */}

@@ -63,13 +63,13 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
   },
   {
     id: 'wishlist-cooker',
-    name: 'Multi-Burner Stainless Steel Gas Cooker',
+    name: 'Silver Crest 10-in-1 Electric Pressure Cooker',
     quantity: 1,
     price: 143180,
     formattedPrice: '₦143,180',
     category: 'Kitchen & Dining',
     image: 'https://ng.jumia.is/unsafe/fit-in/500x500/filters:fill(white)/product/14/8755814/1.jpg?2343',
-    description: 'Heavy-duty cast iron trivets, automatic ignition, and oven grill for delicious family feasts.',
+    description: 'Multipurpose 6.0L electric pressure cooker for fast, safe, and efficient cooking.',
   },
   {
     id: 'wishlist-airfryer',
