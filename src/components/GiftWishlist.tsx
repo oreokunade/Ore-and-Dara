@@ -274,7 +274,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
           >
             <div className="absolute inset-0 bg-brand-espresso/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
             <img 
-              src="/assets/Image2.jpeg" 
+              src="/assets/0V3A8999.jpg" 
               alt="Oreoluwa & Oluwadara - Our forever starts now"
               className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
