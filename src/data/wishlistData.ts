@@ -308,7 +308,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     quantity: 1,
     price: 160000,
     formattedPrice: '₦160,000',
-    category: 'Electronics',
+    category: 'Living & Comfort',
     image: '/assets/Hollyland lark m2.jpg',
     description: 'High-quality wireless microphone perfect for recording content and creating memories.',
   },
