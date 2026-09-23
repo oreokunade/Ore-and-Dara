@@ -97,13 +97,13 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
           return {
             ...item,
-            isFunded: !!pledgeMatch,
-            fundedBy: pledgeMatch?.giverName,
-            isReserved: !pledgeMatch && !!reservationMatch,
-            reservedUntil: reservationMatch?.expiresAt,
-            reservedByEmail: reservationMatch?.email,
-            reservedByName: reservationMatch?.reservedByName,
-            isAnonymousReservation: reservationMatch?.isAnonymous
+            isFunded: item.price === 0 ? false : !!pledgeMatch,
+            fundedBy: item.price === 0 ? undefined : pledgeMatch?.giverName,
+            isReserved: item.price === 0 ? false : (!pledgeMatch && !!reservationMatch),
+            reservedUntil: item.price === 0 ? undefined : reservationMatch?.expiresAt,
+            reservedByEmail: item.price === 0 ? undefined : reservationMatch?.email,
+            reservedByName: item.price === 0 ? undefined : reservationMatch?.reservedByName,
+            isAnonymousReservation: item.price === 0 ? undefined : reservationMatch?.isAnonymous
           };
         })
       );
@@ -225,7 +225,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
       setItems((prev) =>
         prev.map((it) =>
           it.id === activeItem.id
-            ? { ...it, isFunded: true, fundedBy: giverName.trim() }
+            ? { ...it, isFunded: it.price === 0 ? false : true, fundedBy: it.price === 0 ? undefined : giverName.trim() }
             : it
         )
       );
