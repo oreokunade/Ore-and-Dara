@@ -33,13 +33,15 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const isPublicMode = import.meta.env.VITE_SITE_MODE === 'public';
+
   const navLinks = [
     { name: 'Welcome', href: '/#welcome', icon: Heart },
-    { name: 'Programme', href: '/#programme', icon: Heart },
-    { name: 'Colours', href: '/#colours', icon: Palette },
+    ...(!isPublicMode ? [{ name: 'Programme', href: '/#programme', icon: Heart }] : []),
+    ...(!isPublicMode ? [{ name: 'Colours', href: '/#colours', icon: Palette }] : []),
     { name: 'Wishlist', href: '/wishlist', icon: ShoppingBag },
-    { name: 'Q & A', href: '/#qa', icon: HelpCircle },
-    { name: 'RSVP', href: '/#rsvp', icon: Users },
+    ...(!isPublicMode ? [{ name: 'Q & A', href: '/#qa', icon: HelpCircle }] : []),
+    ...(!isPublicMode ? [{ name: 'RSVP', href: '/#rsvp', icon: Users }] : []),
     { name: 'Gallery', href: '/#gallery', icon: ImageIcon },
   ];
 

@@ -94,18 +94,26 @@ export function App() {
     }
   };
 
+  const isPublicMode = import.meta.env.VITE_SITE_MODE === 'public';
+
   const HomePage = () => (
     <>
       <Navbar onOpenRsvp={scrollToRsvp} />
       <main>
         <Hero onRsvpClick={scrollToRsvp} />
         <Countdown />
-        <EventDetails onNotify={addToast} />
-        <Programme />
-        <Colours />
+        
+        {!isPublicMode && (
+          <>
+            <EventDetails onNotify={addToast} />
+            <Programme />
+            <Colours />
+          </>
+        )}
         
         <Gifts onNotify={addToast} />
-        <FloatingRSVP onRSVPClick={scrollToRsvp} />
+        
+        {!isPublicMode && <FloatingRSVP onRSVPClick={scrollToRsvp} />}
 
         {/* Link to Wishlist Page */}
         <section id="wishlist" className="py-24 sm:py-32 px-4 sm:px-6 bg-brand-cream relative border-t border-brand-espresso/10">
@@ -141,8 +149,12 @@ export function App() {
             </div>
           </div>
         </section>
-        <QandA />
-        <RsvpForm onNotify={addToast} />
+        {!isPublicMode && (
+          <>
+            <QandA />
+            <RsvpForm onNotify={addToast} />
+          </>
+        )}
         <Gallery />
       </main>
       <Footer />
