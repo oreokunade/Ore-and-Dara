@@ -159,12 +159,14 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
 
           {/* CTA Button - Clean, Borderless */}
           <div className="hidden sm:flex items-center gap-4">
-            <button
-              onClick={onOpenRsvp}
-              className="px-6 py-2.5 rounded-full bg-brand-gold hover:bg-brand-cream text-brand-espresso text-xs font-sans font-semibold tracking-widest uppercase transition-all duration-300 shadow-md hover:scale-105"
-            >
-              RSVP Now
-            </button>
+            {!isPublicMode && (
+              <button
+                onClick={onOpenRsvp}
+                className="px-6 py-2.5 rounded-full bg-brand-gold hover:bg-brand-cream text-brand-espresso text-xs font-sans font-semibold tracking-widest uppercase transition-all duration-300 shadow-md hover:scale-105"
+              >
+                RSVP Now
+              </button>
+            )}
           </div>
 
           {/* Mobile Right Actions: Music Button & Burger Menu horizontally aligned */}

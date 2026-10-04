@@ -101,7 +101,7 @@ export function App() {
       <Navbar onOpenRsvp={scrollToRsvp} />
       <main>
         <Hero onRsvpClick={scrollToRsvp} />
-        <Countdown />
+        {!isPublicMode && <Countdown />}
         
         {!isPublicMode && (
           <>

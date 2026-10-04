@@ -7,6 +7,8 @@ interface HeroProps {
 }
 
 export const Hero: FC<HeroProps> = () => {
+  const isPublicMode = import.meta.env.VITE_SITE_MODE === 'public';
+
   return (
     <section id="welcome" className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-brand-espresso">
       {/* Background Image with Cinematic Moody Overlay */}
@@ -58,17 +60,19 @@ export const Hero: FC<HeroProps> = () => {
           </motion.p>
 
         {/* Location - Borderless Clean Text */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="flex items-center justify-center gap-2 mb-2 sm:mb-3 text-brand-cream"
-        >
-          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-brand-gold shrink-0" />
-          <span className="font-sans text-[14px] sm:text-[15px] tracking-widest uppercase">
-            Lagos, Nigeria
-          </span>
-        </motion.div>
+        {!isPublicMode && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="flex items-center justify-center gap-2 mb-2 sm:mb-3 text-brand-cream"
+          >
+            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-brand-gold shrink-0" />
+            <span className="font-sans text-[14px] sm:text-[15px] tracking-widest uppercase">
+              Lagos, Nigeria
+            </span>
+          </motion.div>
+        )}
 
         {/* Hashtag */}
         <motion.p
