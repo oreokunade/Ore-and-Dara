@@ -13,7 +13,7 @@ export const Hero: FC<HeroProps> = () => {
     <section id="welcome" className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-brand-espresso">
       {/* Background Image with Cinematic Moody Overlay */}
       <div className="absolute inset-0 z-0">
-        <img fetchpriority="high" decoding="sync"
+        <img  decoding="sync"
           src="/assets/hero-image-new.jpg"
           alt="Oluwadara and Oreoluwa"
           className="w-full h-full object-cover object-[center_45%] scale-105 transition-transform duration-1000 ease-out"
@@ -32,7 +32,7 @@ export const Hero: FC<HeroProps> = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-3 sm:mb-4 drop-shadow-md"
           >
-            <img fetchpriority="high" decoding="sync" 
+            <img  decoding="sync" 
               src="/assets/logo.png" 
               alt="Oluwadara & Oreoluwa Logo" 
               className="h-32 sm:h-44 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"

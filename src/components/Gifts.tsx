@@ -81,7 +81,7 @@ export const Gifts: FC<GiftsProps> = ({ onNotify }) => {
             className="text-brand-muted text-[17px] sm:text-lg font-sans mt-5 leading-relaxed max-w-xl mx-auto"
           >
             {import.meta.env.VITE_SITE_MODE === 'public'
-              ? 'We are so grateful for your love and generosity. Should you wish to bless us with a gift, we deeply appreciate your kindness.'
+              ? 'We are getting married and will be building our home together. If you would like to support us on this journey, we deeply appreciate your kindness and generosity.'
               : 'We are so grateful for your love and generosity. Your presence is the greatest gift, but should you wish to bless us with a gift, we deeply appreciate your kindness.'}
           </motion.p>
         </div>
