@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { OurStory } from './components/OurStory';
 import { Countdown } from './components/Countdown';
 import { EventDetails } from './components/EventDetails';
 import { Programme } from './components/Programme';
@@ -101,6 +102,7 @@ export function App() {
       <Navbar onOpenRsvp={scrollToRsvp} />
       <main>
         <Hero onRsvpClick={scrollToRsvp} />
+        <OurStory />
         {!isPublicMode && <Countdown />}
         
         {!isPublicMode && (
