@@ -209,7 +209,9 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
         <div className="fixed inset-0 z-30 bg-[#1a1410] flex flex-col justify-center items-center p-6 md:hidden animate-fade-in">
           <div className="text-center mb-8">
             <h3 className="font-alex text-4xl text-brand-cream">Oreoluwa & Oluwadara</h3>
-            <p className="text-brand-gold text-xs tracking-widest uppercase mt-2">December 12, 2026</p>
+            <p className="text-brand-gold text-xs tracking-widest uppercase mt-2">
+              {isPublicMode ? 'December 2026' : 'December 12, 2026'}
+            </p>
           </div>
 
           <div className="flex flex-col gap-6 text-center w-full max-w-xs">
