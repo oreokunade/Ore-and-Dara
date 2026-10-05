@@ -315,7 +315,7 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
   {
     id: 'wishlist-ergonomic-chair',
     name: 'Generic Moq Ergonomic Swivel Mesh High Back Chair With Headrest',
-    quantity: 1,
+    quantity: 2,
     price: 116800,
     formattedPrice: '₦116,800',
     category: 'Living & Comfort',
