@@ -8,7 +8,6 @@ import { EventDetails } from './components/EventDetails';
 import { Programme } from './components/Programme';
 import { Colours } from './components/Colours';
 import { GiftWishlist } from './components/GiftWishlist';
-import { Gifts } from './components/Gifts';
 import { Gallery } from './components/Gallery';
 import { QandA } from './components/QandA';
 import { RsvpForm } from './components/RsvpForm';
@@ -113,8 +112,6 @@ export function App() {
             <Colours />
           </>
         )}
-        
-        <Gifts onNotify={addToast} />
         
         {isPublicMode && <Collaborate onNotify={addToast} />}
         
