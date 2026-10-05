@@ -38,7 +38,7 @@ export const OurStory: FC = () => {
             className="w-full md:w-1/2"
           >
             <div className="aspect-[4/5] sm:aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl relative bg-brand-espresso border border-brand-gold/20">
-              <img
+              <img loading="lazy" decoding="async"
                 src="/assets/0V3A8914.jpg" 
                 alt="Ore and Dara"
                 className="w-full h-full object-cover"

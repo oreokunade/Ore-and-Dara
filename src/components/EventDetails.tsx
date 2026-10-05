@@ -96,7 +96,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
             <div className="bg-brand-cream/80 rounded-3xl p-8 sm:p-12 shadow-sm text-center flex flex-col justify-center h-full items-center border border-brand-sand/30 relative overflow-hidden">
                 {/* Faint Background Image */}
                 <div className="absolute inset-0 z-0 opacity-15">
-                  <img src="/assets/hero-image-new.jpg" alt="Couple" className="w-full h-full object-cover object-top mix-blend-luminosity grayscale" />
+                  <img loading="lazy" decoding="async" src="/assets/hero-image-new.jpg" alt="Couple" className="w-full h-full object-cover object-top mix-blend-luminosity grayscale" />
                 </div>
                 
                 <div className="relative z-10 flex flex-col items-center w-full">
@@ -164,7 +164,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
           >
             {/* Background Image Layer */}
             <div className="absolute inset-0 z-0">
-              <img src="/assets/celebr8-center.jpg" alt="Celebr8 Center" className="w-full h-full object-cover opacity-15 mix-blend-luminosity" />
+              <img loading="lazy" decoding="async" src="/assets/celebr8-center.jpg" alt="Celebr8 Center" className="w-full h-full object-cover opacity-15 mix-blend-luminosity" />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-espresso via-brand-espresso/70 to-transparent" />
             </div>
 

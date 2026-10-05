@@ -1272,7 +1272,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                           wishlistItems.map((item) => (
                             <tr key={item.id} className="border-b border-brand-sand/30 hover:bg-brand-cream/20 transition-colors">
                               <td className="p-6">
-                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl" />
+                                <img loading="lazy" decoding="async" src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-xl" />
                               </td>
                               <td className="p-6">
                                 <p className="font-semibold text-base mb-1">{item.name}</p>

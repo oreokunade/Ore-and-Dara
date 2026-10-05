@@ -124,7 +124,7 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
             to="/"
             className="flex items-center group transition-transform duration-300 hover:scale-105"
           >
-            <img 
+            <img fetchpriority="high" decoding="sync" 
               src="/assets/logo.png" 
               alt="O & D Logo" 
               className="h-16 sm:h-[90px] w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all duration-300"

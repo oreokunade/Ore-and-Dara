@@ -125,7 +125,7 @@ export function App() {
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10 lg:gap-14 bg-white/60 backdrop-blur-sm p-6 sm:p-12 rounded-3xl border border-brand-sand/50 shadow-sm">
             {/* Couple Portrait Card */}
             <div className="w-full max-w-[280px] sm:max-w-xs shrink-0 rounded-2xl overflow-hidden shadow-2xl border-2 border-brand-gold/30 bg-brand-espresso group relative aspect-[3/4]">
-              <img 
+              <img loading="lazy" decoding="async" 
                 src="/assets/0V3A8999.jpg" 
                 alt="Oreoluwa & Oluwadara - Our forever starts now" 
                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105" 

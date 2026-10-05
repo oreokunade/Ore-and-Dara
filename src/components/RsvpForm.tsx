@@ -137,7 +137,7 @@ export const RsvpForm: FC<RsvpFormProps> = ({ onNotify }) => {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-16 flex flex-col items-center">
           <div className="w-40 h-40 sm:w-56 sm:h-56 rounded-full overflow-hidden mb-8 shadow-lg relative border-4 border-white">
-            <img src="/assets/0V3A8979.jpg" alt="Oreoluwa & Oluwadara" className="w-full h-full object-cover object-[center_30%]" />
+            <img loading="lazy" decoding="async" src="/assets/0V3A8979.jpg" alt="Oreoluwa & Oluwadara" className="w-full h-full object-cover object-[center_30%]" />
             <div className="absolute inset-0 bg-brand-espresso/10"></div>
           </div>
           <motion.p

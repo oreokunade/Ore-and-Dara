@@ -20,7 +20,7 @@ export const Footer: FC = () => {
           viewport={{ once: true }}
           className="mb-6 flex items-center justify-center"
         >
-          <img 
+          <img loading="lazy" decoding="async" 
             src="/assets/logo.png" 
             alt="O & D Logo" 
             className="h-24 sm:h-32 w-auto object-contain drop-shadow-md"

@@ -273,7 +273,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
             className="w-full md:w-1/3 aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border-4 border-white relative group shrink-0"
           >
             <div className="absolute inset-0 bg-brand-espresso/10 group-hover:bg-transparent transition-colors duration-500 z-10" />
-            <img 
+            <img loading="lazy" decoding="async" 
               src="/assets/0V3A8999.jpg" 
               alt="Oreoluwa & Oluwadara - Our forever starts now"
               className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
@@ -515,7 +515,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                   <>
                     {/* Item Snapshot with Quantity Selector */}
                     <div className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl bg-white border border-brand-sand">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={activeItem.image}
                         alt={activeItem.name}
                         className="w-24 h-24 rounded-xl object-cover shrink-0"
@@ -889,7 +889,7 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
 
                     {/* Item preview */}
                     <div className="flex items-center gap-3 p-3 rounded-2xl bg-white border border-brand-sand">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={reminderItem.image}
                         alt={reminderItem.name}
                         className="w-14 h-14 rounded-xl object-cover shrink-0"
