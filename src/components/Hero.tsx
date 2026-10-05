@@ -76,6 +76,18 @@ export const Hero: FC<HeroProps> = () => {
           </motion.div>
         )}
 
+        {/* Public Mode Date Teaser */}
+        {isPublicMode && (
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="font-serif italic text-2xl sm:text-3xl text-brand-cream/90 mb-2 sm:mb-3"
+          >
+            December 2026
+          </motion.p>
+        )}
+
         {/* Hashtag */}
         <motion.p
           initial={{ opacity: 0 }}
