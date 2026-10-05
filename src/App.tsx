@@ -14,6 +14,7 @@ import { QandA } from './components/QandA';
 import { RsvpForm } from './components/RsvpForm';
 import { Footer } from './components/Footer';
 import { MusicPlayer } from './components/MusicPlayer';
+import { Collaborate } from './components/Collaborate';
 import { AdminPage } from './pages/AdminPage';
 import { FloatingRSVP } from './components/FloatingRSVP';
 import { ToastContainer } from './components/Toast';
@@ -114,6 +115,8 @@ export function App() {
         )}
         
         <Gifts onNotify={addToast} />
+        
+        {isPublicMode && <Collaborate onNotify={addToast} />}
         
         {!isPublicMode && <FloatingRSVP onRSVPClick={scrollToRsvp} />}
 
