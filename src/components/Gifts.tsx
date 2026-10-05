@@ -80,7 +80,9 @@ export const Gifts: FC<GiftsProps> = ({ onNotify }) => {
             transition={{ delay: 0.3 }}
             className="text-brand-muted text-[17px] sm:text-lg font-sans mt-5 leading-relaxed max-w-xl mx-auto"
           >
-            We are so grateful for your love and generosity. Your presence is the greatest gift, but should you wish to bless us with a gift, we deeply appreciate your kindness.
+            {import.meta.env.VITE_SITE_MODE === 'public'
+              ? 'We are so grateful for your love and generosity. Should you wish to bless us with a gift, we deeply appreciate your kindness.'
+              : 'We are so grateful for your love and generosity. Your presence is the greatest gift, but should you wish to bless us with a gift, we deeply appreciate your kindness.'}
           </motion.p>
         </div>
 
