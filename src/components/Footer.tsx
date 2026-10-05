@@ -49,9 +49,15 @@ export const Footer: FC = () => {
         </motion.p>
 
         <p className="text-sm font-sans tracking-[0.2em] uppercase text-brand-muted/70 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 justify-center mb-10">
-          <span>Saturday, December 12, 2026</span>
-          <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-brand-gold/30"></span>
-          <span>Lagos, Nigeria</span>
+          {import.meta.env.VITE_SITE_MODE === 'public' ? (
+            <span>December 2026</span>
+          ) : (
+            <>
+              <span>Saturday, December 12, 2026</span>
+              <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-brand-gold/30"></span>
+              <span>Lagos, Nigeria</span>
+            </>
+          )}
         </p>
 
         {/* Back to top button */}
