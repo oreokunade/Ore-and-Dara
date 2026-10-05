@@ -50,14 +50,16 @@ export const Hero: FC<HeroProps> = () => {
           </motion.h1>
 
           {/* Invitation Text */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="font-serif italic text-lg sm:text-2xl md:text-3xl text-brand-cream/90 max-w-2xl mt-1 mb-2 sm:mb-3 font-light tracking-wide"
-          >
-            We Joyfully invite you to our wedding
-          </motion.p>
+          {!isPublicMode && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="font-serif italic text-lg sm:text-2xl md:text-3xl text-brand-cream/90 max-w-2xl mt-1 mb-2 sm:mb-3 font-light tracking-wide"
+            >
+              We Joyfully invite you to our wedding
+            </motion.p>
+          )}
 
         {/* Location - Borderless Clean Text */}
         {!isPublicMode && (

@@ -228,15 +228,17 @@ export const Navbar: FC<NavbarProps> = ({ onOpenRsvp }) => {
               );
             })}
 
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenRsvp();
-              }}
-              className="mt-4 w-full py-3.5 rounded-full bg-brand-gold text-brand-espresso font-sans text-[17px] font-semibold tracking-widest uppercase hover:bg-brand-cream transition-colors shadow-lg"
-            >
-              Confirm Attendance
-            </button>
+            {!isPublicMode && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenRsvp();
+                }}
+                className="mt-4 w-full py-3.5 rounded-full bg-brand-gold text-brand-espresso font-sans text-[17px] font-semibold tracking-widest uppercase hover:bg-brand-cream transition-colors shadow-lg"
+              >
+                Confirm Attendance
+              </button>
+            )}
           </div>
         </div>
       )}

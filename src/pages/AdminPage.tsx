@@ -7,12 +7,6 @@ import { useNavigate } from 'react-router-dom';
 // Cryptographic salt to prevent precomputed rainbow table lookups
 const PIN_SALT = 'OreDara_Wedding_2026_Salt_';
 
-// Salted SHA-256 hashes of authorized PINs
-const ORE_PIN_HASH = '8c07cfdfbe255d306247038188b8020416cdb8c97260969c13cfb06378d8cba2'; // 1999
-const DARA_PIN_HASH = '39a7cc6fbd4379686efcca59317abe6ac88f6a35af4b043faa5e977ff3c9bf19'; // 2003
-const GROOMS_FAMILY_PIN_HASH = 'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7';
-const BRIDES_FAMILY_PIN_HASH = '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d';
-const CUSTOM_1964_PIN_HASH = 'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'; // PIN: 1964
 
 export type AdminRole = 'ore' | 'dara' | 'groomsfamily' | 'bridesfamily' | 'custom1964';
 
@@ -88,32 +82,23 @@ export const AdminPage: FC<{ onNotify: (title: string, message?: string) => void
     setPinError('');
     const enteredHash = await hashPin(pin);
     
-    if (enteredHash === ORE_PIN_HASH) {
-      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
-      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('ore');
-    } else if (enteredHash === DARA_PIN_HASH) {
-      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
-      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('dara');
-    } else if (enteredHash === GROOMS_FAMILY_PIN_HASH) {
-      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
-      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('groomsfamily');
-    } else if (enteredHash === BRIDES_FAMILY_PIN_HASH) {
-      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
-      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('bridesfamily');
-    } else if (enteredHash === CUSTOM_1964_PIN_HASH) {
-      localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
-      localStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      localStorage.setItem('admin_pin_hash', enteredHash);
-      setAuthenticatedRole('custom1964');
-    } else {
+    try {
+      const res = await fetch('/api/admin-db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pinHash: enteredHash, action: 'verifyPin' })
+      });
+      
+      const json = await res.json();
+      if (res.ok && json.success && json.data?.role) {
+        localStorage.removeItem(ATTEMPTS_STORAGE_KEY);
+        localStorage.removeItem(LOCKOUT_STORAGE_KEY);
+        localStorage.setItem('admin_pin_hash', enteredHash);
+        setAuthenticatedRole(json.data.role as AdminRole);
+      } else {
+        throw new Error('Invalid PIN');
+      }
+    } catch (err) {
       const attempts = parseInt(localStorage.getItem(ATTEMPTS_STORAGE_KEY) || '0', 10) + 1;
       localStorage.setItem(ATTEMPTS_STORAGE_KEY, attempts.toString());
 

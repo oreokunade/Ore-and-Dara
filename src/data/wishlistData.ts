@@ -313,6 +313,16 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     description: 'High-quality wireless microphone perfect for recording content and creating memories.',
   },
   {
+    id: 'wishlist-ergonomic-chair',
+    name: 'Generic Moq Ergonomic Swivel Mesh High Back Chair With Headrest',
+    quantity: 1,
+    price: 116800,
+    formattedPrice: '₦116,800',
+    category: 'Living & Comfort',
+    image: 'https://ng.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/41/4335104/1.jpg',
+    description: 'High back ergonomic mesh office chair with adjustable headrest and lumbar support for the home office.',
+  },
+  {
     id: 'wishlist-cash-gift',
     name: 'Cash Gift',
     quantity: 1,

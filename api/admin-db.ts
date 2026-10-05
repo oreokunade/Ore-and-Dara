@@ -20,17 +20,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { pinHash, action, payload } = req.body;
 
-  // Verify the PIN hash securely on the server
-  const validHashes = [
-    '8c07cfdfbe255d306247038188b8020416cdb8c97260969c13cfb06378d8cba2', // Ore (1999)
-    '39a7cc6fbd4379686efcca59317abe6ac88f6a35af4b043faa5e977ff3c9bf19', // Dara (2003)
-    'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7', // Groom's fam
-    '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d', // Bride's fam
-    'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8'  // Ore's dad
-  ];
+  const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '127.0.0.1';
+  const rateLimitKey = `ratelimit:admin:${ip}`;
 
-  if (!validHashes.includes(pinHash)) {
+  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  // Check rate limit if KV/Upstash is configured
+  if (kvUrl && kvToken) {
+    try {
+      const { createClient } = require('@vercel/kv');
+      const kv = createClient({ url: kvUrl, token: kvToken });
+      const attempts = (await kv.get(rateLimitKey)) || 0;
+      if (attempts >= 10) {
+        return res.status(429).json({ error: 'Too many attempts. Security lockout active for 5 minutes.' });
+      }
+    } catch (e) {
+      console.warn('KV rate limiting failed, bypassing:', e);
+    }
+  }
+
+  // Verify the PIN hash securely on the server
+  const validHashes: Record<string, string> = {
+    '8c07cfdfbe255d306247038188b8020416cdb8c97260969c13cfb06378d8cba2': 'ore', // 1999
+    '39a7cc6fbd4379686efcca59317abe6ac88f6a35af4b043faa5e977ff3c9bf19': 'dara', // 2003
+    'e13f99645f87a7c2aab8b5ae9074165318cde28e754a566087006120fca132e7': 'groomsfamily',
+    '42ff322c7b6c9b702d027adeb217b1f226a41d71a86f9a9dcfdcf38a21cf515d': 'bridesfamily',
+    'ec9de88936216680d2661d006be2e47b070650b6c8d5c177ccf7c4e13fe943d8': 'custom1964'
+  };
+
+  const role = validHashes[pinHash];
+  if (!role) {
+    // Record failed attempt
+    if (kvUrl && kvToken) {
+      try {
+        const { createClient } = require('@vercel/kv');
+        const kv = createClient({ url: kvUrl, token: kvToken });
+        const attempts = await kv.incr(rateLimitKey);
+        if (attempts === 1) await kv.expire(rateLimitKey, 300); // 5 mins
+      } catch (e) {}
+    }
     return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // Reset rate limit on success
+  if (kvUrl && kvToken) {
+    try {
+      const { createClient } = require('@vercel/kv');
+      const kv = createClient({ url: kvUrl, token: kvToken });
+      await kv.del(rateLimitKey);
+    } catch (e) {}
+  }
+
+  if (action === 'verifyPin') {
+    return res.status(200).json({ success: true, data: { role } });
   }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
