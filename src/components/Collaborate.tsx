@@ -10,23 +10,27 @@ export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
   const [formData, setFormData] = useState({ name: '', contact: '', offer: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg('');
 
     try {
       // Create HTML email body
       const html = `
-        <h2>New Vendor Collaboration Request</h2>
-        <p><strong>Name/Brand:</strong> ${formData.name}</p>
-        <p><strong>Contact Info:</strong> ${formData.contact}</p>
-        <p><strong>What they are offering:</strong><br/> ${formData.offer.replace(/\\n/g, '<br/>')}</p>
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 10px;">
+          <h2 style="color: #2b2b2b; margin-bottom: 20px;">New Vendor Collaboration Request</h2>
+          <p><strong>Name / Brand:</strong> ${formData.name}</p>
+          <p><strong>Contact Info:</strong> ${formData.contact}</p>
+          <p><strong>Offer Details:</strong><br/> ${formData.offer.replace(/\\n/g, '<br/>')}</p>
+        </div>
       `;
 
-      // Use the generic sendEmail function
+      // Send to Ore's email
       const res = await sendEmail({
-        to: 'YOUR_EMAIL_HERE', // TODO: update with real email
+        to: 'oreokunade@gmail.com',
         subject: `Wedding Collab: ${formData.name}`,
         html,
       });
@@ -35,11 +39,11 @@ export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
         setSubmitted(true);
         onNotify('Thank you!', 'Your request has been sent. We will be in touch shortly.');
       } else {
-        throw new Error('Failed to send email');
+        throw new Error(res.error || 'Failed to send email');
       }
-    } catch (err) {
-      console.error(err);
-      onNotify('Oops', 'Something went wrong. Please try again later.');
+    } catch (err: any) {
+      console.error('Collaboration form error:', err);
+      setErrorMsg(err.message || 'Something went wrong. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -115,6 +119,11 @@ export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
                 onSubmit={handleSubmit}
                 className="space-y-5"
               >
+                {errorMsg && (
+                  <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-sans text-center">
+                    {errorMsg}
+                  </div>
+                )}
                 <div>
                   <label htmlFor="name" className="block text-xs font-semibold tracking-widest uppercase text-brand-espresso/70 mb-2">Name / Brand Name</label>
                   <input
