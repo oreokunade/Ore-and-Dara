@@ -301,3 +301,71 @@ export async function sendReservationReminderEmail(params: {
     html: getEmailWrapper(content)
   });
 }
+
+export async function sendGiftNotificationEmail(params: {
+  giverName: string;
+  giverEmail?: string;
+  giverRelation?: string;
+  giverNote?: string;
+  itemName: string;
+  amount: number;
+}): Promise<{ success: boolean; error?: any }> {
+  const formattedAmount = params.amount.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+  
+  const relationLabels: Record<string, string> = {
+    'groom': 'The Groom',
+    'bride': 'The Bride',
+    'groomsfamily': "Groom's Family",
+    'bridefamily': "Bride's Family",
+    'both': 'Both (Groom & Bride)'
+  };
+  const relationText = params.giverRelation ? (relationLabels[params.giverRelation] || params.giverRelation) : 'Not specified';
+
+  const content = `
+    <h2 style="margin: 0 0 15px 0; color: #1c1917; font-family: Georgia, serif; font-size: 24px; font-weight: normal;">
+      🎉 New Gift Received!
+    </h2>
+    <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #44403c;">
+      Someone just blessed you with a gift on your wedding registry. Here are the details:
+    </p>
+
+    <!-- Gift Details Box -->
+    <div style="background-color: #faf8f2; border: 1px solid #e7e0d3; border-radius: 16px; padding: 20px 25px; margin-bottom: 25px;">
+      <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">
+        Gift Details
+      </p>
+      <h3 style="margin: 0 0 8px 0; font-family: Georgia, serif; font-size: 22px; color: #1c1917;">
+        ${params.itemName}
+      </h3>
+      <p style="margin: 0; font-size: 20px; font-weight: 700; color: #1c1917;">${formattedAmount}</p>
+    </div>
+
+    <!-- Giver Info -->
+    <div style="background-color: #ffffff; border: 1px solid #e7e0d3; border-radius: 14px; padding: 18px; margin-bottom: 25px;">
+      <p style="margin: 0 0 12px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">
+        From
+      </p>
+      <p style="margin: 0 0 8px 0; font-size: 16px; color: #1c1917;"><strong>Name:</strong> ${params.giverName}</p>
+      ${params.giverEmail ? `<p style="margin: 0 0 8px 0; font-size: 15px; color: #44403c;"><strong>Email:</strong> ${params.giverEmail}</p>` : ''}
+      <p style="margin: 0 0 8px 0; font-size: 15px; color: #44403c;"><strong>Connection:</strong> ${relationText}</p>
+      ${params.giverNote ? `
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e7e0d3;">
+          <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #8c734e; font-weight: 600;">
+            Their Message
+          </p>
+          <p style="margin: 0; font-size: 15px; font-style: italic; line-height: 1.6; color: #44403c;">"${params.giverNote}"</p>
+        </div>
+      ` : ''}
+    </div>
+
+    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #78716c;">
+      Please check your bank account to confirm the transfer. You can view all gifts on your admin dashboard.
+    </p>
+  `;
+
+  return sendEmail({
+    to: 'oreokunade@gmail.com',
+    subject: `💰 New Gift: ${params.itemName} (${formattedAmount}) from ${params.giverName}`,
+    html: getEmailWrapper(content)
+  });
+}

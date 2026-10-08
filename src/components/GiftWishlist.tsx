@@ -8,7 +8,7 @@ import {
 import { INITIAL_WISHLIST_ITEMS } from '../data/wishlistData';
 import { WishlistItem, GiftPledge } from '../types';
 import { getStoredGiftPledges, saveGiftPledge, saveReminder, getActiveReservations, getStoredWishlistItems } from '../utils/storage';
-import { sendReservationConfirmationEmail } from '../utils/email';
+import { sendReservationConfirmationEmail, sendGiftNotificationEmail } from '../utils/email';
 
 interface GiftWishlistProps {
   onNotify: (title: string, message?: string) => void;
@@ -239,6 +239,16 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
           colors: ['#c5a880', '#A80A4E', '#334a33', '#ffd700'],
         });
       } catch (err) {}
+
+      // Notify the couple via email (fire-and-forget)
+      sendGiftNotificationEmail({
+        giverName: giverName.trim(),
+        giverEmail: giverEmail.trim() || undefined,
+        giverRelation: giverRelation || undefined,
+        giverNote: giverNote.trim() || undefined,
+        itemName: isCashGift ? 'Cash Gift' : activeItem.name,
+        amount: finalAmount,
+      }).catch((err) => console.error('Failed to send gift notification email:', err));
 
       setIsSubmitting(false);
       setJustGifted(pledge);
