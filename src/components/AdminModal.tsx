@@ -656,26 +656,39 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                             <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
                               <Filter className="w-3.5 h-3.5" /> Creator
                             </div>
-                              {[
-                                { id: 'all', label: 'All' },
-                                { id: 'ore', label: 'Ore (1999)' },
-                                { id: 'dara', label: 'Dara (2003)' },
-                                { id: 'custom1964', label: "Ore's Dad (1964)" },
-                              { id: 'groomsfamily', label: "Ore's Mum (1972)" },
-                              { id: 'bridesfamily', label: "Dara's Mum (1975)" }
-                            ].map((f) => (
-                              <button
-                                key={f.id}
-                                onClick={() => setCreatorFilter(f.id)}
-                                className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
-                                  creatorFilter === f.id 
-                                    ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
-                                    : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
-                                }`}
-                              >
-                                {f.label}
-                              </button>
-                            ))}
+                          {(() => {
+                            // Compute RSVP count per creator
+                            const getCreatorRsvpCount = (creatorId: string): number => {
+                              if (creatorId === 'all') return rsvps.length;
+                              const creatorCodes = codes.filter(c => c.created_by === creatorId && c.is_used && c.used_by);
+                              const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
+                              return rsvps.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase())).length;
+                            };
+
+                            return [
+                              { id: 'all', label: 'All' },
+                              { id: 'ore', label: 'Ore' },
+                              { id: 'dara', label: 'Dara' },
+                              { id: 'custom1964', label: "Ore's Dad" },
+                              { id: 'groomsfamily', label: "Ore's Mum" },
+                              { id: 'bridesfamily', label: "Dara's Mum" }
+                            ].map((f) => {
+                              const count = getCreatorRsvpCount(f.id);
+                              return (
+                                <button
+                                  key={f.id}
+                                  onClick={() => setCreatorFilter(f.id)}
+                                  className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                                    creatorFilter === f.id 
+                                      ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
+                                      : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
+                                  }`}
+                                >
+                                  {f.label} ({count})
+                                </button>
+                              );
+                            });
+                          })()}
                           </div>
                         )}
                       </div>

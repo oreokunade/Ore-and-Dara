@@ -560,18 +560,23 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
                                 </button>
                               </div>
                               {cashGiftAmount === -1 && (
-                                <div className="mt-2 relative">
-                                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-medium text-brand-espresso">₦</span>
-                                  <input
-                                    type="text"
-                                    value={customCashAmount}
-                                    onChange={(e) => {
-                                      const val = e.target.value.replace(/\D/g, '');
-                                      setCustomCashAmount(val ? parseInt(val, 10).toLocaleString('en-NG') : '');
-                                    }}
-                                    placeholder="Enter amount"
-                                    className="w-full pl-8 pr-4 py-3 bg-white border border-brand-sand rounded-xl font-mono text-sm focus:outline-none focus:border-brand-gold"
-                                  />
+                                <div className="mt-2">
+                                  <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono font-bold text-lg text-brand-espresso">₦</span>
+                                    <input
+                                      type="text"
+                                      inputMode="numeric"
+                                      autoFocus
+                                      value={customCashAmount}
+                                      onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, '');
+                                        setCustomCashAmount(val ? parseInt(val, 10).toLocaleString('en-NG') : '');
+                                      }}
+                                      placeholder="e.g. 25,000"
+                                      className="w-full pl-10 pr-4 py-3.5 bg-white border-2 border-brand-gold/50 rounded-xl font-mono text-lg font-semibold text-brand-espresso focus:outline-none focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 placeholder:text-brand-muted/40 placeholder:font-normal"
+                                    />
+                                  </div>
+                                  <p className="text-[10px] text-brand-muted font-sans mt-1.5 pl-1">Minimum: ₦1,000</p>
                                 </div>
                               )}
                               <div className="flex flex-col items-end mt-2">
