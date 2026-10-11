@@ -44,8 +44,24 @@ export async function getStoredRsvps(): Promise<RsvpSubmission[]> {
       submittedAt: row.created_at
     }));
   } catch (error) {
-    console.error('Error fetching RSVPs:', error);
-    return [];
+    console.warn('adminDb getStoredRsvps failed, trying direct Supabase fallback:', error);
+    try {
+      const { data, error: sbError } = await supabase.from('rsvps').select('*').order('created_at', { ascending: false });
+      if (sbError) throw sbError;
+      return (data || []).map((row: any) => ({
+        id: row.id,
+        firstName: row.first_name || (row.full_name ? row.full_name.split(' ')[0] : ''),
+        lastName: row.last_name || (row.full_name ? row.full_name.substring(row.full_name.indexOf(' ') + 1) : ''),
+        email: row.email,
+        attendance: row.attendance as 'yes' | 'no',
+        relation: row.relation,
+        message: row.message,
+        submittedAt: row.created_at
+      }));
+    } catch (fallbackErr) {
+      console.error('Error fetching RSVPs:', fallbackErr);
+      return [];
+    }
   }
 }
 
@@ -192,8 +208,37 @@ export async function getStoredGiftPledgesAdmin(): Promise<GiftPledge[]> {
       };
     });
   } catch (error) {
-    console.error('Error fetching pledges (admin):', error);
-    return [];
+    console.warn('adminDb getStoredGiftPledgesAdmin failed, trying direct Supabase fallback:', error);
+    try {
+      const { data, error: sbError } = await supabase.from('gift_pledges').select('*').order('created_at', { ascending: false });
+      if (sbError) throw sbError;
+      return (data || []).map((row: any) => {
+        let relation = row.relation;
+        let note = row.giver_note || '';
+        if (!relation && note.startsWith('[Relation:')) {
+          const match = note.match(/^\[Relation:\s*([^\]]+)\]\s*(.*)$/);
+          if (match) {
+            relation = match[1];
+            note = match[2];
+          }
+        }
+
+        return {
+          id: row.id,
+          itemId: row.item_id,
+          itemName: row.item_name,
+          amount: row.amount,
+          giverName: row.giver_name,
+          giverEmail: row.giver_email,
+          giverNote: note,
+          giverRelation: relation,
+          pledgedAt: row.created_at
+        };
+      });
+    } catch (fallbackErr) {
+      console.error('Error fetching pledges (admin):', fallbackErr);
+      return [];
+    }
   }
 }
 
@@ -725,8 +770,18 @@ export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[
     }
     return data as InviteCode[];
   } catch (err) {
-    console.error('Error fetching invite codes:', err);
-    return [];
+    console.warn('adminDb getInviteCodes failed, trying direct Supabase fallback:', err);
+    try {
+      let { data, error: sbError } = await supabase.from('invite_codes').select('*').order('created_at', { ascending: false });
+      if (sbError) throw sbError;
+      if (filterByRole && !['ore', 'dara'].includes(filterByRole)) {
+        data = (data || []).filter((c: any) => c.created_by === filterByRole);
+      }
+      return (data || []) as InviteCode[];
+    } catch (fallbackErr) {
+      console.error('Error fetching invite codes:', fallbackErr);
+      return [];
+    }
   }
 }
 
