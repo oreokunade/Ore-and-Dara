@@ -143,6 +143,16 @@ export const INITIAL_WISHLIST_ITEMS: WishlistItem[] = [
     description: 'Help the couple create unforgettable memories with contributions toward their dream honeymoon getaway.',
   },
   {
+    id: 'wishlist-years-rent',
+    name: "A Year's Rent (Total Package)",
+    quantity: 1,
+    price: 2800000,
+    formattedPrice: '₦2,800,000',
+    category: 'Milestone Gift',
+    image: '/assets/years-rent.jpg',
+    description: 'Support our first year together as husband and wife as we secure our home.',
+  },
+  {
     id: 'wishlist-pots',
     name: 'High-End Non-Stick Cookware Set (12-Piece)',
     quantity: 1,
