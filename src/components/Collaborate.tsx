@@ -7,7 +7,7 @@ interface CollaborateProps {
 }
 
 export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
-  const [formData, setFormData] = useState({ name: '', contact: '', offer: '' });
+  const [formData, setFormData] = useState({ name: '', brandPage: '', contact: '', offer: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -23,6 +23,7 @@ export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 10px;">
           <h2 style="color: #2b2b2b; margin-bottom: 20px;">New Vendor Collaboration Request</h2>
           <p><strong>Name / Brand:</strong> ${formData.name}</p>
+          <p><strong>Brand Page (IG, TikTok):</strong> ${formData.brandPage || 'None provided'}</p>
           <p><strong>Contact Info:</strong> ${formData.contact}</p>
           <p><strong>Offer Details:</strong><br/> ${formData.offer.replace(/\\n/g, '<br/>')}</p>
         </div>
@@ -134,6 +135,17 @@ export const Collaborate: FC<CollaborateProps> = ({ onNotify }) => {
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full bg-white border border-brand-espresso/10 rounded-xl px-4 py-3 text-brand-espresso font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/50 transition-shadow"
                     placeholder="E.g. Jane Doe Photography"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="brandPage" className="block text-xs font-semibold tracking-widest uppercase text-brand-espresso/70 mb-2">Brand Page (IG, TikTok)</label>
+                  <input
+                    type="text"
+                    id="brandPage"
+                    value={formData.brandPage}
+                    onChange={(e) => setFormData(prev => ({ ...prev, brandPage: e.target.value }))}
+                    className="w-full bg-white border border-brand-espresso/10 rounded-xl px-4 py-3 text-brand-espresso font-sans focus:outline-none focus:ring-2 focus:ring-brand-gold/50 transition-shadow"
+                    placeholder="E.g. @yourbrand or link to page"
                   />
                 </div>
                 <div>
