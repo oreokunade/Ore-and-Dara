@@ -260,9 +260,9 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
       try {
         let filesArray: File[] = [];
         try {
-          const response = await fetch('/invitation.png');
+          const response = await fetch('/invitation.png?v=2');
           const blob = await response.blob();
-          const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type });
+          const file = new File([blob], 'Ore_and_Dara_Invitation.png', { type: blob.type || 'image/png' });
           filesArray = [file];
         } catch (fetchErr) {
           console.warn('Could not load IV image for sharing', fetchErr);
@@ -290,7 +290,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     try {
       let imageBlob: Blob | null = null;
       try {
-        const response = await fetch('/invitation.png');
+        const response = await fetch('/invitation.png?v=2');
         imageBlob = await response.blob();
       } catch (e) {
         console.warn('Could not fetch image for clipboard', e);
