@@ -1,7 +1,7 @@
 export const WEDDING_EVENT = {
   title: "Oreoluwa & Oluwadara's Wedding",
-  description: "Join us in celebrating the joyful wedding of Oreoluwa & Oluwadara! Church Wedding at 11:00 AM at Celebration Church Int'l (Celebr8 Centre HQ) followed by Reception at 2:00 PM at Excellence Hotel.",
-  location: "Celebration Church Int'l (Celebr8 Centre HQ) / Excellence Hotel, Lagos, Nigeria",
+  description: "Join us in celebrating the joyful wedding of Oreoluwa & Oluwadara! Church Wedding at 11:00 AM at Celebration Church Int'l (Celebr8 Centre HQ) followed by Reception at 2:00 PM at Celebration Church Int'l (Celebr8 Centre HQ) (Annex 2).",
+  location: "Celebration Church Int'l (Celebr8 Centre HQ) (Annex 2), Vori Close, off Acme Road, Ogba, Lagos",
   startDate: "20261212T070000Z", // 8:00 AM Lagos (WAT is UTC+1 -> 07:00 UTC) for Engagement start
   endDate: "20261212T200000Z",
   startLocal: "2026-12-12T08:00:00",

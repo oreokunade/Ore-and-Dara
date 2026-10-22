@@ -20,11 +20,11 @@ export const QandA: FC = () => {
     },
     {
       question: "Would there be parking spaces available?",
-      answer: "Yes, ample parking space will be available within the compounds of both venues for your convenience."
+      answer: "Yes, ample parking space will be available within the venue compound for your convenience."
     },
     {
       question: "Are the ceremony and reception happening in the same venue?",
-      answer: "No, they will be held at two separate locations. The church wedding will take place at Celebr8 Center HQ, and the reception will follow at Excellence Hotel, which is just a short 8-minute drive away."
+      answer: "Yes! Both the church ceremony and reception will be held at Celebration Church Int'l (Celebr8 Centre HQ), with the reception taking place in Annex 2 on the same premises."
     },
     {
       question: "Is the wedding indoors or outdoors?",

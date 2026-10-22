@@ -188,7 +188,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
                 Reception
               </h3>
               <p className="text-brand-sand text-[17px] font-sans leading-relaxed drop-shadow-sm mt-1">
-                Excellence Hotel, Lateef Jakande Rd, Ogba-Aguda, Ikeja, Lagos, Nigeria
+                Celebration Church Int'l (Celebr8 Centre HQ) (Annex 2), Vori Close, off Acme Road, Ogba, Lagos
               </p>
             </div>
 
@@ -203,7 +203,7 @@ export const EventDetails: FC<EventDetailsProps> = ({ onNotify }) => {
                 <ExternalLink className="w-4 h-4" />
               </a>
               <a
-                href="https://maps.google.com/?q=Excellence+Hotel,+Lateef+Jakande+Rd,+Ogba-Aguda,+Ikeja,+Lagos,+Nigeria"
+                href="https://maps.google.com/?q=Celebration+Church+Int'l+(Celebr8+Centre+HQ),+Vori+Close,+off+Acme+Road,+Ogba,+Lagos"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-full bg-brand-gold hover:bg-brand-cream text-brand-espresso text-xs font-sans font-semibold tracking-widest uppercase transition-all duration-300 shadow-md"
