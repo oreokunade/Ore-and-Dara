@@ -325,6 +325,16 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
     console.error('Failed to queue admin notification:', err);
   }
 
+  // Clear matching items from local reminder storage
+  try {
+    const raw = localStorage.getItem(REMINDERS_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      const filtered = arr.filter((r: any) => r.itemId !== pledge.itemId);
+      localStorage.setItem(REMINDERS_STORAGE_KEY, JSON.stringify(filtered));
+    }
+  } catch(e) {}
+
   return result;
 }
 
@@ -424,21 +434,33 @@ export async function getStoredReminders(): Promise<GiftReminder[]> {
 
 export async function getActiveReservations(): Promise<GiftReminder[]> {
   // Query ONLY non-sensitive columns from Supabase so emails are never transferred over the wire to public visitors
-  const { data, error } = await supabase
-    .from('gift_reminders')
-    .select('id, item_id, item_name, is_anonymous, reserved_by_name, remind_date, created_at')
-    .order('created_at', { ascending: false });
+  const [{ data, error }, { data: pledgesData }] = await Promise.all([
+    supabase
+      .from('gift_reminders')
+      .select('id, item_id, item_name, is_anonymous, reserved_by_name, remind_date, created_at')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('gift_pledges')
+      .select('item_id, item_name')
+  ]);
 
   if (error) {
     console.error('Error fetching public reservations:', error);
     return [];
   }
 
+  const paidIds = new Set((pledgesData || []).map((p: any) => p.item_id));
+  const paidNames = new Set((pledgesData || []).map((p: any) => (p.item_name || '').toLowerCase().trim()));
+
   const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
   const now = Date.now();
 
   return (data || [])
     .filter(row => {
+      // Exclude if already paid/pledged
+      if (paidIds.has(row.item_id) || paidNames.has((row.item_name || '').toLowerCase().trim())) {
+        return false;
+      }
       const createdTime = new Date(row.created_at).getTime();
       return (createdTime + ONE_WEEK_MS) > now;
     })

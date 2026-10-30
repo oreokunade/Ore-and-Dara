@@ -225,7 +225,15 @@ export const GiftWishlist: FC<GiftWishlistProps> = ({ onNotify }) => {
       setItems((prev) =>
         prev.map((it) =>
           it.id === activeItem.id
-            ? { ...it, isFunded: it.price === 0 ? false : true, fundedBy: it.price === 0 ? undefined : giverName.trim() }
+            ? {
+                ...it,
+                isFunded: it.price === 0 ? false : true,
+                fundedBy: it.price === 0 ? undefined : giverName.trim(),
+                isReserved: false,
+                reservedUntil: undefined,
+                reservedByName: undefined,
+                reservedByEmail: undefined
+              }
             : it
         )
       );

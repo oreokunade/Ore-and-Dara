@@ -62,6 +62,9 @@ export interface GiftReminder {
   remindDate: string;
   expiresAt?: string;
   createdAt: string;
+  isPaid?: boolean;
+  paidBy?: string;
+  paidAt?: string;
 }
 
 export interface GiftPledge {

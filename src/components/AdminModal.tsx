@@ -144,6 +144,46 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     return codes;
   }, [codes, creatorFilter, role]);
 
+  const [reservationFilter, setReservationFilter] = useState<'all' | 'active' | 'paid' | 'expired'>('all');
+
+  const enrichedReservations = useMemo(() => {
+    return reservations.map((r) => {
+      const pledgeMatch = pledges.find(
+        (p) =>
+          p.itemId === r.itemId ||
+          (p.itemName && r.itemName && p.itemName.toLowerCase().trim() === r.itemName.toLowerCase().trim())
+      );
+
+      const isPaid = !!pledgeMatch;
+      const isExpired = !isPaid && r.expiresAt ? new Date(r.expiresAt).getTime() <= Date.now() : false;
+      const isActive = !isPaid && !isExpired;
+
+      return {
+        ...r,
+        isPaid,
+        paidBy: pledgeMatch?.giverName,
+        paidAt: pledgeMatch?.pledgedAt,
+        paidAmount: pledgeMatch?.amount,
+        isExpired,
+        isActive,
+      };
+    });
+  }, [reservations, pledges]);
+
+  const reservationStats = useMemo(() => {
+    const active = enrichedReservations.filter((r) => r.isActive).length;
+    const paid = enrichedReservations.filter((r) => r.isPaid).length;
+    const expired = enrichedReservations.filter((r) => r.isExpired).length;
+    return { active, paid, expired, total: enrichedReservations.length };
+  }, [enrichedReservations]);
+
+  const filteredReservations = useMemo(() => {
+    if (reservationFilter === 'active') return enrichedReservations.filter((r) => r.isActive);
+    if (reservationFilter === 'paid') return enrichedReservations.filter((r) => r.isPaid);
+    if (reservationFilter === 'expired') return enrichedReservations.filter((r) => r.isExpired);
+    return enrichedReservations;
+  }, [enrichedReservations, reservationFilter]);
+
   const handleGenerateCode = async () => {
     let amount = parseInt(bulkGenAmount, 10);
     if (isNaN(amount) || amount < 1) amount = 1;
@@ -364,16 +404,21 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     });
   };
 
-  const handleDeleteReservation = (id: string, itemId: string, guestName?: string) => {
+  const handleDeleteReservation = (id: string, itemId: string, guestName?: string, isPaid?: boolean) => {
     setConfirmDialog({
       isOpen: true,
-      title: 'Release Reservation',
-      message: `Are you sure you want to release the reservation held by ${guestName || 'this guest'}? The item will immediately become available again.`,
+      title: isPaid ? 'Delete Reservation Record' : 'Release Reservation',
+      message: isPaid
+        ? `Are you sure you want to delete this fulfilled reservation record for ${guestName || 'this guest'}? The gift payment record will remain safe in Gift Payments.`
+        : `Are you sure you want to release the reservation held by ${guestName || 'this guest'}? The item will immediately become available again.`,
       onConfirm: async () => {
         try {
           await deleteReservation(id, itemId);
           setReservations((prev) => prev.filter((r) => r.id !== id));
-          onNotify('Reservation Released', 'The item reservation was cancelled and released.');
+          onNotify(
+            isPaid ? 'Record Deleted' : 'Reservation Released',
+            isPaid ? 'The reservation record was removed.' : 'The item reservation was cancelled and released.'
+          );
         } catch (err) {
           console.error(err);
           onNotify('Error', 'Failed to release reservation.');
@@ -383,6 +428,10 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
   };
 
   const handleSendReminder = async (r: GiftReminder) => {
+    if (r.isPaid) {
+      onNotify('Already Paid', 'This gift has already been paid for. No reminder email needed.');
+      return;
+    }
     if (!r.email) {
       onNotify('Error', 'This reservation has no email address.');
       return;
@@ -596,11 +645,15 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
               }`}
             >
               <Clock className="w-4 h-4" /> Reservations
-              {reservations.length > 0 && (
-                <span className="bg-brand-gold text-brand-espresso px-2 py-0.5 rounded-full text-[10px] ml-1">
+              {reservationStats.active > 0 ? (
+                <span className="bg-brand-gold text-brand-espresso font-bold px-2 py-0.5 rounded-full text-[10px] ml-1">
+                  {reservationStats.active}
+                </span>
+              ) : reservations.length > 0 ? (
+                <span className="bg-brand-sand/70 text-brand-muted font-medium px-2 py-0.5 rounded-full text-[10px] ml-1">
                   {reservations.length}
                 </span>
-              )}
+              ) : null}
             </button>
           </>
         )}
@@ -1337,16 +1390,52 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                   <div>
                     <h3 className="font-serif text-2xl text-brand-espresso mb-1">Item Reservations</h3>
                     <p className="text-sm font-sans text-brand-muted">
-                      Items currently saved/held by guests for up to 7 days before expiring.
+                      Items saved/held by guests. Paid items are automatically marked as fulfilled.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="px-4 py-2 rounded-xl bg-brand-gold/15 text-brand-goldDark text-xs font-bold uppercase tracking-wider font-sans">
-                      {reservations.filter(r => r.expiresAt && new Date(r.expiresAt).getTime() > Date.now()).length} Active
-                    </span>
-                    <span className="px-4 py-2 rounded-xl bg-brand-sand/50 text-brand-muted text-xs font-bold uppercase tracking-wider font-sans">
-                      {reservations.filter(r => r.expiresAt && new Date(r.expiresAt).getTime() <= Date.now()).length} Expired
-                    </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => setReservationFilter('all')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all ${
+                        reservationFilter === 'all'
+                          ? 'bg-brand-espresso text-brand-goldLight shadow-sm'
+                          : 'bg-brand-sand/40 text-brand-espresso hover:bg-brand-sand/70'
+                      }`}
+                    >
+                      All ({reservationStats.total})
+                    </button>
+                    <button
+                      onClick={() => setReservationFilter('active')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all flex items-center gap-1.5 ${
+                        reservationFilter === 'active'
+                          ? 'bg-emerald-700 text-white shadow-sm'
+                          : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                      }`}
+                    >
+                      <Clock className="w-3.5 h-3.5" />
+                      {reservationStats.active} Active Hold{reservationStats.active !== 1 ? 's' : ''}
+                    </button>
+                    <button
+                      onClick={() => setReservationFilter('paid')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all flex items-center gap-1.5 ${
+                        reservationFilter === 'paid'
+                          ? 'bg-brand-goldDark text-white shadow-sm'
+                          : 'bg-brand-gold/15 text-brand-goldDark hover:bg-brand-gold/25'
+                      }`}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      {reservationStats.paid} Paid For
+                    </button>
+                    <button
+                      onClick={() => setReservationFilter('expired')}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all ${
+                        reservationFilter === 'expired'
+                          ? 'bg-rose-700 text-white shadow-sm'
+                          : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                      }`}
+                    >
+                      {reservationStats.expired} Expired
+                    </button>
                   </div>
                 </div>
 
@@ -1364,15 +1453,16 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                         </tr>
                       </thead>
                       <tbody className="text-sm font-sans text-brand-espresso">
-                        {reservations.length === 0 ? (
+                        {filteredReservations.length === 0 ? (
                           <tr>
                             <td colSpan={5} className="p-12 text-center text-brand-muted text-base">
-                              No active item reservations at this time.
+                              {reservationFilter === 'all'
+                                ? 'No item reservations at this time.'
+                                : `No ${reservationFilter} reservations found.`}
                             </td>
                           </tr>
                         ) : (
-                          reservations.map((r) => {
-                            const isExpired = r.expiresAt ? new Date(r.expiresAt).getTime() <= Date.now() : false;
+                          filteredReservations.map((r) => {
                             return (
                               <tr key={r.id} className="border-b border-brand-sand/30 hover:bg-brand-cream/20 transition-colors">
                                 <td className="p-6">
@@ -1401,8 +1491,13 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                                   )}
                                 </td>
                                 <td className="p-6">
-                                  {isExpired ? (
-                                    <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700">
+                                  {r.isPaid ? (
+                                    <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-gold/20 text-brand-goldDark border border-brand-gold/40 flex items-center gap-1.5 w-max">
+                                      <Check className="w-3.5 h-3.5 text-brand-goldDark" />
+                                      Paid For
+                                    </span>
+                                  ) : r.isExpired ? (
+                                    <span className="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-700 flex items-center gap-1.5 w-max">
                                       Expired
                                     </span>
                                   ) : (
@@ -1414,22 +1509,41 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                                 </td>
                                 <td className="p-6 text-xs text-brand-muted font-sans space-y-1">
                                   <p><strong className="text-brand-espresso">Reserved:</strong> {new Date(r.createdAt).toLocaleDateString()}</p>
-                                  <p><strong className="text-brand-goldDark">Reminder Due:</strong> {new Date(r.remindDate).toLocaleDateString()}</p>
-                                  {r.expiresAt && <p><strong className="text-brand-espresso">Expires:</strong> {new Date(r.expiresAt).toLocaleDateString()}</p>}
+                                  {r.isPaid ? (
+                                    <>
+                                      {r.paidAt && (
+                                        <p><strong className="text-brand-goldDark">Paid On:</strong> {new Date(r.paidAt).toLocaleDateString()}</p>
+                                      )}
+                                      {r.paidBy && (
+                                        <p><strong className="text-brand-espresso">Paid By:</strong> {r.paidBy}</p>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p><strong className="text-brand-goldDark">Reminder Due:</strong> {new Date(r.remindDate).toLocaleDateString()}</p>
+                                      {r.expiresAt && <p><strong className="text-brand-espresso">Expires:</strong> {new Date(r.expiresAt).toLocaleDateString()}</p>}
+                                    </>
+                                  )}
                                 </td>
                                 <td className="p-6 text-right">
-                                  <div className="flex justify-end gap-2">
+                                  <div className="flex justify-end items-center gap-2">
+                                    {r.isPaid ? (
+                                      <span className="px-2.5 py-1 rounded-lg bg-brand-gold/10 text-brand-goldDark text-xs font-medium flex items-center gap-1">
+                                        <Check className="w-3.5 h-3.5" /> Fulfilled
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleSendReminder(r)}
+                                        className="p-2.5 text-brand-gold hover:text-brand-goldDark hover:bg-brand-gold/10 rounded-xl transition-colors"
+                                        title="Send Reminder Email"
+                                      >
+                                        <Mail className="w-5 h-5" />
+                                      </button>
+                                    )}
                                     <button
-                                      onClick={() => handleSendReminder(r)}
-                                      className="p-2.5 text-brand-gold hover:text-brand-goldDark hover:bg-brand-gold/10 rounded-xl transition-colors"
-                                      title="Send Reminder Email"
-                                    >
-                                      <Mail className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteReservation(r.id, r.itemId, r.reservedByName)}
+                                      onClick={() => handleDeleteReservation(r.id, r.itemId, r.reservedByName, r.isPaid)}
                                       className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                                      title="Release reservation (Make item available again)"
+                                      title={r.isPaid ? "Delete reservation record" : "Release reservation (Make item available again)"}
                                     >
                                       <Trash2 className="w-5 h-5" />
                                     </button>
