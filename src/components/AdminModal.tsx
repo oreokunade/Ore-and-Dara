@@ -260,7 +260,7 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       const websiteUrl = window.location.origin;
       
       const codeSection = `📌 *YOUR EXCLUSIVE RSVP CODE* 📌
-To help us finalize our guest list, please use your unique code 👉 *${code}* 👈 to RSVP online here: 
+To help us finalize our guest list, please use your unique code 👉 *${code}* 👈 to RSVP online on or before *November 20th, 2026* here: 
 🔗 ${websiteUrl}
 *(Kindly note that this code can only be used once)*
 ✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`;
