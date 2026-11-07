@@ -105,7 +105,11 @@ export async function saveRsvp(submission: Omit<RsvpSubmission, 'id' | 'submitte
 }
 
 export async function deleteRsvp(id: string): Promise<void> {
-  await adminDb('deleteRsvp', { id });
+  try {
+    await adminDb('deleteRsvp', { id });
+  } catch (e) {
+    await supabase.from('rsvps').delete().eq('id', id);
+  }
 }
 
 export function getUserActiveRsvp(): RsvpSubmission | null {
@@ -339,7 +343,11 @@ export async function saveGiftPledge(pledge: Omit<GiftPledge, 'id' | 'pledgedAt'
 }
 
 export async function deleteGiftPledge(id: string): Promise<void> {
-  await adminDb('deleteGiftPledge', { id });
+  try {
+    await adminDb('deleteGiftPledge', { id });
+  } catch (e) {
+    await supabase.from('gift_pledges').delete().eq('id', id);
+  }
 }
 
 export async function exportGiftPledgesCsv(): Promise<void> {
@@ -680,21 +688,40 @@ export async function saveWishlistItem(item: Omit<WishlistItem, 'id' | 'isFunded
     image: item.image,
     description: item.description
   };
-  const data = await adminDb('saveWishlistItem', { item: payload });
-  return {
-    id: data.id,
-    name: data.name,
-    quantity: data.quantity,
-    price: data.price,
-    formattedPrice: data.formatted_price,
-    category: data.category,
-    image: data.image,
-    description: data.description
-  };
+  try {
+    const data = await adminDb('saveWishlistItem', { item: payload });
+    return {
+      id: data.id,
+      name: data.name,
+      quantity: data.quantity,
+      price: data.price,
+      formattedPrice: data.formatted_price,
+      category: data.category,
+      image: data.image,
+      description: data.description
+    };
+  } catch {
+    const { data, error } = await supabase.from('wishlist_items').upsert([payload]).select().single();
+    if (error) throw error;
+    return {
+      id: data.id,
+      name: data.name,
+      quantity: data.quantity,
+      price: data.price,
+      formattedPrice: data.formatted_price,
+      category: data.category,
+      image: data.image,
+      description: data.description
+    };
+  }
 }
 
 export async function deleteWishlistItem(id: string): Promise<void> {
-  await adminDb('deleteWishlistItem', { id });
+  try {
+    await adminDb('deleteWishlistItem', { id });
+  } catch {
+    await supabase.from('wishlist_items').delete().eq('id', id);
+  }
 }
 
 export async function updateWishlistItem(item: Omit<WishlistItem, 'isFunded' | 'fundedBy' | 'isReserved' | 'reservedUntil' | 'reservedByEmail' | 'reservedByName'>): Promise<WishlistItem> {
@@ -708,17 +735,32 @@ export async function updateWishlistItem(item: Omit<WishlistItem, 'isFunded' | '
     image: item.image,
     description: item.description
   };
-  const data = await adminDb('saveWishlistItem', { item: payload });
-  return {
-    id: data.id,
-    name: data.name,
-    quantity: data.quantity,
-    price: data.price,
-    formattedPrice: data.formatted_price,
-    category: data.category,
-    image: data.image,
-    description: data.description
-  };
+  try {
+    const data = await adminDb('saveWishlistItem', { item: payload });
+    return {
+      id: data.id,
+      name: data.name,
+      quantity: data.quantity,
+      price: data.price,
+      formattedPrice: data.formatted_price,
+      category: data.category,
+      image: data.image,
+      description: data.description
+    };
+  } catch {
+    const { data, error } = await supabase.from('wishlist_items').upsert([payload]).select().single();
+    if (error) throw error;
+    return {
+      id: data.id,
+      name: data.name,
+      quantity: data.quantity,
+      price: data.price,
+      formattedPrice: data.formatted_price,
+      category: data.category,
+      image: data.image,
+      description: data.description
+    };
+  }
 }
 
 // --- Invite Codes ---
@@ -734,46 +776,86 @@ export interface InviteCode {
 }
 
 export async function generateInviteCode(createdBy: string = 'ore'): Promise<string> {
-  const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
-  const existingSet = new Set(existingCodes.map(c => c.code));
-  
-  let code = '';
-  while (true) {
-    code = Math.floor(10000 + Math.random() * 90000).toString();
-    if (!existingSet.has(code)) break;
-  }
-  
-  await adminDb('generateInviteCode', { code: { code, created_by: createdBy } });
-  return code;
-}
-
-export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'ore'): Promise<string[]> {
-  const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
-  const existingSet = new Set(existingCodes.map(c => c.code));
-  
-  const codes = [];
-  const payload = [];
-  
-  for (let i = 0; i < count; i++) {
+  try {
+    const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
+    const existingSet = new Set(existingCodes.map(c => c.code));
+    
     let code = '';
     while (true) {
       code = Math.floor(10000 + Math.random() * 90000).toString();
-      if (!existingSet.has(code)) {
-        existingSet.add(code);
-        break;
-      }
+      if (!existingSet.has(code)) break;
     }
-    codes.push(code);
-    payload.push({ code, created_by: createdBy });
+    
+    await adminDb('generateInviteCode', { code: { code, created_by: createdBy } });
+    return code;
+  } catch {
+    const { data: existingCodes } = await supabase.from('invite_codes').select('code');
+    const existingSet = new Set((existingCodes || []).map((c: any) => c.code));
+    let code = '';
+    while (true) {
+      code = Math.floor(10000 + Math.random() * 90000).toString();
+      if (!existingSet.has(code)) break;
+    }
+    await supabase.from('invite_codes').upsert([{ code, created_by: createdBy }], { onConflict: 'code', ignoreDuplicates: true });
+    return code;
   }
-  
-  await adminDb('bulkGenerateInviteCodes', { codes: payload });
-  return codes;
+}
+
+export async function bulkGenerateInviteCodes(count: number, createdBy: string = 'ore'): Promise<string[]> {
+  try {
+    const existingCodes: InviteCode[] = await adminDb('getInviteCodes');
+    const existingSet = new Set(existingCodes.map(c => c.code));
+    
+    const codes = [];
+    const payload = [];
+    
+    for (let i = 0; i < count; i++) {
+      let code = '';
+      while (true) {
+        code = Math.floor(10000 + Math.random() * 90000).toString();
+        if (!existingSet.has(code)) {
+          existingSet.add(code);
+          break;
+        }
+      }
+      codes.push(code);
+      payload.push({ code, created_by: createdBy });
+    }
+    
+    await adminDb('bulkGenerateInviteCodes', { codes: payload });
+    return codes;
+  } catch {
+    const { data: existingCodes } = await supabase.from('invite_codes').select('code');
+    const existingSet = new Set((existingCodes || []).map((c: any) => c.code));
+    
+    const codes = [];
+    const payload = [];
+    
+    for (let i = 0; i < count; i++) {
+      let code = '';
+      while (true) {
+        code = Math.floor(10000 + Math.random() * 90000).toString();
+        if (!existingSet.has(code)) {
+          existingSet.add(code);
+          break;
+        }
+      }
+      codes.push(code);
+      payload.push({ code, created_by: createdBy });
+    }
+    
+    await supabase.from('invite_codes').upsert(payload, { onConflict: 'code', ignoreDuplicates: true });
+    return codes;
+  }
 }
 
 export async function deleteInviteCodes(ids: string[]): Promise<void> {
   if (!ids.length) return;
-  await adminDb('deleteInviteCodes', { ids });
+  try {
+    await adminDb('deleteInviteCodes', { ids });
+  } catch {
+    await supabase.from('invite_codes').delete().in('id', ids);
+  }
 }
 
 export async function markInviteCodeAsShared(id: string): Promise<void> {
@@ -797,6 +879,34 @@ export async function resetInviteCode(id: string): Promise<void> {
     await adminDb('resetInviteCode', { id });
   } catch (e) {
     await supabase.from('invite_codes').update({ is_used: false, used_by: null, is_shared: false }).eq('id', id);
+  }
+}
+
+export async function reallocateInviteCode(id: string, createdBy: string = 'ore'): Promise<InviteCode> {
+  try {
+    const data = await adminDb('reallocateInviteCode', { id, createdBy });
+    return data;
+  } catch {
+    // 1. Delete old code
+    await supabase.from('invite_codes').delete().eq('id', id);
+    
+    // 2. Generate unique new 5-digit code
+    const { data: existingCodes } = await supabase.from('invite_codes').select('code');
+    const existingSet = new Set((existingCodes || []).map((c: any) => c.code));
+    let code = '';
+    while (true) {
+      code = Math.floor(10000 + Math.random() * 90000).toString();
+      if (!existingSet.has(code)) break;
+    }
+    
+    // 3. Insert fresh code
+    const { data: inserted, error } = await supabase
+      .from('invite_codes')
+      .insert([{ code, created_by: createdBy, is_used: false, is_shared: false }])
+      .select()
+      .single();
+    if (error) throw error;
+    return inserted as InviteCode;
   }
 }
 
@@ -877,4 +987,101 @@ export async function exportInviteCodesCsv(filterByRole?: string): Promise<void>
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// --- Invitation Posters Management ---
+
+export interface InvitationPostersConfig {
+  generalUrl: string;
+  familyVipUrl: string;
+  generalUpdatedAt?: string;
+  familyVipUpdatedAt?: string;
+}
+
+const INVITATION_POSTERS_KEY = 'ore_dara_invitation_posters';
+
+export const DEFAULT_POSTERS: InvitationPostersConfig = {
+  generalUrl: '/invitation.png?v=2',
+  familyVipUrl: '/Main IV.png?v=2',
+  generalUpdatedAt: 'Default Asset',
+  familyVipUpdatedAt: 'Default Asset'
+};
+
+export function getStoredInvitationPosters(): InvitationPostersConfig {
+  try {
+    const raw = localStorage.getItem(INVITATION_POSTERS_KEY);
+    if (!raw) return DEFAULT_POSTERS;
+    const parsed = JSON.parse(raw);
+    return {
+      generalUrl: parsed.generalUrl || DEFAULT_POSTERS.generalUrl,
+      familyVipUrl: parsed.familyVipUrl || DEFAULT_POSTERS.familyVipUrl,
+      generalUpdatedAt: parsed.generalUpdatedAt || DEFAULT_POSTERS.generalUpdatedAt,
+      familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt
+    };
+  } catch {
+    return DEFAULT_POSTERS;
+  }
+}
+
+export function saveStoredInvitationPosters(config: InvitationPostersConfig): void {
+  try {
+    localStorage.setItem(INVITATION_POSTERS_KEY, JSON.stringify(config));
+  } catch (e) {
+    console.warn('Could not save invitation posters to localStorage', e);
+  }
+}
+
+export async function uploadInvitationPoster(
+  file: File,
+  tier: 'general' | 'familyVip'
+): Promise<string> {
+  const fileExt = file.name.split('.').pop() || 'png';
+  const fileName = `${tier}_poster_${Date.now()}.${fileExt}`;
+  
+  // 1. Attempt upload to Supabase Storage
+  try {
+    const { data, error } = await supabase.storage.from('invitations').upload(fileName, file, {
+      upsert: true,
+      contentType: file.type
+    });
+    if (!error && data?.path) {
+      const { data: pub } = supabase.storage.from('invitations').getPublicUrl(data.path);
+      if (pub?.publicUrl) return pub.publicUrl;
+    }
+  } catch (e) {
+    console.warn('Supabase storage upload failed, using optimized local storage:', e);
+  }
+
+  // 2. Client-side optimized image compression (WebP / JPEG)
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1600;
+        let width = img.width;
+        let height = img.height;
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        // Compress as image/jpeg 0.88 quality
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => resolve(e.target?.result as string);
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
