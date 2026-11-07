@@ -4,7 +4,7 @@ import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Cop
 import { 
   getStoredRsvps, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
-  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, unmarkInviteCodeAsShared, resetInviteCode, bulkMakeCodesAvailable, reallocateInviteCode, InviteCode,
+  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, reallocateInviteCode, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem, updateWishlistItem,
   getStoredReminders, deleteReservation,
   getStoredInvitationPosters, saveStoredInvitationPosters, uploadInvitationPoster, InvitationPostersConfig, DEFAULT_POSTERS
@@ -123,14 +123,25 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
   if (!isOpen) return null;
 
-  const totalAttendingGuests = rsvps.filter((r) => r.attendance === 'yes').length;
-  const attendingCount = totalAttendingGuests;
-  const declinedCount = rsvps.filter((r) => r.attendance === 'no').length;
-  const totalResponses = rsvps.length;
+
 
   const totalGiftValue = pledges.reduce((acc, p) => acc + p.amount, 0);
 
   const [creatorFilter, setCreatorFilter] = useState<string>('all');
+  const [rsvpAttendanceFilter, setRsvpAttendanceFilter] = useState<'all' | 'attending' | 'declined'>('all');
+
+  const rsvpCounts = useMemo(() => {
+    let base = rsvps;
+    if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
+      const creatorCodes = codes.filter(c => c.created_by === creatorFilter && c.is_used && c.used_by);
+      const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
+      base = base.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
+    }
+    const attending = base.filter(r => r.attendance === 'yes').length;
+    const declined = base.filter(r => r.attendance === 'no').length;
+    const total = base.length;
+    return { attending, declined, total };
+  }, [rsvps, creatorFilter, role, codes]);
 
   const filteredRsvps = useMemo(() => {
     let result = rsvps;
@@ -139,10 +150,15 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
       const usedNames = creatorCodes.map(c => c.used_by!.trim().toLowerCase());
       result = result.filter(r => usedNames.includes(`${r.firstName.trim()} ${r.lastName.trim()}`.toLowerCase()));
     }
+    if (rsvpAttendanceFilter === 'attending') {
+      result = result.filter(r => r.attendance === 'yes');
+    } else if (rsvpAttendanceFilter === 'declined') {
+      result = result.filter(r => r.attendance === 'no');
+    }
     return result;
-  }, [rsvps, creatorFilter, role, codes]);
+  }, [rsvps, creatorFilter, role, codes, rsvpAttendanceFilter]);
 
-  const [codeStatusFilter, setCodeStatusFilter] = useState<'all' | 'unused' | 'shared' | 'available' | 'used'>('all');
+  const [codeStatusFilter, setCodeStatusFilter] = useState<'all' | 'available' | 'shared' | 'used'>('all');
 
   const codeStats = useMemo(() => {
     const base = ['ore', 'dara'].includes(role || '') && creatorFilter !== 'all'
@@ -163,12 +179,11 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
       result = result.filter(c => c.created_by === creatorFilter);
     }
-    if (codeStatusFilter === 'unused') {
-      result = result.filter(c => !c.is_used);
+    if (codeStatusFilter === 'available') {
+      result = result.filter(c => !c.is_used && !c.is_shared);
     } else if (codeStatusFilter === 'shared') {
       result = result.filter(c => !c.is_used && c.is_shared);
-    } else if (codeStatusFilter === 'available') {
-      result = result.filter(c => !c.is_used && !c.is_shared);
+
     } else if (codeStatusFilter === 'used') {
       result = result.filter(c => c.is_used);
     }
@@ -464,6 +479,38 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     });
   };
 
+  const handleReallocateRsvpCode = (rsvp: RsvpSubmission, matchingCode?: InviteCode) => {
+    const guestName = `${rsvp.firstName} ${rsvp.lastName}`.trim();
+    const creator = matchingCode?.created_by || (creatorFilter !== 'all' ? creatorFilter : (role || 'ore'));
+    const oldCodeStr = matchingCode ? `code ${matchingCode.code}` : `the invite code for ${guestName}`;
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Re-allocate Invite Code',
+      message: `Are you sure you want to re-allocate ${oldCodeStr} (guest: ${guestName})? This will permanently delete ${oldCodeStr} so they cannot reuse it, and generate a brand new code in your Available pool for a new guest.`,
+      onConfirm: async () => {
+        try {
+          let newCodeStr = '';
+          if (matchingCode) {
+            const res = await reallocateInviteCode(matchingCode.id, creator);
+            newCodeStr = typeof res === 'object' && res.code ? res.code : String(res);
+          } else {
+            newCodeStr = await generateInviteCode(creator);
+          }
+          const updatedCodes = await getInviteCodes(role);
+          setCodes(updatedCodes);
+          onNotify(
+            'Code Re-allocated',
+            `Fresh code ${newCodeStr} generated and added to Available codes for a new guest.`
+          );
+        } catch (err) {
+          console.error(err);
+          onNotify('Error', 'Failed to re-allocate invite code.');
+        }
+      }
+    });
+  };
+
   const handleReallocateCode = (id: string, oldCode: string, creator: string) => {
     setConfirmDialog({
       isOpen: true,
@@ -474,63 +521,11 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
           const newCode = await reallocateInviteCode(id, creator);
           const updatedCodes = await getInviteCodes(role);
           setCodes(updatedCodes);
-          onNotify('Code Re-allocated', `Old code ${oldCode} deleted. Fresh code generated: ${newCode}`);
+          const newCodeStr = typeof newCode === 'object' && (newCode as any).code ? (newCode as any).code : String(newCode);
+          onNotify('Code Re-allocated', `Old code ${oldCode} deleted. Fresh code generated: ${newCodeStr}`);
         } catch (err) {
           console.error(err);
           onNotify('Error', 'Failed to re-allocate invite code.');
-        }
-      }
-    });
-  };
-
-  const handleMakeAvailable = async (id: string, codeStr?: string) => {
-    try {
-      await unmarkInviteCodeAsShared(id);
-      setCodes(prev => prev.map(c => c.id === id ? { ...c, is_shared: false } : c));
-      setSelectedCodes(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-      onNotify('Code Available', codeStr ? `Code ${codeStr} is now available again for a new guest.` : 'Code marked as available.');
-    } catch (e) {
-      console.error(e);
-      onNotify('Error', 'Failed to make code available.');
-    }
-  };
-
-  const handleBulkMakeAvailable = async () => {
-    if (selectedCodes.size === 0) return;
-    const ids = Array.from(selectedCodes);
-    try {
-      await bulkMakeCodesAvailable(ids);
-      setCodes(prev => prev.map(c => ids.includes(c.id) ? { ...c, is_shared: false } : c));
-      setSelectedCodes(new Set());
-      onNotify('Codes Available', `${ids.length} code(s) marked as Available again.`);
-    } catch (e) {
-      console.error(e);
-      onNotify('Error', 'Failed to make selected codes available.');
-    }
-  };
-
-  const handleResetCode = (id: string, codeStr: string, guestName?: string) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Reset Invite Code',
-      message: `Are you sure you want to reset code ${codeStr}${guestName ? ` (previously used by ${guestName})` : ''}? This will clear the RSVP linkage and make this code available for a new guest.`,
-      onConfirm: async () => {
-        try {
-          await resetInviteCode(id);
-          setCodes(prev => prev.map(c => c.id === id ? { ...c, is_used: false, used_by: undefined, is_shared: false } : c));
-          setSelectedCodes(prev => {
-            const next = new Set(prev);
-            next.delete(id);
-            return next;
-          });
-          onNotify('Code Reset', `Code ${codeStr} has been reset and is now available for a new guest.`);
-        } catch (err) {
-          console.error(err);
-          onNotify('Error', 'Failed to reset invite code.');
         }
       }
     });
@@ -857,18 +852,56 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
               >
                 {/* RSVP Stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Attending</p>
-                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-emerald-700">{attendingCount}</p>
-                  </div>
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Declined</p>
-                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-rose-700">{declinedCount}</p>
-                  </div>
-                  <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm col-span-2 sm:col-span-1">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold mb-1 sm:mb-2">Total Responses</p>
-                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-brand-espresso">{totalResponses}</p>
-                  </div>
+                  <button
+                    onClick={() => setRsvpAttendanceFilter(rsvpAttendanceFilter === 'attending' ? 'all' : 'attending')}
+                    className={`text-left p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm transition-all border-2 ${
+                      rsvpAttendanceFilter === 'attending'
+                        ? 'bg-emerald-50/70 border-emerald-600 ring-2 ring-emerald-500/30'
+                        : 'bg-white border-transparent hover:border-emerald-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1 sm:mb-2">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold">Attending</p>
+                      {rsvpAttendanceFilter === 'attending' && (
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800">Filtered</span>
+                      )}
+                    </div>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-emerald-700">{rsvpCounts.attending}</p>
+                  </button>
+
+                  <button
+                    onClick={() => setRsvpAttendanceFilter(rsvpAttendanceFilter === 'declined' ? 'all' : 'declined')}
+                    className={`text-left p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm transition-all border-2 ${
+                      rsvpAttendanceFilter === 'declined'
+                        ? 'bg-rose-50/70 border-rose-600 ring-2 ring-rose-500/30'
+                        : 'bg-white border-transparent hover:border-rose-200'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1 sm:mb-2">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold">Declined</p>
+                      {rsvpAttendanceFilter === 'declined' && (
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-200 text-rose-800">Filtered</span>
+                      )}
+                    </div>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-rose-700">{rsvpCounts.declined}</p>
+                  </button>
+
+                  <button
+                    onClick={() => setRsvpAttendanceFilter('all')}
+                    className={`text-left p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm col-span-2 sm:col-span-1 transition-all border-2 ${
+                      rsvpAttendanceFilter === 'all'
+                        ? 'bg-brand-cream/40 border-brand-espresso ring-2 ring-brand-gold/30'
+                        : 'bg-white border-transparent hover:border-brand-sand'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1 sm:mb-2">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-brand-muted font-bold">Total Responses</p>
+                      {rsvpAttendanceFilter === 'all' && (
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-goldDark">All</span>
+                      )}
+                    </div>
+                    <p className="text-3xl sm:text-4xl font-sans font-semibold text-brand-espresso">{rsvpCounts.total}</p>
+                  </button>
                 </div>
 
                 {/* RSVP Actions & Table */}
@@ -878,8 +911,34 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full">
                       <h3 className="font-serif text-2xl text-brand-espresso shrink-0">Guest List</h3>
                       
-                      <div className="flex flex-col gap-3 w-full sm:w-auto">
-
+                      <div className="flex flex-col gap-2.5 w-full sm:w-auto">
+                        {/* Attendance Status Filter */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 shrink-0 -mx-1 px-1">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-sand/30 rounded-xl text-brand-muted text-[11px] font-bold uppercase tracking-wider shrink-0">
+                            <Filter className="w-3 h-3" /> Status
+                          </div>
+                          {[
+                            { id: 'all', label: `All (${rsvpCounts.total})` },
+                            { id: 'attending', label: `Attending (${rsvpCounts.attending})` },
+                            { id: 'declined', label: `Declined (${rsvpCounts.declined})` }
+                          ].map((s) => (
+                            <button
+                              key={s.id}
+                              onClick={() => setRsvpAttendanceFilter(s.id as any)}
+                              className={`px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border shrink-0 whitespace-nowrap ${
+                                rsvpAttendanceFilter === s.id
+                                  ? s.id === 'attending'
+                                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                                    : s.id === 'declined'
+                                    ? 'bg-rose-700 text-white border-rose-700 shadow-sm'
+                                    : 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-sm'
+                                  : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30'
+                              }`}
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
 
                         {/* Creator Filter for Master */}
                         {['ore', 'dara'].includes(role || '') && (
@@ -1038,14 +1097,30 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                               <td className="p-6 text-sm text-brand-muted whitespace-nowrap font-medium">
                                 {new Date(rsvp.submittedAt).toLocaleDateString()}
                               </td>
-                              <td className="p-6 text-right">
-                                <button
-                                  onClick={() => handleDeleteRsvp(rsvp.id)}
-                                  className="p-2.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="w-5 h-5" />
-                                </button>
+                              <td className="p-4 sm:p-6 text-right whitespace-nowrap">
+                                {(() => {
+                                  const guestFullName = `${rsvp.firstName.trim()} ${rsvp.lastName.trim()}`.toLowerCase();
+                                  const matchingCode = codes.find(c => c.is_used && c.used_by && c.used_by.trim().toLowerCase() === guestFullName);
+                                  return (
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={() => handleReallocateRsvpCode(rsvp, matchingCode)}
+                                        className="px-2.5 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-amber-100 text-brand-espresso hover:text-amber-900 border border-brand-sand/60 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shadow-sm shrink-0"
+                                        title={matchingCode ? `Re-allocate code ${matchingCode.code} (Guest: ${rsvp.firstName})` : `Generate replacement code for ${rsvp.firstName}`}
+                                      >
+                                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                                        <span>Re-allocate Code</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteRsvp(rsvp.id)}
+                                        className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
+                                        title="Delete RSVP record"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  );
+                                })()}
                               </td>
                             </tr>
                           ))
@@ -1224,21 +1299,12 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
 
                       <div className="flex flex-wrap items-center gap-3 shrink-0">
                         {selectedCodes.size > 0 && (
-                          <>
-                            <button
-                              onClick={handleBulkMakeAvailable}
-                              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold border border-emerald-200"
-                              title="Release selected codes back into available pool"
-                            >
-                              <RotateCcw className="w-4 h-4" /> Make Available ({selectedCodes.size})
-                            </button>
-                            <button
-                              onClick={handleDeleteSelectedCodes}
-                              className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold"
-                            >
-                              <Trash2 className="w-4 h-4" /> Delete ({selectedCodes.size})
-                            </button>
-                          </>
+                          <button
+                            onClick={handleDeleteSelectedCodes}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete ({selectedCodes.size})
+                          </button>
                         )}
                       <button
                         onClick={async () => {
@@ -1303,9 +1369,8 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                       </div>
                       {[
                         { id: 'all', label: `All (${codeStats.total})` },
-                        { id: 'unused', label: `All Unused (${codeStats.unused})` },
-                        { id: 'shared', label: `Shared / Awaiting RSVP (${codeStats.shared})` },
                         { id: 'available', label: `Available (${codeStats.available})` },
+                        { id: 'shared', label: `Shared / Awaiting RSVP (${codeStats.shared})` },
                         { id: 'used', label: `Used (${codeStats.used})` }
                       ].map((s) => (
                         <button
@@ -1437,39 +1502,20 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                               <td className="p-6 text-sm text-brand-muted font-medium">
                                 {new Date(c.created_at).toLocaleDateString()}
                               </td>
-                              <td className="p-6 text-right">
+                              <td className="p-4 sm:p-6 text-right whitespace-nowrap">
                                 <div className="flex items-center justify-end gap-2">
-                                  {!c.is_used && c.is_shared && (
-                                    <button
-                                      onClick={() => handleMakeAvailable(c.id, c.code)}
-                                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shadow-sm"
-                                      title="Release code back to available pool so you can reassign it"
-                                    >
-                                      <RotateCcw className="w-3.5 h-3.5" />
-                                      <span>Make Available</span>
-                                    </button>
-                                  )}
-                                  {c.is_used && (
-                                    <button
-                                      onClick={() => handleResetCode(c.id, c.code, c.used_by)}
-                                      className="px-3 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-rose-50 text-brand-muted hover:text-rose-700 border border-brand-sand/60 text-xs font-sans font-medium flex items-center gap-1.5 transition-all"
-                                      title="Reset code (Clear RSVP to make code available again)"
-                                    >
-                                      <RotateCcw className="w-3.5 h-3.5" />
-                                      <span>Reset</span>
-                                    </button>
-                                  )}
-                                  {(c.is_shared || c.is_used) && (
+                                  {(c.is_shared || c.is_used) ? (
                                     <button
                                       onClick={() => handleReallocateCode(c.id, c.code, c.created_by || role || 'ore')}
-                                      className="px-2.5 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-amber-100 text-brand-muted hover:text-amber-900 border border-brand-sand/60 text-xs font-sans font-medium flex items-center gap-1 transition-all shrink-0"
+                                      className="px-3 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-amber-100 text-brand-espresso hover:text-amber-900 border border-brand-sand/60 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shrink-0 shadow-sm"
                                       title="Re-allocate (Delete old code and generate a fresh replacement)"
                                     >
-                                      <RotateCcw className="w-3.5 h-3.5" />
-                                      <span className="hidden sm:inline">Re-allocate</span>
+                                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                                      <span>Re-allocate</span>
                                     </button>
+                                  ) : (
+                                    <span className="text-xs text-brand-muted/40 font-mono">-</span>
                                   )}
-
                                 </div>
                               </td>
                             </tr>
