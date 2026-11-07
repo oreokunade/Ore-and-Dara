@@ -666,7 +666,9 @@ export async function getStoredWishlistItems(): Promise<WishlistItem[]> {
     return [];
   }
 
-  return (data || []).map(row => ({
+  return (data || [])
+    .filter((row: any) => row.name !== '__APP_INVITATION_POSTERS__' && row.id !== '00000000-0000-0000-0000-000000000001')
+    .map((row: any) => ({
     id: row.id,
     name: row.name,
     quantity: row.quantity,
@@ -1007,7 +1009,7 @@ export const DEFAULT_POSTERS: InvitationPostersConfig = {
   familyVipUpdatedAt: 'Default Asset'
 };
 
-export function getStoredInvitationPosters(): InvitationPostersConfig {
+export function getLocalInvitationPosters(): InvitationPostersConfig {
   try {
     const raw = localStorage.getItem(INVITATION_POSTERS_KEY);
     if (!raw) return DEFAULT_POSTERS;
@@ -1023,11 +1025,56 @@ export function getStoredInvitationPosters(): InvitationPostersConfig {
   }
 }
 
-export function saveStoredInvitationPosters(config: InvitationPostersConfig): void {
+export async function getStoredInvitationPosters(): Promise<InvitationPostersConfig> {
+  try {
+    const { data, error } = await supabase
+      .from('wishlist_items')
+      .select('description')
+      .eq('id', '00000000-0000-0000-0000-000000000001')
+      .single();
+
+    if (!error && data?.description) {
+      const parsed = JSON.parse(data.description);
+      const config: InvitationPostersConfig = {
+        generalUrl: parsed.generalUrl || DEFAULT_POSTERS.generalUrl,
+        familyVipUrl: parsed.familyVipUrl || DEFAULT_POSTERS.familyVipUrl,
+        generalUpdatedAt: parsed.generalUpdatedAt || DEFAULT_POSTERS.generalUpdatedAt,
+        familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt
+      };
+      try {
+        localStorage.setItem(INVITATION_POSTERS_KEY, JSON.stringify(config));
+      } catch {}
+      return config;
+    }
+  } catch (err) {
+    console.warn('Could not fetch cloud invitation posters, using local fallback:', err);
+  }
+
+  return getLocalInvitationPosters();
+}
+
+export async function saveStoredInvitationPosters(config: InvitationPostersConfig): Promise<void> {
   try {
     localStorage.setItem(INVITATION_POSTERS_KEY, JSON.stringify(config));
   } catch (e) {
     console.warn('Could not save invitation posters to localStorage', e);
+  }
+
+  try {
+    await supabase.from('wishlist_items').upsert([
+      {
+        id: '00000000-0000-0000-0000-000000000001',
+        name: '__APP_INVITATION_POSTERS__',
+        quantity: 1,
+        price: 1,
+        formatted_price: '₦1',
+        category: 'Milestone Gift',
+        image: config.generalUrl.startsWith('data:') ? '' : config.generalUrl,
+        description: JSON.stringify(config)
+      }
+    ]);
+  } catch (err) {
+    console.warn('Could not persist invitation posters to Supabase:', err);
   }
 }
 
