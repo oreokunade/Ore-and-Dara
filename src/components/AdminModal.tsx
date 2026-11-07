@@ -1,10 +1,10 @@
 import { useState, useEffect, FC, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, X, Edit2 } from 'lucide-react';
+import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, Edit2, RotateCcw } from 'lucide-react';
 import { 
   getStoredRsvps, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
-  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, unmarkInviteCodeAsShared, InviteCode,
+  getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, unmarkInviteCodeAsShared, resetInviteCode, bulkMakeCodesAvailable, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem, updateWishlistItem,
   getStoredReminders, deleteReservation
 } from '../utils/storage';
@@ -137,12 +137,38 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
     return result;
   }, [rsvps, creatorFilter, role, codes]);
 
-  const filteredCodes = useMemo(() => {
-    if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
-      return codes.filter(c => c.created_by === creatorFilter);
-    }
-    return codes;
+  const [codeStatusFilter, setCodeStatusFilter] = useState<'all' | 'unused' | 'shared' | 'available' | 'used'>('all');
+
+  const codeStats = useMemo(() => {
+    const base = ['ore', 'dara'].includes(role || '') && creatorFilter !== 'all'
+      ? codes.filter(c => c.created_by === creatorFilter)
+      : codes;
+
+    const total = base.length;
+    const used = base.filter(c => c.is_used).length;
+    const unused = base.filter(c => !c.is_used).length;
+    const shared = base.filter(c => !c.is_used && c.is_shared).length;
+    const available = base.filter(c => !c.is_used && !c.is_shared).length;
+
+    return { total, used, unused, shared, available };
   }, [codes, creatorFilter, role]);
+
+  const filteredCodes = useMemo(() => {
+    let result = codes;
+    if (['ore', 'dara'].includes(role || '') && creatorFilter !== 'all') {
+      result = result.filter(c => c.created_by === creatorFilter);
+    }
+    if (codeStatusFilter === 'unused') {
+      result = result.filter(c => !c.is_used);
+    } else if (codeStatusFilter === 'shared') {
+      result = result.filter(c => !c.is_used && c.is_shared);
+    } else if (codeStatusFilter === 'available') {
+      result = result.filter(c => !c.is_used && !c.is_shared);
+    } else if (codeStatusFilter === 'used') {
+      result = result.filter(c => c.is_used);
+    }
+    return result;
+  }, [codes, creatorFilter, role, codeStatusFilter]);
 
   const [reservationFilter, setReservationFilter] = useState<'all' | 'active' | 'paid' | 'expired'>('all');
 
@@ -245,14 +271,24 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   };
 
   const toggleSelectAllCodes = () => {
-    const unusedCodes = codes.filter(c => !c.is_used);
+    const selectableCodes = filteredCodes.filter(c => !c.is_used);
+    const selectableIds = selectableCodes.map(c => c.id);
+    const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedCodes.has(id));
     
-    // If all unused codes are currently selected, deselect all
-    if (unusedCodes.length > 0 && selectedCodes.size === unusedCodes.length) {
-      setSelectedCodes(new Set()); 
+    if (allSelected) {
+      // Deselect all selectable codes in current view
+      setSelectedCodes(prev => {
+        const next = new Set(prev);
+        selectableIds.forEach(id => next.delete(id));
+        return next;
+      });
     } else {
-      // Select all unused codes
-      setSelectedCodes(new Set(unusedCodes.map(c => c.id)));
+      // Select all selectable codes in current view
+      setSelectedCodes(prev => {
+        const next = new Set(prev);
+        selectableIds.forEach(id => next.add(id));
+        return next;
+      });
     }
   };
 
@@ -359,13 +395,57 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     }
   };
 
-  const handleUnmarkShared = async (id: string) => {
+  const handleMakeAvailable = async (id: string, codeStr?: string) => {
     try {
       await unmarkInviteCodeAsShared(id);
       setCodes(prev => prev.map(c => c.id === id ? { ...c, is_shared: false } : c));
+      setSelectedCodes(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      onNotify('Code Available', codeStr ? `Code ${codeStr} is now available again for a new guest.` : 'Code marked as available.');
     } catch (e) {
-      onNotify('Error', 'Failed to unmark shared status.');
+      console.error(e);
+      onNotify('Error', 'Failed to make code available.');
     }
+  };
+
+  const handleBulkMakeAvailable = async () => {
+    if (selectedCodes.size === 0) return;
+    const ids = Array.from(selectedCodes);
+    try {
+      await bulkMakeCodesAvailable(ids);
+      setCodes(prev => prev.map(c => ids.includes(c.id) ? { ...c, is_shared: false } : c));
+      setSelectedCodes(new Set());
+      onNotify('Codes Available', `${ids.length} code(s) marked as Available again.`);
+    } catch (e) {
+      console.error(e);
+      onNotify('Error', 'Failed to make selected codes available.');
+    }
+  };
+
+  const handleResetCode = (id: string, codeStr: string, guestName?: string) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset Invite Code',
+      message: `Are you sure you want to reset code ${codeStr}${guestName ? ` (previously used by ${guestName})` : ''}? This will clear the RSVP linkage and make this code available for a new guest.`,
+      onConfirm: async () => {
+        try {
+          await resetInviteCode(id);
+          setCodes(prev => prev.map(c => c.id === id ? { ...c, is_used: false, used_by: undefined, is_shared: false } : c));
+          setSelectedCodes(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          onNotify('Code Reset', `Code ${codeStr} has been reset and is now available for a new guest.`);
+        } catch (err) {
+          console.error(err);
+          onNotify('Error', 'Failed to reset invite code.');
+        }
+      }
+    });
   };
 
   const handleDeleteRsvp = (id: string) => {
@@ -1028,11 +1108,11 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
 
                 {/* Codes Table */}
                 <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
-                  <div className="p-4 sm:p-6 border-b border-brand-sand/30 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full">
+                  <div className="p-4 sm:p-6 border-b border-brand-sand/30 flex flex-col gap-5 bg-white">
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
                       <div>
                         <div className="flex items-center gap-3">
-                          <h3 className="font-serif text-2xl text-brand-espresso shrink-0">All Invite Codes</h3>
+                          <h3 className="font-serif text-2xl text-brand-espresso shrink-0">Invite Codes</h3>
                           {!['ore', 'dara'].includes(role || '') && (
                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-widest uppercase ${codes.length >= roleCodeLimit ? 'bg-rose-100 text-rose-700' : 'bg-brand-gold/20 text-brand-goldDark'}`}>
                               {codes.length} / {roleCodeLimit} Cap
@@ -1040,48 +1120,28 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                           )}
                         </div>
                         <p className="text-xs text-brand-muted font-sans mt-1">
-                          {filteredCodes.filter(c => !c.is_used).length} Available â€¢ {filteredCodes.filter(c => c.is_used).length} Used
+                          {codeStats.available} Available â€¢ {codeStats.shared} Shared (Awaiting RSVP) â€¢ {codeStats.used} Used ({codeStats.total} Total)
                         </p>
                       </div>
 
-                      {['ore', 'dara'].includes(role || '') && (
-                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                          <div className="flex items-center gap-1.5 px-3 py-2 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-2">
-                            <Filter className="w-3.5 h-3.5" /> Creator
-                          </div>
-                            {[
-                              { id: 'all', label: 'All' },
-                              { id: 'ore', label: 'Ore (1999)' },
-                              { id: 'dara', label: 'Dara (2003)' },
-                              { id: 'custom1964', label: "Ore's Dad (1964)" },
-                            { id: 'groomsfamily', label: "Ore's Mum (1972)" },
-                            { id: 'bridesfamily', label: "Dara's Mum (1975)" }
-                          ].map((f) => (
+                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+                        {selectedCodes.size > 0 && (
+                          <>
                             <button
-                              key={f.id}
-                              onClick={() => setCreatorFilter(f.id)}
-                              className={`px-4 py-2 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
-                                creatorFilter === f.id 
-                                  ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-md' 
-                                  : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
-                              }`}
+                              onClick={handleBulkMakeAvailable}
+                              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold border border-emerald-200"
+                              title="Release selected codes back into available pool"
                             >
-                              {f.label}
+                              <RotateCcw className="w-4 h-4" /> Make Available ({selectedCodes.size})
                             </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 shrink-0">
-                      {selectedCodes.size > 0 && (
-                        <button
-                          onClick={handleDeleteSelectedCodes}
-                          className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold"
-                        >
-                          <Trash2 className="w-4 h-4" /> Delete ({selectedCodes.size})
-                        </button>
-                      )}
+                            <button
+                              onClick={handleDeleteSelectedCodes}
+                              className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-sans uppercase tracking-wider rounded-xl transition-colors font-bold"
+                            >
+                              <Trash2 className="w-4 h-4" /> Delete ({selectedCodes.size})
+                            </button>
+                          </>
+                        )}
                       <button
                         onClick={async () => {
                           if (codes.length === 0) {
@@ -1137,6 +1197,68 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                       </button>
                     </div>
                   </div>
+
+                    {/* Status Filter Tabs */}
+                    <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-brand-sand/20">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-1">
+                        <Filter className="w-3.5 h-3.5" /> Status
+                      </div>
+                      {[
+                        { id: 'all', label: `All (${codeStats.total})` },
+                        { id: 'unused', label: `All Unused (${codeStats.unused})` },
+                        { id: 'shared', label: `Shared / Awaiting RSVP (${codeStats.shared})` },
+                        { id: 'available', label: `Available (${codeStats.available})` },
+                        { id: 'used', label: `Used (${codeStats.used})` }
+                      ].map((s) => (
+                        <button
+                          key={s.id}
+                          onClick={() => {
+                            setCodeStatusFilter(s.id as any);
+                            setSelectedCodes(new Set());
+                          }}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                            codeStatusFilter === s.id
+                              ? 'bg-brand-espresso text-brand-goldLight border-brand-espresso shadow-sm'
+                              : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30'
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Creator Filters for Ore / Dara */}
+                    {['ore', 'dara'].includes(role || '') && (
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-brand-sand/20">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-sand/30 rounded-xl text-brand-muted text-xs font-bold uppercase tracking-wider mr-1">
+                          <Users className="w-3.5 h-3.5" /> Creator
+                        </div>
+                        {[
+                          { id: 'all', label: 'All Creators' },
+                          { id: 'ore', label: 'Ore (1999)' },
+                          { id: 'dara', label: 'Dara (2003)' },
+                          { id: 'custom1964', label: "Ore's Dad (1964)" },
+                          { id: 'groomsfamily', label: "Ore's Mum (1972)" },
+                          { id: 'bridesfamily', label: "Dara's Mum (1975)" }
+                        ].map((f) => (
+                          <button
+                            key={f.id}
+                            onClick={() => {
+                              setCreatorFilter(f.id);
+                              setSelectedCodes(new Set());
+                            }}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-sans font-bold uppercase tracking-wider transition-all border ${
+                              creatorFilter === f.id 
+                                ? 'bg-brand-goldDark text-white border-brand-goldDark shadow-sm' 
+                                : 'bg-white text-brand-muted border-brand-sand/50 hover:bg-brand-sand/30 hover:border-brand-sand'
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="overflow-x-auto min-h-[400px]" data-lenis-prevent="true">
                     <table className="w-full text-left border-collapse">
                       <thead>
@@ -1144,7 +1266,7 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                           <th className="p-6 w-12 text-center">
                             <input
                               type="checkbox"
-                              checked={codes.filter(c => !c.is_used).length > 0 && selectedCodes.size === codes.filter(c => !c.is_used).length}
+                              checked={filteredCodes.filter(c => !c.is_used).length > 0 && filteredCodes.filter(c => !c.is_used).every(c => selectedCodes.has(c.id))}
                               onChange={toggleSelectAllCodes}
                               className="w-4 h-4 rounded text-brand-gold cursor-pointer"
                             />
@@ -1154,13 +1276,14 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                           <th className="p-6 font-semibold">Status</th>
                           <th className="p-6 font-semibold">Used By</th>
                           <th className="p-6 font-semibold">Created</th>
+                          <th className="p-6 font-semibold text-right">Action</th>
                         </tr>
                       </thead>
                       <tbody className="text-sm font-sans text-brand-espresso">
                         {filteredCodes.length === 0 ? (
                           <tr>
-                            <td colSpan={6} className="p-12 text-center text-brand-muted text-base">
-                              No invite codes generated yet.
+                            <td colSpan={7} className="p-12 text-center text-brand-muted text-base">
+                              No invite codes found for this filter.
                             </td>
                           </tr>
                         ) : (
@@ -1180,20 +1303,9 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                                 {index + 1}
                               </td>
                               <td className="p-6">
-                                <div className="flex items-center gap-4">
-                                  <span className={`font-mono font-bold text-2xl tracking-[0.2em] ${c.is_used ? 'text-brand-muted/50' : 'text-brand-espresso'}`}>
-                                    {c.code}
-                                  </span>
-                                  <div className="flex items-center gap-4 justify-end">
-                                    <button
-                                      onClick={() => handleCopyCode(c.code)}
-                                      className="p-2 text-brand-muted hover:text-brand-espresso hover:bg-brand-sand/50 rounded-xl transition-colors"
-                                      title="Copy Code"
-                                    >
-                                      {copiedCode === c.code ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
-                                    </button>
-                                  </div>
-                                </div>
+                                <span className={`font-mono font-bold text-2xl tracking-[0.2em] ${c.is_used ? 'text-brand-muted/50' : 'text-brand-espresso'}`}>
+                                  {c.code}
+                                </span>
                               </td>
                               <td className="p-4 sm:p-6">
                                 {c.is_used ? (
@@ -1201,20 +1313,13 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                                     Used
                                   </span>
                                 ) : c.is_shared ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap">
-                                      Copied / Shared
-                                    </span>
-                                    <button 
-                                      onClick={() => handleUnmarkShared(c.id)}
-                                      className="p-1 rounded-full text-amber-600 hover:text-amber-800 hover:bg-amber-100 transition-colors"
-                                      title="Undo 'Shared' status"
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 whitespace-nowrap flex items-center gap-1.5 w-max">
+                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                    Shared â€¢ Awaiting RSVP
+                                  </span>
                                 ) : (
-                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap">
+                                  <span className="px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 whitespace-nowrap flex items-center gap-1.5 w-max">
+                                    <Check className="w-3.5 h-3.5 text-emerald-600" />
                                     Available
                                   </span>
                                 )}
@@ -1224,6 +1329,37 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                               </td>
                               <td className="p-6 text-sm text-brand-muted font-medium">
                                 {new Date(c.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="p-6 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  {!c.is_used && c.is_shared && (
+                                    <button
+                                      onClick={() => handleMakeAvailable(c.id, c.code)}
+                                      className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                                      title="Release code back to available pool so you can reassign it"
+                                    >
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                      <span>Make Available</span>
+                                    </button>
+                                  )}
+                                  {c.is_used && (
+                                    <button
+                                      onClick={() => handleResetCode(c.id, c.code, c.used_by)}
+                                      className="px-3 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-rose-50 text-brand-muted hover:text-rose-700 border border-brand-sand/60 text-xs font-sans font-medium flex items-center gap-1.5 transition-all"
+                                      title="Reset code (Clear RSVP to make code available again)"
+                                    >
+                                      <RotateCcw className="w-3.5 h-3.5" />
+                                      <span>Reset</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => handleCopyCode(c.code)}
+                                    className="p-2 text-brand-muted hover:text-brand-espresso hover:bg-brand-sand/50 rounded-xl transition-colors"
+                                    title="Copy invitation text with code"
+                                  >
+                                    {copiedCode === c.code ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))

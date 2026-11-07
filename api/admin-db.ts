@@ -107,6 +107,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return client.from('invite_codes').update({ is_shared: true }).eq('id', payload.id);
       case 'unmarkInviteCodeAsShared':
         return client.from('invite_codes').update({ is_shared: false }).eq('id', payload.id);
+      case 'resetInviteCode':
+        return client.from('invite_codes').update({ is_used: false, used_by: null, is_shared: false }).eq('id', payload.id);
+      case 'bulkMakeCodesAvailable':
+        return client.from('invite_codes').update({ is_shared: false }).in('id', payload.ids);
       case 'saveWishlistItem':
         return client.from('wishlist_items').upsert([payload.item]).select().single();
       case 'deleteWishlistItem':

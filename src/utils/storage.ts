@@ -777,11 +777,36 @@ export async function deleteInviteCodes(ids: string[]): Promise<void> {
 }
 
 export async function markInviteCodeAsShared(id: string): Promise<void> {
-  await adminDb('markInviteCodeAsShared', { id });
+  try {
+    await adminDb('markInviteCodeAsShared', { id });
+  } catch (e) {
+    await supabase.from('invite_codes').update({ is_shared: true }).eq('id', id);
+  }
 }
 
 export async function unmarkInviteCodeAsShared(id: string): Promise<void> {
-  await adminDb('unmarkInviteCodeAsShared', { id });
+  try {
+    await adminDb('unmarkInviteCodeAsShared', { id });
+  } catch (e) {
+    await supabase.from('invite_codes').update({ is_shared: false }).eq('id', id);
+  }
+}
+
+export async function resetInviteCode(id: string): Promise<void> {
+  try {
+    await adminDb('resetInviteCode', { id });
+  } catch (e) {
+    await supabase.from('invite_codes').update({ is_used: false, used_by: null, is_shared: false }).eq('id', id);
+  }
+}
+
+export async function bulkMakeCodesAvailable(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  try {
+    await adminDb('bulkMakeCodesAvailable', { ids });
+  } catch (e) {
+    await supabase.from('invite_codes').update({ is_shared: false }).in('id', ids);
+  }
 }
 
 export async function getInviteCodes(filterByRole?: string): Promise<InviteCode[]> {
