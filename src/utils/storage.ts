@@ -888,11 +888,9 @@ export async function reallocateInviteCode(id: string, createdBy: string = 'ore'
   try {
     const data = await adminDb('reallocateInviteCode', { id, createdBy });
     return data;
-  } catch {
-    // 1. Delete old code
-    await supabase.from('invite_codes').delete().eq('id', id);
-    
-    // 2. Generate unique new 5-digit code
+  } catch (err) {
+    console.warn('adminDb reallocateInviteCode fallback to Supabase update:', err);
+    // 1. Generate unique new 5-digit code
     const { data: existingCodes } = await supabase.from('invite_codes').select('code');
     const existingSet = new Set((existingCodes || []).map((c: any) => c.code));
     let code = '';
@@ -900,8 +898,28 @@ export async function reallocateInviteCode(id: string, createdBy: string = 'ore'
       code = Math.floor(10000 + Math.random() * 90000).toString();
       if (!existingSet.has(code)) break;
     }
-    
-    // 3. Insert fresh code
+
+    // 2. In-place update replacing old code with new code and resetting to available
+    if (id) {
+      const { data: updated, error } = await supabase
+        .from('invite_codes')
+        .update({
+          code,
+          created_by: createdBy,
+          is_used: false,
+          used_by: null,
+          is_shared: false
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+      if (!error && updated) {
+        return updated as InviteCode;
+      }
+    }
+
+    // 3. Fallback insert if row not found
     const { data: inserted, error } = await supabase
       .from('invite_codes')
       .insert([{ code, created_by: createdBy, is_used: false, is_shared: false }])

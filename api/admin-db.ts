@@ -110,7 +110,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'resetInviteCode':
         return client.from('invite_codes').update({ is_used: false, used_by: null, is_shared: false }).eq('id', payload.id);
       case 'reallocateInviteCode': {
-        await client.from('invite_codes').delete().eq('id', payload.id);
         const { data: existing } = await client.from('invite_codes').select('code');
         const set = new Set((existing || []).map((c: any) => c.code));
         let newCode = '';
@@ -118,6 +117,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           newCode = Math.floor(10000 + Math.random() * 90000).toString();
           if (!set.has(newCode)) break;
         }
+
+        if (payload.id) {
+          const updateRes = await client
+            .from('invite_codes')
+            .update({
+              code: newCode,
+              created_by: payload.createdBy || 'ore',
+              is_used: false,
+              used_by: null,
+              is_shared: false
+            })
+            .eq('id', payload.id)
+            .select()
+            .maybeSingle();
+
+          if (updateRes.data) return updateRes;
+        }
+
         return client
           .from('invite_codes')
           .insert([{ code: newCode, created_by: payload.createdBy || 'ore', is_used: false, is_shared: false }])

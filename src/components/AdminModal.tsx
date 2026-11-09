@@ -489,13 +489,13 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
     setConfirmDialog({
       isOpen: true,
       title: 'Re-allocate Invite Code',
-      message: `Are you sure you want to re-allocate ${oldCodeStr} (guest: ${guestName})? This will permanently delete ${oldCodeStr} so they cannot reuse it, and generate a brand new code in your Available pool for a new guest.`,
+      message: `Are you sure you want to re-allocate ${oldCodeStr} (guest: ${guestName})? This will permanently invalidate ${oldCodeStr} so they cannot reuse it, and generate a brand new code in your Available pool for a new guest.`,
       onConfirm: async () => {
         try {
           let newCodeStr = '';
           if (matchingCode) {
             const res = await reallocateInviteCode(matchingCode.id, creator);
-            newCodeStr = typeof res === 'object' && res.code ? res.code : String(res);
+            newCodeStr = typeof res === 'object' && (res as any)?.code ? (res as any).code : String(res);
           } else {
             newCodeStr = await generateInviteCode(creator);
           }
@@ -503,11 +503,11 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
           setCodes(updatedCodes);
           onNotify(
             'Code Re-allocated',
-            `Fresh code ${newCodeStr} generated and added to Available codes for a new guest.`
+            `Seat freed for ${guestName}! Fresh code ${newCodeStr} has been generated and added to Available codes.`
           );
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
-          onNotify('Error', 'Failed to re-allocate invite code.');
+          onNotify('Error', `Failed to re-allocate invite code: ${err?.message || 'Unknown error'}`);
         }
       }
     });
@@ -524,10 +524,10 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
           const updatedCodes = await getInviteCodes(role);
           setCodes(updatedCodes);
           const newCodeStr = typeof newCode === 'object' && (newCode as any).code ? (newCode as any).code : String(newCode);
-          onNotify('Code Re-allocated', `Old code ${oldCode} deleted. Fresh code generated: ${newCodeStr}`);
-        } catch (err) {
+          onNotify('Code Re-allocated', `Old code ${oldCode} replaced. Fresh code generated: ${newCodeStr}`);
+        } catch (err: any) {
           console.error(err);
-          onNotify('Error', 'Failed to re-allocate invite code.');
+          onNotify('Error', `Failed to re-allocate invite code: ${err?.message || 'Unknown error'}`);
         }
       }
     });
@@ -1101,18 +1101,36 @@ To help us finalize our guest list, please use your unique code ðŸ‘‰ *${code}* ð
                               </td>
                               <td className="p-4 sm:p-6 text-right whitespace-nowrap">
                                 {(() => {
-                                  const guestFullName = `${rsvp.firstName.trim()} ${rsvp.lastName.trim()}`.toLowerCase();
-                                  const matchingCode = codes.find(c => c.is_used && c.used_by && c.used_by.trim().toLowerCase() === guestFullName);
+                                  const fn = (rsvp.firstName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                                  const ln = (rsvp.lastName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+                                  const guestFullName = `${fn} ${ln}`.trim();
+                                  const matchingCode = codes.find(c => {
+                                    if (!c.is_used || !c.used_by) return false;
+                                    const ub = c.used_by.trim().toLowerCase().replace(/\s+/g, ' ');
+                                    if (ub === guestFullName) return true;
+                                    if (fn && ln && ub.includes(fn) && ub.includes(ln)) return true;
+                                    return false;
+                                  });
                                   return (
                                     <div className="flex items-center justify-end gap-2">
-                                      <button
-                                        onClick={() => handleReallocateRsvpCode(rsvp, matchingCode)}
-                                        className="px-2.5 py-1.5 rounded-xl bg-brand-sand/40 hover:bg-amber-100 text-brand-espresso hover:text-amber-900 border border-brand-sand/60 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shadow-sm shrink-0"
-                                        title={matchingCode ? `Re-allocate code ${matchingCode.code} (Guest: ${rsvp.firstName})` : `Generate replacement code for ${rsvp.firstName}`}
-                                      >
-                                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
-                                        <span>Re-allocate Code</span>
-                                      </button>
+                                      {matchingCode ? (
+                                        <button
+                                          onClick={() => handleReallocateRsvpCode(rsvp, matchingCode)}
+                                          className="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-sans font-bold flex items-center gap-1.5 transition-all shadow-sm shrink-0"
+                                          title={matchingCode ? `Re-allocate code ${matchingCode.code} (Guest: ${rsvp.firstName})` : `Generate replacement code for ${rsvp.firstName}`}
+                                        >
+                                          <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                                          <span>Re-allocate Code</span>
+                                        </button>
+                                      ) : (
+                                        <span
+                                          className="px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 text-xs font-sans font-medium flex items-center gap-1 shrink-0"
+                                          title="This guest's invite code has been reallocated to a new guest in your Available pool."
+                                        >
+                                          <Check className="w-3 h-3 text-emerald-600" />
+                                          <span>Re-allocated</span>
+                                        </span>
+                                      )}
                                       <button
                                         onClick={() => handleDeleteRsvp(rsvp.id)}
                                         className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
