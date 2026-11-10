@@ -1009,13 +1009,41 @@ export async function exportInviteCodesCsv(filterByRole?: string): Promise<void>
   document.body.removeChild(link);
 }
 
-// --- Invitation Posters Management ---
+// --- Invitation Posters & Messages Management ---
+
+export const DEFAULT_INVITATION_MESSAGES = {
+  general: `*WEDDING INVITATION 💍*
+We are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!
+
+📌 *YOUR EXCLUSIVE RSVP CODE* 📌
+To help us finalize our guest list, please use your unique code 👉 *{code}* 👈 to RSVP online on or before *November 20th, 2026* here: 
+🔗 {link}
+*(Kindly note that this code can only be used once)*
+
+✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`,
+
+  familyVip: `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*
+We are overjoyed to invite you as our valued family & VIP guest to celebrate our special day with us!
+
+✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.
+
+📌 *YOUR EXCLUSIVE RSVP CODE* 📌
+To help us finalize our guest list, please use your unique code 👉 *{code}* 👈 to RSVP online on or before *November 20th, 2026* here: 
+🔗 {link}
+*(Kindly note that this code can only be used once)*
+
+✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`
+};
 
 export interface InvitationPostersConfig {
   generalUrl: string;
   familyVipUrl: string;
   generalUpdatedAt?: string;
   familyVipUpdatedAt?: string;
+  generalMessage?: string;
+  familyVipMessage?: string;
+  generalMessageUpdatedAt?: string;
+  familyVipMessageUpdatedAt?: string;
 }
 
 const INVITATION_POSTERS_KEY = 'ore_dara_invitation_posters';
@@ -1024,8 +1052,61 @@ export const DEFAULT_POSTERS: InvitationPostersConfig = {
   generalUrl: '/invitation.png?v=2',
   familyVipUrl: '/Main IV.png?v=2',
   generalUpdatedAt: 'Default Asset',
-  familyVipUpdatedAt: 'Default Asset'
+  familyVipUpdatedAt: 'Default Asset',
+  generalMessage: DEFAULT_INVITATION_MESSAGES.general,
+  familyVipMessage: DEFAULT_INVITATION_MESSAGES.familyVip,
+  generalMessageUpdatedAt: 'Default Template',
+  familyVipMessageUpdatedAt: 'Default Template'
 };
+
+export function formatInviteMessage(
+  template: string | undefined,
+  code: string,
+  websiteUrl: string,
+  creatorRole?: string,
+  tier: 'general' | 'familyVip' = 'general'
+): string {
+  if (template && template.trim()) {
+    let msg = template;
+    if (msg.includes('{code}')) {
+      msg = msg.replace(/\{code\}/g, code);
+    } else if (msg.includes('[CODE]')) {
+      msg = msg.replace(/\[CODE\]/g, code);
+    } else {
+      msg = `${msg.trim()}\n\n📌 *YOUR EXCLUSIVE RSVP CODE: 👉 ${code} 👈*\n🔗 RSVP here: ${websiteUrl}\n*(Kindly note that this code can only be used once)*`;
+    }
+
+    msg = msg.replace(/\{link\}|\{website\}|\{url\}/gi, websiteUrl);
+    return msg;
+  }
+
+  // Fallback to role-specific default if no custom template
+  const codeSection = `📌 *YOUR EXCLUSIVE RSVP CODE* 📌
+To help us finalize our guest list, please use your unique code 👉 *${code}* 👈 to RSVP online on or before *November 20th, 2026* here: 
+🔗 ${websiteUrl}
+*(Kindly note that this code can only be used once)*
+✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`;
+
+  if (tier === 'familyVip') {
+    if (creatorRole === 'bridesfamily') {
+      return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nIt gives us immense joy to invite you as our special guest and family to the wedding celebrations of our daughter, *Oluwadara* and *Oreoluwa*!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
+    } else if (creatorRole === 'groomsfamily') {
+      return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nIt gives us immense joy to invite you as our special guest and family to the wedding celebrations of our son, *Oreoluwa* and *Oluwadara*!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
+    } else {
+      return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nWe are overjoyed to invite you as our valued family & VIP guest to celebrate our special day with us!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
+    }
+  }
+
+  if (creatorRole === 'bridesfamily') {
+    return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
+  } else if (creatorRole === 'groomsfamily') {
+    return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
+  } else if (['ore', 'dara'].includes(creatorRole || '')) {
+    return `*WEDDING INVITATION 💍*\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n${codeSection}`;
+  }
+
+  return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
+}
 
 export function getLocalInvitationPosters(): InvitationPostersConfig {
   try {
@@ -1036,7 +1117,11 @@ export function getLocalInvitationPosters(): InvitationPostersConfig {
       generalUrl: parsed.generalUrl || DEFAULT_POSTERS.generalUrl,
       familyVipUrl: parsed.familyVipUrl || DEFAULT_POSTERS.familyVipUrl,
       generalUpdatedAt: parsed.generalUpdatedAt || DEFAULT_POSTERS.generalUpdatedAt,
-      familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt
+      familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt,
+      generalMessage: parsed.generalMessage || DEFAULT_POSTERS.generalMessage,
+      familyVipMessage: parsed.familyVipMessage || DEFAULT_POSTERS.familyVipMessage,
+      generalMessageUpdatedAt: parsed.generalMessageUpdatedAt || DEFAULT_POSTERS.generalMessageUpdatedAt,
+      familyVipMessageUpdatedAt: parsed.familyVipMessageUpdatedAt || DEFAULT_POSTERS.familyVipMessageUpdatedAt
     };
   } catch {
     return DEFAULT_POSTERS;
@@ -1057,7 +1142,11 @@ export async function getStoredInvitationPosters(): Promise<InvitationPostersCon
         generalUrl: parsed.generalUrl || DEFAULT_POSTERS.generalUrl,
         familyVipUrl: parsed.familyVipUrl || DEFAULT_POSTERS.familyVipUrl,
         generalUpdatedAt: parsed.generalUpdatedAt || DEFAULT_POSTERS.generalUpdatedAt,
-        familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt
+        familyVipUpdatedAt: parsed.familyVipUpdatedAt || DEFAULT_POSTERS.familyVipUpdatedAt,
+        generalMessage: parsed.generalMessage || DEFAULT_POSTERS.generalMessage,
+        familyVipMessage: parsed.familyVipMessage || DEFAULT_POSTERS.familyVipMessage,
+        generalMessageUpdatedAt: parsed.generalMessageUpdatedAt || DEFAULT_POSTERS.generalMessageUpdatedAt,
+        familyVipMessageUpdatedAt: parsed.familyVipMessageUpdatedAt || DEFAULT_POSTERS.familyVipMessageUpdatedAt
       };
       try {
         localStorage.setItem(INVITATION_POSTERS_KEY, JSON.stringify(config));

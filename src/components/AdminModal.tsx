@@ -1,13 +1,13 @@
 import { useState, useEffect, FC, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, Edit2, RotateCcw, XCircle, Image as ImageIcon, UploadCloud, Eye, Share2, Sparkles } from 'lucide-react';
+import { Download, Users, Mail, MessageSquare, Trash2, Gift, KeyRound, Plus, Copy, Check, LogOut, Filter, Heart, Clock, Edit2, RotateCcw, XCircle, Image as ImageIcon, UploadCloud, Eye, Share2, Sparkles, Save, Smartphone } from 'lucide-react';
 import { 
   getStoredRsvps, deleteRsvp,
   getStoredGiftPledgesAdmin, exportGiftPledgesCsv, deleteGiftPledge,
   getInviteCodes, generateInviteCode, bulkGenerateInviteCodes, deleteInviteCodes, markInviteCodeAsShared, reallocateInviteCode, InviteCode,
   getStoredWishlistItems, saveWishlistItem, deleteWishlistItem, updateWishlistItem,
   getStoredReminders, deleteReservation,
-  getStoredInvitationPosters, getLocalInvitationPosters, saveStoredInvitationPosters, uploadInvitationPoster, InvitationPostersConfig, DEFAULT_POSTERS
+  getStoredInvitationPosters, getLocalInvitationPosters, saveStoredInvitationPosters, uploadInvitationPoster, InvitationPostersConfig, DEFAULT_POSTERS, DEFAULT_INVITATION_MESSAGES, formatInviteMessage
 } from '../utils/storage';
 import { sendReservationReminderEmail } from '../utils/email';
 import { RsvpSubmission, GiftPledge, WishlistItem, GiftReminder } from '../types';
@@ -28,6 +28,18 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
   const [previewPosterUrl, setPreviewPosterUrl] = useState<string | null>(null);
   const [sharingCode, setSharingCode] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [generalMsgDraft, setGeneralMsgDraft] = useState(invitationPosters.generalMessage || DEFAULT_INVITATION_MESSAGES.general);
+  const [familyVipMsgDraft, setFamilyVipMsgDraft] = useState(invitationPosters.familyVipMessage || DEFAULT_INVITATION_MESSAGES.familyVip);
+  const [isSavingMessage, setIsSavingMessage] = useState<'general' | 'familyVip' | null>(null);
+  const [previewTab, setPreviewTab] = useState<{ general: 'editor' | 'preview'; familyVip: 'editor' | 'preview' }>({
+    general: 'editor',
+    familyVip: 'editor'
+  });
+
+  useEffect(() => {
+    setGeneralMsgDraft(invitationPosters.generalMessage || DEFAULT_INVITATION_MESSAGES.general);
+    setFamilyVipMsgDraft(invitationPosters.familyVipMessage || DEFAULT_INVITATION_MESSAGES.familyVip);
+  }, [invitationPosters.generalMessage, invitationPosters.familyVipMessage]);
 
   // Completely pause Lenis smooth scroll while Admin Dashboard is open
   useEffect(() => {
@@ -316,33 +328,8 @@ export const AdminModal: FC<AdminDashboardProps> = ({ isOpen, onClose, onNotify,
 
     const getInviteMessage = (code: string, creatorRole: string, tier: 'general' | 'familyVip' = 'general') => {
       const websiteUrl = window.location.origin;
-      
-      const codeSection = `📌 *YOUR EXCLUSIVE RSVP CODE* 📌
-To help us finalize our guest list, please use your unique code 👉 *${code}* 👈 to RSVP online on or before *November 20th, 2026* here: 
-🔗 ${websiteUrl}
-*(Kindly note that this code can only be used once)*
-✨ *A Gentle Reminder:* As much as we love little ones, this will be an adult-only celebration. Thank you so much for understanding!`;
-
-      if (tier === 'familyVip') {
-        if (creatorRole === 'bridesfamily') {
-          return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nIt gives us immense joy to invite you as our special guest and family to the wedding celebrations of our daughter, *Oluwadara* and *Oreoluwa*!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
-        } else if (creatorRole === 'groomsfamily') {
-          return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nIt gives us immense joy to invite you as our special guest and family to the wedding celebrations of our son, *Oreoluwa* and *Oluwadara*!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
-        } else {
-          return `*HONOURED WEDDING & CELEBRATION INVITATION 💍✨*\nWe are overjoyed to invite you as our valued family & VIP guest to celebrate our special day with us!\n\n✨ *Events Include:* Traditional Engagement, Church Solemnization, Reception & Exclusive Afterparty.\n\n${codeSection}`;
-        }
-      }
-
-      if (creatorRole === 'bridesfamily') {
-        return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our daughter, *Oluwadara* and *Oreoluwa*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
-      } else if (creatorRole === 'groomsfamily') {
-        return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of our son, *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
-      } else if (['ore', 'dara'].includes(creatorRole || '')) {
-        return `*WEDDING INVITATION 💍*\nWe are absolutely overjoyed to invite you to celebrate with us as we tie the knot on *Saturday, December 12th, 2026*!\n${codeSection}`;
-      }
-      
-      // Default for 'custom1964' or anything else
-      return `*WEDDING INVITATION 💍*\nIt gives us immense joy to announce the forthcoming wedding of *Oreoluwa* and *Oluwadara*, taking place on *Saturday, December 12th, 2026*!\n${codeSection}`;
+      const template = tier === 'familyVip' ? invitationPosters.familyVipMessage : invitationPosters.generalMessage;
+      return formatInviteMessage(template, code, websiteUrl, creatorRole, tier);
     };
 
   const executeShare = async (code: string, tier: 'general' | 'familyVip') => {
@@ -479,6 +466,58 @@ To help us finalize our guest list, please use your unique code 👉 *${code}* �
         onNotify('Poster Reset', `${tier === 'familyVip' ? 'Family & VIP' : 'General'} poster restored to default.`);
       }
     });
+  };
+
+  const handleSaveMessage = async (tier: 'general' | 'familyVip') => {
+    setIsSavingMessage(tier);
+    try {
+      const draft = tier === 'general' ? generalMsgDraft : familyVipMsgDraft;
+      const nowStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const updated: InvitationPostersConfig = {
+        ...invitationPosters,
+        [tier === 'general' ? 'generalMessage' : 'familyVipMessage']: draft,
+        [tier === 'general' ? 'generalMessageUpdatedAt' : 'familyVipMessageUpdatedAt']: `Edited ${nowStr}`
+      };
+      setInvitationPosters(updated);
+      await saveStoredInvitationPosters(updated);
+      onNotify('Message Saved', `${tier === 'familyVip' ? 'Family & VIP' : 'General'} invitation message saved and synced across all devices.`);
+    } catch (err) {
+      console.error('Failed to save invitation message:', err);
+      onNotify('Error', 'Failed to save invitation message.');
+    } finally {
+      setIsSavingMessage(null);
+    }
+  };
+
+  const handleResetMessage = (tier: 'general' | 'familyVip') => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reset Message to Default',
+      message: `Are you sure you want to restore the default ${tier === 'familyVip' ? 'Family & VIP' : 'General'} invitation message? Any unsaved edits will be discarded.`,
+      onConfirm: async () => {
+        const defaultText = tier === 'general' ? DEFAULT_INVITATION_MESSAGES.general : DEFAULT_INVITATION_MESSAGES.familyVip;
+        if (tier === 'general') setGeneralMsgDraft(defaultText);
+        else setFamilyVipMsgDraft(defaultText);
+
+        const updated: InvitationPostersConfig = {
+          ...invitationPosters,
+          [tier === 'general' ? 'generalMessage' : 'familyVipMessage']: defaultText,
+          [tier === 'general' ? 'generalMessageUpdatedAt' : 'familyVipMessageUpdatedAt']: 'Default Template'
+        };
+        setInvitationPosters(updated);
+        await saveStoredInvitationPosters(updated);
+        onNotify('Message Reset', `${tier === 'familyVip' ? 'Family & VIP' : 'General'} invitation message restored to default template.`);
+      }
+    });
+  };
+
+  const handleInsertPlaceholder = (tier: 'general' | 'familyVip', tag: '{code}' | '{link}') => {
+    if (tier === 'general') {
+      setGeneralMsgDraft(prev => prev ? `${prev} ${tag}` : tag);
+    } else {
+      setFamilyVipMsgDraft(prev => prev ? `${prev} ${tag}` : tag);
+    }
+    onNotify('Placeholder Added', `Added ${tag} to ${tier === 'familyVip' ? 'Family & VIP' : 'General'} message draft.`);
   };
 
   const handleReallocateRsvpCode = (rsvp: RsvpSubmission, matchingCode?: InviteCode) => {
@@ -2031,6 +2070,267 @@ To help us finalize our guest list, please use your unique code 👉 *${code}* �
                         >
                           <RotateCcw className="w-4 h-4" />
                           <span className="hidden sm:inline">Reset</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Accompanying Invitation Messages */}
+                <div className="bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm border border-brand-sand/40 flex flex-col gap-6">
+                  {/* Section Title & Description */}
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-6 border-b border-brand-sand/30">
+                    <div>
+                      <div className="flex items-center gap-2 text-brand-goldDark text-xs font-bold uppercase tracking-widest mb-1.5">
+                        <MessageSquare className="w-4 h-4" /> Accompanying Message Editor
+                      </div>
+                      <h3 className="font-serif text-2xl sm:text-3xl text-brand-espresso">Invitation Messages</h3>
+                      <p className="text-xs sm:text-sm font-sans text-brand-muted mt-1 max-w-2xl leading-relaxed">
+                        Customize the WhatsApp, SMS, and email messages sent to guests alongside each invitation card. The unique 5-digit RSVP code and website URL will automatically fill in for each recipient.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 px-3.5 py-2 bg-brand-sand/20 rounded-2xl border border-brand-sand/40 text-xs text-brand-muted shrink-0">
+                      <Sparkles className="w-4 h-4 text-brand-goldDark" />
+                      <span>Use <strong className="text-brand-espresso font-mono">{`{code}`}</strong> & <strong className="text-brand-espresso font-mono">{`{link}`}</strong> tags</span>
+                    </div>
+                  </div>
+
+                  {/* Message Cards Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* General Message Card */}
+                    <div className="bg-brand-cream/20 rounded-3xl border border-brand-sand/40 overflow-hidden flex flex-col">
+                      <div className="p-5 sm:p-6 border-b border-brand-sand/30 flex items-center justify-between bg-white">
+                        <div>
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-700 bg-emerald-100 font-bold px-2.5 py-0.5 rounded-full">
+                            General Guests
+                          </span>
+                          <h4 className="font-serif text-xl sm:text-2xl text-brand-espresso mt-1">General Message</h4>
+                          <p className="text-xs text-brand-muted mt-0.5">Sent with General Invitation Card</p>
+                        </div>
+                        <span className="text-[11px] font-sans text-brand-muted/70 bg-brand-ivory px-3 py-1 rounded-xl border border-brand-sand/40">
+                          {invitationPosters.generalMessageUpdatedAt || 'Default Template'}
+                        </span>
+                      </div>
+
+                      {/* Toolbar */}
+                      <div className="px-5 py-3 bg-brand-ivory/60 border-b border-brand-sand/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-brand-muted font-semibold uppercase tracking-wider mr-1">Insert:</span>
+                          <button
+                            type="button"
+                            onClick={() => handleInsertPlaceholder('general', '{code}')}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-brand-sand/60 hover:bg-brand-gold/10 hover:border-brand-gold text-brand-espresso text-xs font-mono font-medium transition-colors shadow-2xs"
+                            title="Insert unique guest RSVP code tag"
+                          >
+                            + {`{code}`}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleInsertPlaceholder('general', '{link}')}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-brand-sand/60 hover:bg-brand-gold/10 hover:border-brand-gold text-brand-espresso text-xs font-mono font-medium transition-colors shadow-2xs"
+                            title="Insert website RSVP link tag"
+                          >
+                            + {`{link}`}
+                          </button>
+                        </div>
+
+                        {/* Toggle Editor vs Live Phone Preview */}
+                        <div className="flex items-center gap-1 bg-brand-sand/30 p-0.5 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTab(prev => ({ ...prev, general: 'editor' }))}
+                            className={`px-3 py-1 rounded-lg text-xs font-sans font-bold transition-all ${
+                              previewTab.general === 'editor'
+                                ? 'bg-white text-brand-espresso shadow-xs'
+                                : 'text-brand-muted hover:text-brand-espresso'
+                            }`}
+                          >
+                            <Edit2 className="w-3 h-3 inline mr-1" /> Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTab(prev => ({ ...prev, general: 'preview' }))}
+                            className={`px-3 py-1 rounded-lg text-xs font-sans font-bold transition-all ${
+                              previewTab.general === 'preview'
+                                ? 'bg-white text-brand-espresso shadow-xs'
+                                : 'text-brand-muted hover:text-brand-espresso'
+                            }`}
+                          >
+                            <Smartphone className="w-3 h-3 inline mr-1" /> Preview
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Content Area */}
+                      <div className="p-5 flex-1 flex flex-col bg-white">
+                        {previewTab.general === 'editor' ? (
+                          <div className="flex-1 flex flex-col">
+                            <textarea
+                              value={generalMsgDraft}
+                              onChange={(e) => setGeneralMsgDraft(e.target.value)}
+                              rows={11}
+                              className="w-full flex-1 p-4 rounded-2xl border border-brand-sand/60 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 font-sans text-xs sm:text-sm text-brand-espresso leading-relaxed resize-y min-h-[220px]"
+                              placeholder="Write the accompanying general invitation message..."
+                            />
+                            <div className="flex items-center justify-between mt-2 text-[11px] text-brand-muted">
+                              <span>Formatting: *bold*, _italic_</span>
+                              <span>{generalMsgDraft.length} characters</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="bg-[#EFEAE2] p-4 sm:p-5 rounded-2xl border border-brand-sand/40 shadow-inner">
+                              <div className="text-[11px] font-mono text-emerald-800 font-bold mb-2 flex items-center gap-1">
+                                <Smartphone className="w-3.5 h-3.5" /> Sample WhatsApp Message Preview
+                              </div>
+                              <div className="bg-white p-4 rounded-xl rounded-tl-none shadow-sm text-xs sm:text-sm text-brand-espresso whitespace-pre-wrap leading-relaxed font-sans border border-brand-sand/30">
+                                {formatInviteMessage(generalMsgDraft, '84722', window.location.origin, role, 'general')}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="p-5 border-t border-brand-sand/30 bg-brand-cream/30 flex items-center justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveMessage('general')}
+                          disabled={isSavingMessage === 'general'}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-brand-espresso text-brand-goldLight rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-brand-charcoal transition-colors shadow-sm disabled:opacity-50"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>{isSavingMessage === 'general' ? 'Saving...' : 'Save Message'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleResetMessage('general')}
+                          className="p-2.5 rounded-xl border border-brand-sand/60 hover:bg-rose-50 text-brand-muted hover:text-rose-600 transition-colors text-xs font-semibold flex items-center gap-1.5"
+                          title="Restore default message template"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          <span className="hidden sm:inline">Reset Default</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Close Family & VIP Message Card */}
+                    <div className="bg-brand-cream/20 rounded-3xl border-2 border-brand-gold/40 overflow-hidden flex flex-col">
+                      <div className="p-5 sm:p-6 border-b border-brand-sand/30 flex items-center justify-between bg-gradient-to-r from-brand-gold/10 via-brand-cream/40 to-transparent">
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-mono uppercase tracking-widest text-brand-espresso bg-brand-gold/30 font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 text-brand-goldDark" /> VIP & Family
+                            </span>
+                          </div>
+                          <h4 className="font-serif text-xl sm:text-2xl text-brand-espresso mt-1">VIP & Family Message</h4>
+                          <p className="text-xs text-brand-muted mt-0.5">Includes Engagement & Exclusive Afterparty</p>
+                        </div>
+                        <span className="text-[11px] font-sans text-brand-muted/70 bg-white px-3 py-1 rounded-xl border border-brand-sand/40">
+                          {invitationPosters.familyVipMessageUpdatedAt || 'Default Template'}
+                        </span>
+                      </div>
+
+                      {/* Toolbar */}
+                      <div className="px-5 py-3 bg-brand-ivory/60 border-b border-brand-sand/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-brand-muted font-semibold uppercase tracking-wider mr-1">Insert:</span>
+                          <button
+                            type="button"
+                            onClick={() => handleInsertPlaceholder('familyVip', '{code}')}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-brand-sand/60 hover:bg-brand-gold/10 hover:border-brand-gold text-brand-espresso text-xs font-mono font-medium transition-colors shadow-2xs"
+                            title="Insert unique guest RSVP code tag"
+                          >
+                            + {`{code}`}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleInsertPlaceholder('familyVip', '{link}')}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-brand-sand/60 hover:bg-brand-gold/10 hover:border-brand-gold text-brand-espresso text-xs font-mono font-medium transition-colors shadow-2xs"
+                            title="Insert website RSVP link tag"
+                          >
+                            + {`{link}`}
+                          </button>
+                        </div>
+
+                        {/* Toggle Editor vs Live Phone Preview */}
+                        <div className="flex items-center gap-1 bg-brand-sand/30 p-0.5 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTab(prev => ({ ...prev, familyVip: 'editor' }))}
+                            className={`px-3 py-1 rounded-lg text-xs font-sans font-bold transition-all ${
+                              previewTab.familyVip === 'editor'
+                                ? 'bg-white text-brand-espresso shadow-xs'
+                                : 'text-brand-muted hover:text-brand-espresso'
+                            }`}
+                          >
+                            <Edit2 className="w-3 h-3 inline mr-1" /> Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPreviewTab(prev => ({ ...prev, familyVip: 'preview' }))}
+                            className={`px-3 py-1 rounded-lg text-xs font-sans font-bold transition-all ${
+                              previewTab.familyVip === 'preview'
+                                ? 'bg-white text-brand-espresso shadow-xs'
+                                : 'text-brand-muted hover:text-brand-espresso'
+                            }`}
+                          >
+                            <Smartphone className="w-3 h-3 inline mr-1" /> Preview
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Content Area */}
+                      <div className="p-5 flex-1 flex flex-col bg-white">
+                        {previewTab.familyVip === 'editor' ? (
+                          <div className="flex-1 flex flex-col">
+                            <textarea
+                              value={familyVipMsgDraft}
+                              onChange={(e) => setFamilyVipMsgDraft(e.target.value)}
+                              rows={11}
+                              className="w-full flex-1 p-4 rounded-2xl border border-brand-sand/60 focus:border-brand-gold focus:ring-2 focus:ring-brand-gold/20 font-sans text-xs sm:text-sm text-brand-espresso leading-relaxed resize-y min-h-[220px]"
+                              placeholder="Write the accompanying VIP & family invitation message..."
+                            />
+                            <div className="flex items-center justify-between mt-2 text-[11px] text-brand-muted">
+                              <span>Formatting: *bold*, _italic_</span>
+                              <span>{familyVipMsgDraft.length} characters</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex flex-col justify-center">
+                            <div className="bg-[#EFEAE2] p-4 sm:p-5 rounded-2xl border border-brand-sand/40 shadow-inner">
+                              <div className="text-[11px] font-mono text-emerald-800 font-bold mb-2 flex items-center gap-1">
+                                <Smartphone className="w-3.5 h-3.5" /> Sample WhatsApp Message Preview
+                              </div>
+                              <div className="bg-white p-4 rounded-xl rounded-tl-none shadow-sm text-xs sm:text-sm text-brand-espresso whitespace-pre-wrap leading-relaxed font-sans border border-brand-sand/30">
+                                {formatInviteMessage(familyVipMsgDraft, '84722', window.location.origin, role, 'familyVip')}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="p-5 border-t border-brand-sand/30 bg-brand-cream/30 flex items-center justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveMessage('familyVip')}
+                          disabled={isSavingMessage === 'familyVip'}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-brand-goldDark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-brand-espresso transition-colors shadow-sm disabled:opacity-50"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>{isSavingMessage === 'familyVip' ? 'Saving...' : 'Save Message'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleResetMessage('familyVip')}
+                          className="p-2.5 rounded-xl border border-brand-sand/60 hover:bg-rose-50 text-brand-muted hover:text-rose-600 transition-colors text-xs font-semibold flex items-center gap-1.5"
+                          title="Restore default message template"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                          <span className="hidden sm:inline">Reset Default</span>
                         </button>
                       </div>
                     </div>
