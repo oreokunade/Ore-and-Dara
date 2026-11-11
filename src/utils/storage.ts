@@ -1176,7 +1176,7 @@ export async function saveStoredInvitationPosters(config: InvitationPostersConfi
         price: 1,
         formatted_price: '₦1',
         category: 'Milestone Gift',
-        image: config.generalUrl.startsWith('data:') ? '' : config.generalUrl,
+        image: (config.generalUrl && !config.generalUrl.startsWith('data:')) ? config.generalUrl : '/invitation.png',
         description: JSON.stringify(config)
       }
     ]);
